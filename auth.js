@@ -72,3 +72,49 @@
 
   d.addEventListener("auth:changed", () => init());
 })();
+/* ===== Bestie minimal auth helpers (additive) ===== */
+(function () {
+  const BASES = ["/", "/index.html", "/login", "/login/"];
+  const DASH = "/dashboard/";
+
+  // Utility: JSON GET with no-store to avoid stale auth
+  async function getMe() {
+    try {
+      const r = await fetch("/api/users/me", { headers: { "cache-control": "no-store" } });
+      if (!r.ok) return { ok: false };
+      const j = await r.json().catch(() => ({ ok: false }));
+      return j && j.ok ? j : { ok: false };
+    } catch { return { ok: false }; }
+  }
+
+  // Redirect if logged in and on home/login
+  document.addEventListener("DOMContentLoaded", async () => {
+    const me = await getMe();
+    const path = location.pathname.replace(/\/+$/, "") || "/";
+    if (me.ok && BASES.includes(path)) {
+      location.replace(DASH);
+      return;
+    }
+
+    // Email remember: load into login form if present
+    try {
+      const emailKey = "bc.remember.email";
+      const emailInput = document.querySelector('form[action$="/api/login"] input[type="email"], form#login input[type="email"], input[name="email"]');
+      const rememberBox = document.querySelector('#remember, input[name="remember"]');
+
+      // Pre-fill if saved
+      const saved = localStorage.getItem(emailKey);
+      if (emailInput && saved && !emailInput.value) emailInput.value = saved;
+
+      // Save on submit if checked
+      const form = emailInput ? emailInput.closest("form") : null;
+      if (form && rememberBox) {
+        form.addEventListener("submit", () => {
+          const val = emailInput.value || "";
+          if (rememberBox.checked && val) localStorage.setItem(emailKey, val);
+          else localStorage.removeItem(emailKey);
+        }, { once: true });
+      }
+    } catch {}
+  });
+})();
