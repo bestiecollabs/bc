@@ -1,47 +1,52 @@
-# AI_README
+﻿# AI_README.md
 
-Project: Bestie Collabs  
-Scope: Admin + Creator/Brand directory, Cloudflare Pages + Functions (D1)  
-Current State (resuming point “Project Root”):
-- Admin endpoints live: /api/admin/chipchip/*
-- Delete + Undo working for brands and creators
-- Minimal Admin UI: /admin/index.html + /admin/admin.js
-- D1 schema stable (admin_recycle_bin includes: id, admin_email, action, entity_table, entity_id, before_json, after_json, batch_id, created_at, ts)
+PROJECT
+Bestie Collabs
 
-## Handoff File Rules (for New Chats)
+STACK
+- Static HTML and vanilla JS on Cloudflare Pages
+- Cloudflare Pages Functions in /functions
+- Cloudflare D1 database name bestiedb
+- Domains: bestiecollabs.com and api.bestiecollabs.com
+- Repo: https://github.com/bestiecollabs/bc  branch main
+- Local root: C:\bc\cloudflare\html
 
-**Full Code Delivery**  
-Always include the full code, the exact file directory path, a clear explanation of what the code does, and what to expect after running it.
+PROD URLS
+- App: https://bestiecollabs.com
+- API: https://api.bestiecollabs.com
+- Health: /api/healthcheck returns ok true
 
-**File Verification**  
-Before updating any code, verify you have the latest version. If not, ask me to provide the most recent file before making changes.
+CURRENT CONFIG
+- Build: Framework preset None, Build command empty, Output directory .
+- Pages Functions: auto detected from /functions
+- wrangler.toml manages plaintext vars and D1 binding
+- OPENAI_API_KEY stored as Cloudflare Secret
+- D1 binding variable name DB  database bestiedb
+- Redirect: www.bestiecollabs.com to https://bestiecollabs.com/${1}
+- SSL: Active Full
 
-**Concise Instructions**  
-Provide short, direct, and clear instructions for every step.
+SEED RULES
+- Full code delivery with exact file paths and what to expect
+- Verify latest files before edits  ask if unsure
+- Concise instructions
+- Provide full code via PowerShell blocks
+- Read files provided in chat before coding
+- Do not remove features to make new code work
+- Keep the same code structure  no new folders without approval
+- No backups or variants  fix root causes
+- Answer side questions then return to main task
+- Production first  deploys from main
 
-**PowerShell Compatibility**  
-Always provide full PowerShell-ready code blocks so I can update or run them directly in PowerShell.
+WHERE WE LEFT OFF
+- GitHub to Cloudflare deploy verified
+- API healthcheck works on both domains
+- D1 binding aligned as env.DB
 
-**Understand the Codebase First**  
-Before writing or editing code, review all files in the provided zip to understand the project structure and logic.  
-If a needed file is missing, ask me for it immediately before continuing.
+NEXT TWO TASKS
+1. Verify /api/users/me returns ok true with session when logged in
+2. Implement Admin Delete plus Undo for Brands and Creators in production
 
-**Respect Existing Work**  
-This is a continuation from prior chats. Do not remove or override working features to land new changes.
-
-**Maintain Consistent Structure**  
-Match existing file layout, naming, and coding conventions.
-
-**No Backup or Variant Files**  
-Do not create .bak or variant files. Update only the intended files.
-
-**Fix, Don’t Patch**  
-No temporary hacks. Identify root causes and update code cleanly.
-
-**Deliver Seed via PowerShell (New Requirement)**  
-From now on, every handoff must include a PowerShell script that writes the updated Seed Kit files exactly as delivered here.
-
-## How to Run Locally (reference)
-- Start: `wrangler pages dev . --port=8788`
-- Admin header in dev: `x-admin-email: collabsbestie@gmail.com`
-- Admin routes are under `/api/admin/...` (no `/functions` prefix)
+DO NOTS
+- Do not change file structure
+- Do not commit secrets
+- Do not use React or Vite

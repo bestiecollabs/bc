@@ -1,40 +1,26 @@
-# HANDOFF
+﻿# HANDOFF.md
 
-We are resuming from the last confirmed working state (“Project Root”).
-- Backend stable. Brands/Creators delete + undo work.
-- Admin UI exists at /admin/ and talks to /api/admin/chipchip/*.
+We left off at: live deploy verified and API reachable at both domains. Next step is: verify /api/users/me and complete Admin Delete plus Undo.
 
-## For the Next Chat
+ENV
+- Cloudflare Pages project bc
+- Domains bestiecollabs.com and api.bestiecollabs.com
+- D1 database bestiedb  binding name DB
+- Secrets in Cloudflare  OPENAI_API_KEY
+- wrangler.toml controls vars and D1 binding
 
-1) **Confirm starting point**  
-   Acknowledge we are resuming from “Project Root” and list any local edits you intend to make.
+DEPLOY FLOW
+1. Edit locally in C:\bc\cloudflare\html
+2. git add -A  git commit  git push origin main
+3. Cloudflare auto deploys
 
-2) **Verify files first**  
-   Ask for the latest zip if you suspect drift. Do not modify until you have the newest files.
+CHECKS
+- https://api.bestiecollabs.com/api/healthcheck returns ok true
+- Pages Custom Domains show Active and SSL enabled
+- DNS has CNAME www to bestiecollabs.com and CNAME root to pages.dev
+- Rules redirect www to root with ${1}
 
-3) **Always deliver code completely**  
-   - Provide full file contents and exact paths.
-   - Explain what each change does and what to expect after running.
-
-4) **PowerShell-first delivery**  
-   Provide a single PowerShell script that writes the updated files in-place. No backups or temp files.
-
-5) **Consistency**  
-   - Keep structure and naming consistent with existing code.
-   - Do not delete other features to make yours work.
-
-6) **Admin header requirement**  
-   Local dev must set `x-admin-email`. In production, Cloudflare Access will provide identity.
-
-7) **No patches**  
-   If something breaks, identify the root cause and fix the real code.
-
-## Minimal Smoke Tests
-
-- Health: `GET /health`
-- Admin DB ping: `GET /api/admin/ping` with header
-- Brands list: `GET /api/admin/chipchip/brands?limit=5` with header
-- Soft delete + undo on one id
-
-## Ready-To-Run Seed Delivery (required)
-All future handoffs must include the complete Seed Kit using a PowerShell script like this file provides.
+WORK RULES
+- Full file paths and PowerShell blocks
+- Minimal changes  no new folders without approval
+- No patches  fix root causes
