@@ -24,3 +24,17 @@ WORK RULES
 - Full file paths and PowerShell blocks
 - Minimal changes  no new folders without approval
 - No patches  fix root causes
+
+## Runtime Diagnostics (admin only)
+- GET /api/health  → public JSON { ok }
+- GET /api/db-health  → requires header x-admin-email; JSON { ok, db }
+- GET /api/db-tables  → requires header x-admin-email; JSON { tables[] }
+- GET /api/db-stats   → requires header x-admin-email; JSON { stats }
+
+### D1 Tables observed
+invites, brand_merge_map, d1_migrations, directory_creators, creators, directory_brands,
+users, addresses, admin_batches, admin_audit, admin_recycle_bin, creator_merge_map, users_admin_meta.
+
+### Notes
+- No migrations recorded (d1_migrations max(id) = null). Plan: add baseline migration.
+- Do not expose diagnostics publicly. Keep header gate.
