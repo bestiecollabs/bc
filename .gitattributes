@@ -1,0 +1,9 @@
+* text=auto
+*.js  text eol=lf
+*.mjs text eol=lf
+*.ts  text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md  text eol=lf
+_redirects text eol=lf
+wrangler.toml text eol=lf
