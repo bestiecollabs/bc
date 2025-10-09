@@ -1,0 +1,3 @@
+id,email,username,full_name,role,phone,shop_name,is_shopify_store,tiktok_user_id,instagram_user_id,last_login_at,bestie_score,suspended_at
+u_test_1,owner@example.com,owner,Owner Admin,admin,,,0,,,,,
+u_test_2,test@example.com,testuser,Test User,user,555-5555,Test Shop,1,tt123,ig456,,,

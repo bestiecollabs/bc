@@ -1,0 +1,262 @@
+﻿Folder PATH listing for volume OS
+Volume serial number is 649C-B7E5
+C:.
+|   .dev.vars
+|   404.html
+|   admin1008.zip
+|   air.css
+|   AI_README.md
+|   auth.js
+|   b1.png
+|   brands_export.csv
+|   creators_export.csv
+|   favicon.png
+|   functions1008.zip
+|   HANDOFF.md
+|   index.html
+|   migrations1008.zip
+|   og.jpg
+|   README.txt
+|   robots.txt
+|   sitemap.xml
+|   users_export.csv
+|   wrangler.toml
+|   _redirects
+|   
++---.wrangler
+|   +---state
+|   |   \---v3
+|   |       +---cache
+|   |       |   \---miniflare-CacheObject
+|   |       +---d1
+|   |       |   \---miniflare-D1DatabaseObject
+|   |       |           2e4bc74ba6f76e797ccda36088478cfe2b2975223c47b4a4749cf40aa4d60806.sqlite
+|   |       |           8114933517a9b411420f47ba808d2995022acc033730265bebba0d890e3c5cea.sqlite
+|   |       |           
+|   |       \---workflows
+|   \---tmp
+|       +---bundle-HU6RiG
+|       |       middleware-insertion-facade.js
+|       |       middleware-loader.entry.ts
+|       |       
+|       +---bundle-p92IYC
+|       |       middleware-insertion-facade.js
+|       |       middleware-loader.entry.ts
+|       |       
+|       +---dev-igsjg1
+|       |       functionsWorker-0.25960231019140934.js
+|       |       functionsWorker-0.25960231019140934.js.map
+|       |       
+|       \---pages-kWT29E
+|               functionsRoutes-0.7656062869946563.mjs
+|               functionsWorker-0.25960231019140934.mjs
+|               functionsWorker-0.25960231019140934.mjs.map
+|               
++---about
+|       index.html
+|       
++---account
+|       index.html
+|       
++---admin
+|   |   admin.js
+|   |   
+|   \---dashboard
+|           admin.js
+|           index.html
+|           
++---ai_artifacts
+|       ai_tree.txt
+|       
++---brands
+|       index.html
+|       
++---connected
+|       index.html
+|       
++---contact
+|       index.html
+|       
++---cookie
+|       index.html
+|       
++---creators
+|   |   index.html
+|   |   
+|   \---profile
+|           index.html
+|           
++---crm
+|   +---brand
+|   |       index.html
+|   |       
+|   \---creator
+|           index.html
+|           
++---dashboard
+|   +---brand
+|   |   |   index.html
+|   |   |   
+|   |   \---payouts
+|   |           index.html
+|   |           
+|   \---creator
+|       |   index.html
+|       |   
+|       \---earnings
+|               index.html
+|               
++---dmca
+|       index.html
+|       
++---docs
+|       SEED_KIT.md
+|       
++---functions
+|   |   disconnect.js
+|   |   health.js
+|   |   logout.js
+|   |   
+|   +---account
+|   |       index.js
+|   |       
+|   +---api
+|   |   |   creator.js
+|   |   |   creators.js
+|   |   |   verify.js
+|   |   |   
+|   |   +---account
+|   |   |       address.js
+|   |   |       password.js
+|   |   |       profile.js
+|   |   |       
+|   |   +---address
+|   |   |       verify.js
+|   |   |       
+|   |   +---admin
+|   |   |   |   ping.js
+|   |   |   |   
+|   |   |   \---chipchip
+|   |   |       |   brands.actions.js
+|   |   |       |   brands.js
+|   |   |       |   creators.actions.js
+|   |   |       |   creators.js
+|   |   |       |   recycle.js
+|   |   |       |   undo.js
+|   |   |       |   whoami.js
+|   |   |       |   
+|   |   |       +---audit
+|   |   |       |       index.js
+|   |   |       |       
+|   |   |       +---import
+|   |   |       |       brands.js
+|   |   |       |       creators.js
+|   |   |       |       
+|   |   |       +---users
+|   |   |       |       index.js
+|   |   |       |       
+|   |   |       \---_lib
+|   |   |               csv.js
+|   |   |               db.js
+|   |   |               
+|   |   +---debug
+|   |   +---signup
+|   |   |       complete.js
+|   |   |       
+|   |   \---users
+|   |           me.js
+|   |           
+|   +---auth
+|   |       login.js
+|   |       start.js
+|   |       
+|   +---connect
+|   |       instagram.js
+|   |       tiktok.js
+|   |       
+|   +---db
+|   |       ping.js
+|   |       
+|   +---debug
+|   |       auth.js
+|   |       
+|   +---dev
+|   |       init.js
+|   |       
+|   \---oauth
+|       \---tiktok
+|               callback.js
+|               
++---join
+|   +---brand
+|   |       index.html
+|   |       
+|   \---creator
+|           index.html
+|           
++---login
+|       index.html
+|       
++---migrations
+|       2025-10-06_admin_directory.sql
+|       2025-10-06_local_stub_users.sql
+|       
++---node_modules
+|   +---.cache
+|   |   \---wrangler
+|   |           pages.json
+|   |           wrangler-account.json
+|   |           
+|   \---.mf
+|           cf.json
+|           
++---pricing
+|       index.html
+|       
++---privacy
+|       index.html
+|       
++---score
+|   +---brand
+|   |       index.html
+|   |       
+|   \---creator
+|           index.html
+|           
++---scripts
++---seed
+|       AI_README.md
+|       brands.csv
+|       brands2.csv
+|       creators.csv
+|       HANDOFF.md
+|       SOP_SEED.md
+|       USER_NAMES.md
+|       
++---settings
+|   +---brand
+|   |       index.html
+|   |       
+|   \---creator
+|           index.html
+|           
++---signup
+|       index.html
+|       
++---snippets
+|       footer.html
+|       header.html
+|       
++---styles
+|       bestie-home.css
+|       bestie-shared.css
+|       
++---support
+|       index.html
+|       
++---terms
+|       index.html
+|       
+\---tools
+        fix-css.js
+        
