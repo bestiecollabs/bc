@@ -142,3 +142,32 @@
   }
   document.addEventListener("DOMContentLoaded", bindLogout);
 })();
+/* ===== Bestie protected-route guard (additive) ===== */
+(function () {
+  if (window.__bcGuardAdded) return; window.__bcGuardAdded = true;
+
+  const PROTECTED_PREFIXES = [
+    "/dashboard", "/admin", "/crm", "/settings", "/account",
+    "/brands", "/creators", "/score"
+  ];
+
+  function isProtected(path) {
+    return PROTECTED_PREFIXES.some(p => path === p || path.startsWith(p + "/"));
+  }
+
+  async function getMe() {
+    try {
+      const r = await fetch("/api/users/me", { headers: { "cache-control": "no-store" } });
+      if (!r.ok) return { ok: false };
+      return await r.json();
+    } catch { return { ok: false }; }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const path = location.pathname.replace(/\/+$/, "") || "/";
+    if (!isProtected(path)) return;
+
+    const me = await getMe();
+    if (!me || !me.ok) location.replace("/");
+  });
+})();
