@@ -227,5 +227,15 @@
 
 <!-- load auth.js last like homepage -->
 <script src="/auth.js" defer></script>
+<script id="bcRedirectIfLoggedIn">
+(function(){
+  // Run ASAP
+  fetch("/api/users/me", { headers: { "cache-control":"no-store" }})
+    .then(r => r.ok ? r.json() : { ok:false })
+    .then(j => { if (j && j.ok) location.replace("/dashboard/"); })
+    .catch(()=>{});
+})();
+</script>
 </body>
 </html>
+
