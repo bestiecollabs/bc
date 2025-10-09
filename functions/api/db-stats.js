@@ -1,4 +1,10 @@
-﻿export async function onRequestGet({ env }) {
+﻿export async function onRequestGet(ctx) {
+  const { request, env } = ctx;
+  const isAdmin = (req) => {
+    const h = req.headers.get("x-admin-email");
+    return h && /^(collabsbestie@gmail\.com|chipchip@bestiecollabs\.com)$/i.test(h);
+  };
+  if (!isAdmin(request)) return new Response("forbidden", { status: 403 });
   try {
     const q = (sql) => env.DB.prepare(sql).first();
     const res = {
