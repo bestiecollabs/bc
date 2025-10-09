@@ -8,17 +8,7 @@
   <meta name="theme-color" content="#4C6FFF">
 
   <!-- Redirect logged-in users to dashboard -->
-  <script>
-    (async () => {
-      try {
-        const r = await fetch('/auth/session',{credentials:'include'});
-        if (r.ok) {
-          const j = await r.json().catch(()=>null);
-          if (j && (j.auth === true || j.user)) location.replace('/account/');
-        }
-      } catch(e) {}
-    })();
-  </script>
+  
 
   <link rel="stylesheet" href="/air.css">
 </head>
@@ -229,13 +219,22 @@
 <script src="/auth.js" defer></script>
 <script id="bcRedirectIfLoggedIn">
 (function(){
-  // Run ASAP
+  // If user just logged out, skip redirect once and clear flag
+  try {
+    if (localStorage.getItem("bc.justLoggedOut")==="1") {
+      localStorage.removeItem("bc.justLoggedOut");
+      return;
+    }
+  } catch(e) {}
+
   fetch("/api/users/me", { headers: { "cache-control":"no-store" }})
     .then(r => r.ok ? r.json() : { ok:false })
-    .then(j => { if (j && j.ok) location.replace("/dashboard/"); })
+    .then(j => { if (j && j.ok && j.user) location.replace("/dashboard/"); })
     .catch(()=>{});
 })();
 </script>
 </body>
 </html>
+
+
 
