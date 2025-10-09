@@ -1,4 +1,4 @@
-Changes:
+﻿Changes:
 - Logo path fixed to "b1.png" (no leading slash). No file moves or renames.
 - Header nav limited to: Brands, Creators, Pricing, Support.
 - Unified button sizing and gradient across site.
@@ -12,9 +12,10 @@ Install:
    .\replace-chrome-v6.ps1 -Root "C:\bc\cloudflare\html"
 3) Deploy:
    cd C:\bc\cloudflare\html
-   wrangler pages deploy . --project-name=bestiecollabs
+   wrangler pages deploy . --project-name=bc
 
 Verify:
 - Logo shows. Header appears sitewide with 4 links.
 - Buttons match size.
 - No strange characters in legal pages.
+

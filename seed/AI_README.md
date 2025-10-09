@@ -50,3 +50,4 @@ DO NOTS
 - Do not change file structure
 - Do not commit secrets
 - Do not use React or Vite
+

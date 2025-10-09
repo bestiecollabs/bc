@@ -22,3 +22,4 @@
 ## Notes
 - Delete → recycle → undo works and is audited.
 - Password login is disabled until `users.pw_salt` and `users.pw_hash` exist.
+
