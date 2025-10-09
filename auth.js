@@ -1,4 +1,4 @@
-// /auth.js — header link toggles + simple route guards + footer dot scrub (no theme)
+﻿// /auth.js â€” header link toggles + simple route guards + footer dot scrub (no theme)
 (function () {
   const d = document;
   const qa = (sel, root) => Array.from((root || d).querySelectorAll(sel));
@@ -43,10 +43,10 @@
     }
   }
 
-  // Footer: remove " · " and center typical link rows
+  // Footer: remove " Â· " and center typical link rows
   function fixFooter() {
     qa("footer").forEach(f => {
-      try { f.innerHTML = f.innerHTML.replace(/\s*·\s*/g, " "); } catch {}
+      try { f.innerHTML = f.innerHTML.replace(/\s*Â·\s*/g, " "); } catch {}
       qa("nav, .links, ul", f).forEach(row => {
         row.style.display = "flex";
         row.style.justifyContent = "center";
@@ -136,7 +136,7 @@
           }
         } catch {}
         // Always land on home
-        location.replace("/");
+        try{localStorage.setItem("bc.justLoggedOut","1")}catch(e){};try{localStorage.setItem("bc.justLoggedOut","1")}catch(e){};location.replace("/?loggedout=1&_="+Date.now());
       });
     });
   }
@@ -168,6 +168,8 @@
     if (!isProtected(path)) return;
 
     const me = await getMe();
-    if (!me || !me.ok) location.replace("/");
+    if (!me || !me.ok) try{localStorage.setItem("bc.justLoggedOut","1")}catch(e){};try{localStorage.setItem("bc.justLoggedOut","1")}catch(e){};location.replace("/?loggedout=1&_="+Date.now());
   });
 })();
+
+
