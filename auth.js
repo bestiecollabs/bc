@@ -118,3 +118,27 @@
     } catch {}
   });
 })();
+/* ===== Bestie logout binder (additive) ===== */
+(function () {
+  function bindLogout() {
+    const els = document.querySelectorAll('[data-link="logout"], a[href="/logout"], a[href="/api/logout"]');
+    els.forEach(el => {
+      if (el.__bcLogoutBound) return;
+      el.__bcLogoutBound = true;
+      el.addEventListener("click", async (e) => {
+        e.preventDefault();
+        try {
+          // Try API POST first
+          const r = await fetch("/api/logout", { method: "POST" });
+          if (!r.ok) {
+            // Fallback GET route if legacy exists
+            await fetch("/logout", { method: "GET", cache: "no-store" }).catch(()=>{});
+          }
+        } catch {}
+        // Always land on home
+        location.replace("/");
+      });
+    });
+  }
+  document.addEventListener("DOMContentLoaded", bindLogout);
+})();
