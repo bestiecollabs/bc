@@ -1,11 +1,15 @@
-name = "bestie-pages"
-compatibility_date = "2025-10-06"
+﻿name = "bc"
 pages_build_output_dir = "."
-
-[[d1_databases]]
-binding = "DB"
-database_name = "bestiedb"
-database_id = "7ccf7968-cb51-4001-a81b-ca235b8d2403"
+compatibility_date = "2025-10-06"
 
 [vars]
-ADMIN_ALLOWLIST = "collabsbestie@gmail.com,bestie@bestiecollabs.com"
+NODE_VERSION = "20"
+UI_ORIGINS = "https://bestiecollabs.com,https://localhost:5173"
+API_BASE = "https://bestiecollabs.com"
+CF_PAGES = "true"
+ADMIN_ALLOWLIST = "collabsbestie@gmail.com"
+
+[[d1_databases]]
+binding = "BESTIEDB"
+database_name = "bestiedb"
+database_id = "7ccf7968-cb51-4001-a81b-ca235b8d2403"
