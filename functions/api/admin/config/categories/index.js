@@ -1,7 +1,7 @@
 ﻿/**
  * /api/admin/config/categories
  * GET -> { ok, categories: [] }
- * PUT body: { categories: ["Apparel","Beauty","Home"] }
+ * PUT/POST body: { categories: ["Apparel","Beauty","Home"] }
  */
 export const onRequest = async ({ request, env }) => {
   const admin = request.headers.get("x-admin-email");
@@ -14,7 +14,7 @@ export const onRequest = async ({ request, env }) => {
     return json({ ok:true, categories });
   }
 
-  if (request.method === "PUT") {
+  if (request.method === "PUT" || request.method === "POST") {
     const body = await request.json().catch(()=>null);
     if (!body || !Array.isArray(body.categories)) return json({ ok:false, error:"bad_body" }, 400);
     const cats = body.categories.map(String).map(s=>s.trim()).filter(Boolean);
