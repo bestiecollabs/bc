@@ -26,9 +26,8 @@
     LIMIT ? OFFSET ?
   `).bind(...binds, limit, offset).all();
 
-  const total = await db.prepare(\`SELECT COUNT(*) as c FROM brands ${whereSql}\`).bind(...binds).first();
-  return json({ ok:true, page, limit, total: total?.c ?? 0, items: items?.results ?? [] });
+  const totalRow = await db.prepare(`SELECT COUNT(*) as c FROM brands ${whereSql}`).bind(...binds).first();
+
+  return json({ ok:true, page, limit, total: totalRow?.c ?? 0, items: items?.results ?? [] });
 };
 function json(b,s=200){ return new Response(JSON.stringify(b),{status:s,headers:{'content-type':'application/json'}}); }
-
-// touch 2025-10-10T13:41:51.2773280-07:00
