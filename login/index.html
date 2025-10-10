@@ -293,7 +293,7 @@
         throw new Error(j.error || ("http_"+res.status));
       }
       // login ok -> route by role
-      await routeByRole();
+      location.replace("/account/"); return;
     } catch (err) {
       // show minimal error hint
       const msg = String(err && err.message || "login_failed");
