@@ -1,8 +1,8 @@
-<!doctype html>
+ï»¿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Log in · Bestie Collabs</title>
+  <title>Log in Â· Bestie Collabs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="/favicon.png">
   <meta name="theme-color" content="#4C6FFF">
@@ -169,7 +169,7 @@
 
   async function doLogin(){
     if(btn.disabled) return;
-    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Signing in…';
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Signing inâ€¦';
     const id = idEl.value.trim();
     const payload = isEmail(id)
       ? { email: id, username: "", password: pwEl.value, remember: rememberEl.checked }
@@ -193,7 +193,7 @@
     }
 
     const to = (r.json && r.json.redirect) || new URLSearchParams(location.search).get('next') || '/account/';
-    location.assign(to);
+     try{ if(location.search) history.replaceState(null,'',location.pathname); }catch{}
   }
 
   btn.addEventListener('click', doLogin);
