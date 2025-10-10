@@ -233,6 +233,96 @@
     .catch(()=>{});
 })();
 </script>
+<script id="bestie-login-handler">
+(function(){
+  if (window.__bestieLoginBound) return; window.__bestieLoginBound = true;
+
+  async function routeByRole() {
+    try {
+      const p = await fetch("/api/account/profile", {
+        headers: { "cache-control":"no-store" },
+        credentials: "include"
+      }).then(r => r.ok ? r.json() : null);
+      const role = (p && (p.role || p.user?.role)) || "";
+      if (role === "creator")       location.replace("/dashboard/creator/");
+      else if (role === "brand")    location.replace("/dashboard/brand/");
+      else if (role === "admin")    return; // stay
+      else                          location.replace("/account/");
+    } catch { location.replace("/account/"); }
+  }
+
+  function findLoginForm(doc){
+    // Preferred markers
+    let f = doc.querySelector('form[data-auth="login"], form#login, form#bestieLogin');
+    if (f) return f;
+    // Common fallbacks: a form that has password + email/username
+    const forms = Array.from(doc.querySelectorAll("form"));
+    for (const x of forms) {
+      const hasPw  = x.querySelector('input[type="password"], input[name="password"]');
+      const hasId  = x.querySelector('input[name="email"], input[name="username"], input[type="email"], input[type="text"]');
+      if (hasPw && hasId) return x;
+    }
+    return null;
+  }
+
+  async function onSubmit(e){
+    e.preventDefault();
+    const form = e.currentTarget;
+    const emailInput = form.querySelector('input[name="email"], input[type="email"], input[name="username"], input[type="text"]');
+    const pwInput    = form.querySelector('input[name="password"], input[type="password"]');
+    if(!emailInput || !pwInput) return;
+
+    const btn = form.querySelector('button[type="submit"], input[type="submit"]');
+    const orig = btn && (btn.innerText || btn.value);
+
+    try {
+      if (btn) { (btn.innerText!==undefined ? btn.innerText="Signing in…" : btn.value="Signing in…"); btn.disabled=true; }
+      const idv = String(emailInput.value || "").trim();
+      const pw  = String(pwInput.value || "");
+      if (!idv || !pw) throw new Error("missing_credentials");
+
+      const res = await fetch("/auth/login", {
+        method: "POST",
+        headers: { "content-type":"application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: idv, username: idv, password: pw })
+      });
+
+      if (!res.ok) {
+        const j = await res.json().catch(()=>({}));
+        throw new Error(j.error || ("http_"+res.status));
+      }
+      // login ok -> route by role
+      await routeByRole();
+    } catch (err) {
+      // show minimal error hint
+      const msg = String(err && err.message || "login_failed");
+      let out = form.querySelector('[data-login-error]');
+      if (!out) {
+        out = document.createElement("div");
+        out.setAttribute("data-login-error","1");
+        out.style.color = "#b91c1c";
+        out.style.marginTop = "8px";
+        form.appendChild(out);
+      }
+      out.textContent = (msg==="invalid_credentials") ? "Invalid username or password." : "Sign-in failed. Try again.";
+    } finally {
+      if (btn) { (btn.innerText!==undefined ? btn.innerText=orig : btn.value=orig); btn.disabled=false; }
+    }
+  }
+
+  function bind(){
+    const f = findLoginForm(document);
+    if (!f || f.__bestieBound) return;
+    f.__bestieBound = true;
+    // force method=post to avoid leaking creds in URL if native submit happens
+    if (!/post/i.test(f.getAttribute("method")||"")) f.setAttribute("method","post");
+    f.addEventListener("submit", onSubmit);
+  }
+
+  document.addEventListener("DOMContentLoaded", bind);
+})();
+</script>
 </body>
 </html>
 
