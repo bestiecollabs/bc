@@ -1,0 +1,80 @@
+﻿<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin · Brands</title><link rel="stylesheet" href="/air.css">
+<style>
+table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #eee}th{text-align:left}
+.badge{padding:2px 6px;border:1px solid #ccc;border-radius:6px;font-size:12px}
+</style>
+</head><body>
+<main class="section" style="max-width:1100px;margin:0 auto">
+  <h1>Brands</h1>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+    <input id="q" placeholder="Search name or domain" style="flex:1;padding:8px">
+    <select id="status">
+      <option value="all">All</option>
+      <option value="draft">Draft</option>
+      <option value="published" selected>Published</option>
+    </select>
+    <button id="load">Load</button>
+  </div>
+  <table id="t"><thead>
+    <tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr>
+  </thead><tbody></tbody></table>
+</main>
+<script>
+const ADMIN_HDR={ "x-admin-email":"collabsbestie@gmail.com","accept":"application/json","content-type":"application/json" };
+async function fetchBrands(){
+  const q=document.getElementById('q').value.trim();
+  const status=document.getElementById('status').value;
+  const url=new URL('/api/admin/brands', location.origin);
+  if(q) url.searchParams.set('q', q);
+  if(status) url.searchParams.set('status', status);
+  url.searchParams.set('limit','100');
+  const res=await fetch(url,{headers:ADMIN_HDR});
+  return res.json();
+}
+function rowHTML(b){
+  const cats=[b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).join(' • ');
+  return `<tr data-id="${b.id}">
+    <td><div style="display:flex;align-items:center;gap:8px">
+      ${b.logo_url?`<img src="${b.logo_url}" style="width:28px;height:28px;object-fit:cover;border-radius:6px">`:``}
+      <a href="${b.website_url}" target="_blank" rel="noopener">${b.name}</a>
+      <span class="badge">${b.domain||''}</span>
+    </div></td>
+    <td>${cats||''}</td>
+    <td>${b.status}</td>
+    <td>${b.featured? 'Yes':'No'}</td>
+    <td>
+      <button class="publish">${b.status==='published'?'Unpublish':'Publish'}</button>
+      <button class="feature">${b.featured? 'Unfeature':'Feature'}</button>
+    </td>
+  </tr>`;
+}
+async function load(){
+  const data=await fetchBrands();
+  const tbody=document.querySelector('#t tbody');
+  tbody.innerHTML='';
+  if(!data.ok){ tbody.innerHTML='<tr><td colspan=5>Failed to load</td></tr>'; return; }
+  for(const b of data.items) tbody.insertAdjacentHTML('beforeend',rowHTML(b));
+}
+async function update(id, patch){
+  const res=await fetch(`/api/admin/brands/${id}`,{method:'PATCH',headers:ADMIN_HDR,body:JSON.stringify(patch)});
+  return res.json();
+}
+document.getElementById('load').onclick=load;
+document.addEventListener('click', async (e)=>{
+  const tr=e.target.closest('tr[data-id]'); if(!tr) return;
+  const id=tr.getAttribute('data-id');
+  if(e.target.classList.contains('publish')){
+    const cur=tr.children[2].textContent.trim();
+    const next=cur==='published'?'draft':'published';
+    await update(id,{status:next}); await load();
+  }
+  if(e.target.classList.contains('feature')){
+    const cur=tr.children[3].textContent.trim()==='Yes';
+    await update(id,{featured:!cur}); await load();
+  }
+});
+load();
+</script>
+</body></html>
