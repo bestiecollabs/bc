@@ -35,7 +35,7 @@ export const onRequest = async (ctx) => {
   const rows = parseCSV(csvText);
   if (rows.length === 0) return json({ ok:false, error:"empty csv" }, 400);
 
-  const { valid, errors, batchId } = validateAndNormalize(rows);
+  const { valid, errors, batchId } = await validateAndNormalize(rows, env);
   if (dryRun) {
     return json({
       ok: true,
@@ -236,3 +236,4 @@ async function upsertBrand(db, v) {
   ).run();
   return res;
 }
+
