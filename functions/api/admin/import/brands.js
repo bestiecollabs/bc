@@ -1,8 +1,15 @@
 ﻿/**
- * POST /api/admin/import/brands?dry_run=1|0
- * Accepts either multipart/form-data (field "file") or raw text/csv body
+ * /api/admin/import/brands
+ * Accepts POST only. Content-Type: text/csv or multipart/form-data (field "file")
  */
-export const onRequestPost = async ({ request, env }) => {
+export const onRequest = async (ctx) => {
+  const { request, env } = ctx;
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ ok:false, error:"method_not_allowed" }), {
+      status: 405, headers: { "content-type": "application/json" }
+    });
+  }
+
   const admin = request.headers.get("x-admin-email");
   if (!admin) return json({ ok:false, error:"unauthorized" }, 401);
 
@@ -45,7 +52,8 @@ export const onRequestPost = async ({ request, env }) => {
   for (const v of valid) {
     try {
       const res = await upsertBrand(db, { ...v, import_batch_id: batchId });
-      if ((res?.meta?.changes ?? res?.changed ?? 0) > 0 && (res?.lastRowId ?? res?.last_row_id)) inserted++;
+      const changes = (res?.meta?.changes ?? res?.changed ?? 0);
+      if (changes > 0 && (res?.lastRowId ?? res?.last_row_id)) inserted++;
       else updated++;
     } catch (e) {
       rejected++;
@@ -119,6 +127,7 @@ function validateAndNormalize(rows) {
     if (bad) continue;
 
     if (!STATUS_SET.has(String(r.status).toLowerCase())) { errors.push(err(r,"status","status","must be draft or published")); bad = true; }
+
     const hasUS = BOOL(r.has_us_presence);
     const isDrop = BOOL(r.is_dropshipper);
     if (hasUS !== 1) { errors.push(err(r,"has_us_presence","has_us_presence","must be 1 (US presence required)")); bad = true; }
