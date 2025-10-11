@@ -1,8 +1,8 @@
-<!doctype html>
+ï»¿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Log in · Bestie Collabs</title>
+  <title>Log in Â· Bestie Collabs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="/favicon.png">
   <meta name="theme-color" content="#4C6FFF">
@@ -169,7 +169,7 @@
 
   async function doLogin(){
     if(btn.disabled) return;
-    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Signing in…';
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Signing inâ€¦';
     const id = idEl.value.trim();
     const payload = isEmail(id)
       ? { email: id, username: "", password: pwEl.value, remember: rememberEl.checked }
@@ -277,7 +277,7 @@
     const orig = btn && (btn.innerText || btn.value);
 
     try {
-      if (btn) { (btn.innerText!==undefined ? btn.innerText="Signing in…" : btn.value="Signing in…"); btn.disabled=true; }
+      if (btn) { (btn.innerText!==undefined ? btn.innerText="Signing inâ€¦" : btn.value="Signing inâ€¦"); btn.disabled=true; }
       const idv = String(emailInput.value || "").trim();
       const pw  = String(pwInput.value || "");
       if (!idv || !pw) throw new Error("missing_credentials");
