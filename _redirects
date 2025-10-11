@@ -2,3 +2,4 @@
 /auth/*  /auth/:splat  200
 /signup/brand     /signup/   301
 /signup/creator   /signup/   301/dashboard/*    /dashboard/index.html    200
+/admin/dashboard    /dashboard/    301
