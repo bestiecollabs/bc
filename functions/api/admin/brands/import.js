@@ -1,7 +1,7 @@
 ﻿/**
  * POST /api/admin/brands/import
- * Body: { rows: Array<BrandRow> }
- * Behavior: insert new rows; SKIP duplicates (no update). Case-insensitive on website_url and shopify_shop_domain.
+ * Inserts new rows only. Skips duplicates.
+ * Duplicate key = website_host_norm OR shopify_domain_norm (normalized).
  * Response: { ok, inserted, skipped_duplicate, failed }
  */
 export const onRequestPost = async ({ request, env }) => {
@@ -24,30 +24,28 @@ export const onRequestPost = async ({ request, env }) => {
         const v = validateRow(n);
         if (!v.ok) { failed++; continue; }
 
-        // duplicate check (case-insensitive)
-        const find = await env.DB.prepare(`
+        // Compute normalized keys
+        const website_host_norm = normWebsiteHost(n.website_url);
+        const shopify_domain_norm = normDomain(n.shopify_shop_domain);
+
+        // Skip if duplicate exists
+        const found = await env.DB.prepare(`
           SELECT id FROM brands
-          WHERE (website_url IS NOT NULL AND website_url <> '' AND LOWER(website_url)=?)
-             OR (shopify_shop_domain IS NOT NULL AND shopify_shop_domain <> '' AND LOWER(shopify_shop_domain)=?)
+          WHERE (website_host_norm IS NOT NULL AND website_host_norm <> '' AND website_host_norm = ?)
+             OR (shopify_domain_norm IS NOT NULL AND shopify_domain_norm <> '' AND shopify_domain_norm = ?)
           LIMIT 1
-        `).bind(n.website_url_lc, n.shopify_shop_domain_lc).first();
+        `).bind(website_host_norm, shopify_domain_norm).first();
 
-        if (find && find.id) {
-          skipped_duplicate++;        // do not update existing
-          continue;
-        }
+        if (found && found.id) { skipped_duplicate++; continue; }
 
-        const ins = buildInsert(n);
+        const ins = buildInsert(n, website_host_norm, shopify_domain_norm);
         stmts.push(env.DB.prepare(ins.sql).bind(...ins.params));
         inserted++;
       }
 
       if (stmts.length) {
         const res = await env.DB.batch(stmts).catch(e => ({ error:e }));
-        if (res && res.error) {
-          // conservative: count whole batch as failed if batch throws
-          failed += stmts.length;
-        }
+        if (res && res.error) { failed += stmts.length; }
       }
     }
 
@@ -61,24 +59,19 @@ function normalizeRow(r){
   const get = k => (r?.[k] == null ? "" : String(r[k]).trim());
   const toInt = v => {
     const s = String(v ?? "").trim().toLowerCase();
-    if (["1","true","yes"].includes(s)) return 1;
-    if (["0","false","no"].includes(s)) return 0;
+    if (["1","true","yes","y"].includes(s)) return 1;
+    if (["0","false","no","n"].includes(s)) return 0;
     const n = parseInt(s,10); return Number.isFinite(n) ? n : 0;
   };
-  const website_url = get("website_url");
-  const shopify_shop_domain = get("shopify_shop_domain");
-
   return {
     name: get("name"),
-    website_url,
-    website_url_lc: website_url.toLowerCase(),
+    website_url: get("website_url"),
     category_primary: get("category_primary"),
     category_secondary: get("category_secondary"),
     category_tertiary: get("category_tertiary"),
     instagram_url: get("instagram_url"),
     tiktok_url: get("tiktok_url"),
-    shopify_shop_domain,
-    shopify_shop_domain_lc: shopify_shop_domain.toLowerCase(),
+    shopify_shop_domain: get("shopify_shop_domain"),
     shopify_shop_id: get("shopify_shop_id"),
     shopify_public_url: get("shopify_public_url"),
     contact_name: get("contact_name"),
@@ -105,7 +98,30 @@ function validateRow(n){
   if (!n.website_url && !n.shopify_shop_domain) return { ok:false, error:"Need website_url or shopify_shop_domain" };
   return { ok:true };
 }
-function buildInsert(n){
+
+function normWebsiteHost(url){
+  if (!url) return "";
+  try {
+    // ensure URL object by adding scheme if missing
+    const u = new URL(url.includes("://") ? url : ("https://" + url));
+    return normDomain(u.hostname);
+  } catch {
+    // fallback: strip protocol, take up to first slash
+    let s = String(url).trim().toLowerCase();
+    s = s.replace(/^https?:\/\//,'').replace(/\/+.*$/,''); // remove path
+    return normDomain(s);
+  }
+}
+function normDomain(host){
+  if (!host) return "";
+  let h = String(host).trim().toLowerCase();
+  if (h.startsWith("www.")) h = h.slice(4);
+  // drop trailing dot
+  if (h.endsWith(".")) h = h.slice(0,-1);
+  return h;
+}
+
+function buildInsert(n, website_host_norm, shopify_domain_norm){
   const cols = [
     "name","website_url",
     "category_primary","category_secondary","category_tertiary",
@@ -115,6 +131,7 @@ function buildInsert(n){
     "country","state","city","zipcode","address",
     "description","support_email","logo_url",
     "featured","status","has_us_presence","is_dropshipper","notes_admin",
+    "website_host_norm","shopify_domain_norm",
     "created_at","updated_at"
   ];
   const params = [
@@ -126,9 +143,11 @@ function buildInsert(n){
     n.country, n.state, n.city, n.zipcode, n.address,
     n.description, n.support_email, n.logo_url,
     n.featured, n.status, n.has_us_presence, n.is_dropshipper, n.notes_admin,
+    website_host_norm || null, shopify_domain_norm || null,
     now(), now()
   ];
   return { sql: `INSERT INTO brands (${cols.join(",")}) VALUES (${cols.map(()=>"?").join(",")})`, params };
 }
+
 function now(){ return new Date().toISOString(); }
 function json(obj, status=200){ return new Response(JSON.stringify(obj), { status, headers:{ "content-type":"application/json; charset=utf-8" } }); }
