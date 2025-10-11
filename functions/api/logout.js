@@ -1,10 +1,14 @@
-﻿export async function onRequestPost({ request }) {
-  const raw = request.headers.get("cookie") || "";
-  const names = [...new Set(raw.split(";").map(p => p.split("=")[0].trim()).filter(Boolean))];
-  const fallback = ["sid","session","sess","auth","token","bestie_sid","bestie_email"];
-  const all = names.length ? names : fallback;
-  const headers = new Headers();
-  for (const n of all) headers.append("Set-Cookie", `${n}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
-  headers.set("cache-control", "no-store");
-  return new Response("", { status: 204, headers });
+export async function onRequestPost() {
+  const headers = new Headers({
+    "content-type": "application/json",
+    "cache-control": "no-store",
+  });
+
+  // Expire on apex and subdomain scopes
+  const expired = "bestie_email=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; SameSite=Lax";
+  headers.append("Set-Cookie", expired + "; HttpOnly");
+  headers.append("Set-Cookie", expired + "; Domain=.bestiecollabs.com; HttpOnly");
+
+  return new Response(JSON.stringify({ ok: true, cleared: "bestie_email" }), { status: 200, headers });
 }
+export const onRequest = onRequestPost;

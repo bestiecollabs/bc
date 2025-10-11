@@ -1,0 +1,91 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Dashboard · Bestie Collabs</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="/favicon.ico">
+    <style>
+      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;padding:2rem;background:#f7f7f8;color:#111}
+      .wrap{max-width:960px;margin:0 auto}
+      header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+      .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+      .muted{color:#6b7280}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+      a.button{display:inline-block;padding:.6rem 1rem;border-radius:10px;border:1px solid #111;text-decoration:none}
+      nav a{margin-right:12px}
+      .hidden{display:none}
+    </style>
+    <script defer src="/auth.js"></script>
+    <script>
+      async function apiMe(){
+        try{
+          const r = await fetch("/api/users/me", {headers:{"cache-control":"no-store"}, credentials:"include"});
+          if(!r.ok) return {ok:false};
+          return await r.json();
+        }catch{ return {ok:false}; }
+      }
+      async function init(){
+        const me = await apiMe();
+        const guard = document.getElementById("guard");
+        const authed = document.getElementById("authed");
+        const who = document.getElementById("who");
+        if(!me.ok){
+          // not logged in → send to login
+          location.replace("/login/");
+          return;
+        }
+        // show basics
+        guard.classList.add("hidden");
+        authed.classList.remove("hidden");
+        who.textContent = me.user?.email || me.user?.id || "session";
+
+        // links to role dashboards you already have
+        document.getElementById("brandDash").href = "/dashboard/brand/";
+        document.getElementById("creatorDash").href = "/dashboard/creator/";
+      }
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Dashboard</h1>
+        <nav class="auth">
+          <a href="/account/">Account</a>
+          <a data-link="logout" href="/api/logout">Logout</a>
+        </nav>
+      </header>
+
+      <section id="guard" class="card">
+        <strong>Checking your session…</strong>
+        <div class="muted">If nothing happens, <a href="/login/">log in</a>.</div>
+      </section>
+
+      <section id="authed" class="hidden">
+        <div class="card">
+          <h2 style="margin:0 0 .25rem 0">Welcome</h2>
+          <div class="muted" id="who"></div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3 style="margin-top:0">Brand dashboard</h3>
+            <p class="muted">Manage brand profile, campaigns, payouts.</p>
+            <a id="brandDash" class="button" href="/dashboard/brand/">Open</a>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Creator dashboard</h3>
+            <p class="muted">Manage creator profile, collabs, earnings.</p>
+            <a id="creatorDash" class="button" href="/dashboard/creator/">Open</a>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Messages</h3>
+            <p class="muted">Coming soon.</p>
+            <a class="button" href="/account/">Account</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

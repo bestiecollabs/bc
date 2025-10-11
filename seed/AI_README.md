@@ -1,53 +1,55 @@
-﻿# AI_README.md
+﻿# Bestie Collabs · AI_README
 
-PROJECT
-Bestie Collabs
+## Project
+Static site + Pages Functions on Cloudflare Pages. D1 database `bestiedb` bound as `DB`. Live URLs:
+- Production: https://bestiecollabs.com
+- API entry points are under `/api/*`.
 
-STACK
-- Static HTML and vanilla JS on Cloudflare Pages
-- Cloudflare Pages Functions in /functions
-- Cloudflare D1 database name bestiedb
-- Domains: bestiecollabs.com and api.bestiecollabs.com
-- Repo: https://github.com/bestiecollabs/bc  branch main
-- Local root: C:\bc\cloudflare\html
+## Constraints
+- Frontend: static HTML + vanilla JS. No framework.
+- Functions live in `/functions/**`. Keep current directories and names.
+- Use D1 binding `DB`. No structural renames. No feature removals to “fix” bugs.
+- Seed Kit files in `/seed` drive handoffs and SOPs.
 
-PROD URLS
-- App: https://bestiecollabs.com
-- API: https://api.bestiecollabs.com
-- Health: /api/healthcheck returns ok true
+## Current Status (2025-10-10)
+- **DB**: D1 schema migrated (`brands`, `config`).
+- **Config**: `allowed_categories` set to `["Apparel","Beauty","Home"]`.
+- **Import**: `/api/admin/import/brands` supports dry-run and commit. Validates:
+  - required: `name, website_url, category_primary, status, has_us_presence=1, is_dropshipper=0`
+  - US presence required, dropshippers rejected
+  - canonical URLs, domain + slug derivation
+  - category_primary must be in allow-list
+- **Public APIs**:
+  - `GET /api/brands?category=&q=&featured=&page=&limit=`
+  - `GET /api/categories`
+- **Admin APIs**:
+  - `GET|PUT /api/admin/config/categories`
+  - `POST /api/admin/import/brands?dry_run=1|0` (CSV in multipart or text/csv)
+  - `GET /api/admin/brands` (status filter, search, pagination)
+  - `PATCH /api/admin/brands/:id` (status, featured, fields)
+- **Admin UI**:
+  - `/admin/imports/` CSV uploader (Access-protected at the edge)
+  - `/admin/brands/` basic table with publish/feature toggles
 
-CURRENT CONFIG
-- Build: Framework preset None, Build command empty, Output directory .
-- Pages Functions: auto detected from /functions
-- wrangler.toml manages plaintext vars and D1 binding
-- OPENAI_API_KEY stored as Cloudflare Secret
-- D1 binding variable name DB  database bestiedb
-- Redirect: www.bestiecollabs.com to https://bestiecollabs.com/${1}
-- SSL: Active Full
+## Auth (temporary)
+- Gate via `x-admin-email` header. Replace with Cloudflare Access JWT in future.
 
-SEED RULES
-- Full code delivery with exact file paths and what to expect
-- Verify latest files before edits  ask if unsure
-- Concise instructions
-- Provide full code via PowerShell blocks
-- Read files provided in chat before coding
-- Do not remove features to make new code work
-- Keep the same code structure  no new folders without approval
-- No backups or variants  fix root causes
-- Answer side questions then return to main task
-- Production first  deploys from main
+## Data Rules
+- US presence required (`has_us_presence=1`)
+- No dropshippers (`is_dropshipper=0`)
+- Three categories max, relevance-ordered
+- Shopify shop (optional) as `shopify_shop_domain`
+- Socials: Instagram/TikTok URLs only
 
-WHERE WE LEFT OFF
-- GitHub to Cloudflare deploy verified
-- API healthcheck works on both domains
-- D1 binding aligned as env.DB
+## Migrations
+- Files in `/migrations/*.sql`
+- Apply: `wrangler d1 migrations apply DB --remote`
 
-NEXT TWO TASKS
-1. Verify /api/users/me returns ok true with session when logged in
-2. Implement Admin Delete plus Undo for Brands and Creators in production
+## Deploy
+- Production: `wrangler pages deploy . --project-name bc --branch main`
+- Preview: `wrangler pages deploy . --project-name bc`
+- Confirm routes via `/api/admin/brands/ping`
 
-DO NOTS
-- Do not change file structure
-- Do not commit secrets
-- Do not use React or Vite
-
+## Next
+1) Admin Brands: pagination, sort, inline edit, category dropdown.
+2) Creators: schema, importer, public/admin endpoints.

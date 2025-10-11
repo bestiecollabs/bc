@@ -1,11 +1,16 @@
-﻿export async function onRequestGet({ request }) {
-  const raw = request.headers.get("cookie") || "";
-  const names = [...new Set(raw.split(";").map(p => p.split("=")[0].trim()).filter(Boolean))];
-  const fallback = ["sid","session","sess","auth","token","bestie_sid","bestie_email"];
-  const all = names.length ? names : fallback;
-  const headers = new Headers();
-  for (const n of all) headers.append("Set-Cookie", `${n}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
-  headers.set("cache-control", "no-store");
-  headers.set("location", "/");
-  return new Response(null, { status: 302, headers });
+export async function onRequestGet() {
+  const html = `<!doctype html><meta charset="utf-8">
+<script>
+try {
+  // Extra safety: clear any client state
+  localStorage.clear(); sessionStorage.clear();
+  // Nuke cookie on both host scopes from client too
+  var past="Thu, 01 Jan 1970 00:00:00 GMT";
+  document.cookie="bestie_email=; Path=/; Expires="+past+"; Secure; SameSite=Lax";
+  document.cookie="bestie_email=; Domain=.bestiecollabs.com; Path=/; Expires="+past+"; Secure; SameSite=Lax";
+} catch(e){}
+location.replace("/");
+</script>`;
+  return new Response(html, { headers: { "content-type":"text/html; charset=utf-8", "cache-control":"no-store" } });
 }
+export const onRequest = onRequestGet;
