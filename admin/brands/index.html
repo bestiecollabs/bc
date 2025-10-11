@@ -1,80 +1,137 @@
-﻿<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin · Brands</title><link rel="stylesheet" href="/air.css">
-<style>
-table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #eee}th{text-align:left}
-.badge{padding:2px 6px;border:1px solid #ccc;border-radius:6px;font-size:12px}
-</style>
-</head><body>
-<main class="section" style="max-width:1100px;margin:0 auto">
-  <h1>Brands</h1>
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
-    <input id="q" placeholder="Search name or domain" style="flex:1;padding:8px">
-    <select id="status">
-      <option value="all">All</option>
-      <option value="draft">Draft</option>
-      <option value="published" selected>Published</option>
-    </select>
-    <button id="load">Load</button>
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin · Brands</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/air.css" rel="stylesheet">
+  <script defer src="/auth.js"></script>
+  <script defer src="/admin/admin.js"></script>
+  <script defer src="/admin/brands/import.js"></script>
+  <style>
+    :root{ --rail:240px; --gap:12px; --card-pad:16px; --radius:16px; }
+    .layout{ display:grid; grid-template-columns: var(--rail) 1fr; min-height:100vh; }
+    .rail{ background:#f7f9ff; border-right:1px solid #e6ecff; padding:16px; }
+    .rail .logo{ display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+    .rail nav a{ display:block; padding:10px 12px; border-radius:12px; margin-bottom:6px; color:#1b1f33; text-decoration:none; }
+    .rail nav a.active{ background:#e9efff; }
+    .main{ padding:20px; max-width:1280px; width:100%; }
+    .title{ font-size:20px; font-weight:700; margin:0 0 14px; }
+    .toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .btn{ appearance:none; border:1px solid #4C6FFF; background:#4C6FFF; color:#fff; padding:10px 14px; border-radius:12px; cursor:pointer; }
+    .btn.secondary{ background:#fff; color:#1b1f33; border-color:#cdd6ff; }
+    .pill{ font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid #e6ecff; }
+    .ok{ color:#0a5; border-color:#bfead3; background:#e9fbf1; }
+    .bad{ color:#b00; border-color:#f4cccc; background:#ffeaea; }
+    .card{ background:#fff; border:1px solid #e6ecff; border-radius:var(--radius); padding:var(--card-pad); box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .muted{ color:#556; font-size:12px; }
+    .table-wrap{ border:1px solid #eef2ff; border-radius:12px; overflow:auto; max-height:60vh; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; }
+    thead th{ position:sticky; top:0; background:#f9fbff; text-align:left; font-size:12px; color:#556; padding:8px; }
+    tbody td{ border-top:1px solid #eef2ff; padding:8px; font-size:13px; vertical-align:top; }
+    tr:nth-child(even) td{ background:#fcfdff; }
+    .drawer{ position:fixed; top:0; right:-480px; width:480px; height:100vh; background:#fff; border-left:1px solid #e6ecff; box-shadow:-6px 0 16px rgba(0,0,0,.06); transition:right .22s ease; padding:18px; }
+    .drawer.open{ right:0; }
+    .drawer h2{ margin:0 0 10px; font-size:18px; }
+    .close-x{ border:none; background:transparent; font-size:20px; cursor:pointer; }
+    .toast{ position:fixed; right:16px; bottom:16px; background:#1b1f33; color:#fff; padding:12px 14px; border-radius:12px; display:none; }
+    @media (max-width:1024px){ .layout{ grid-template-columns: 64px 1fr; } .rail .label{ display:none; } }
+    @media (max-width:768px){ .toolbar{ gap:8px; } .drawer{ width:100%; } }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="rail">
+      <div class="logo">
+        <img src="/b1.png" alt="Bestie Collabs" width="28" height="28"><strong class="label">Admin</strong>
+      </div>
+      <nav>
+        <a href="/admin/">Dashboard</a>
+        <a href="/admin/brands/" class="active" aria-current="page">Brands</a>
+        <a href="/admin/creators/">Creators</a>
+        <a href="/admin/invitations/">Invitations</a>
+      </nav>
+      <div class="muted" id="admin-user"></div>
+    </aside>
+
+    <main class="main">
+      <h1 class="title">Brands</h1>
+
+      <section class="card" style="margin-bottom:12px">
+        <div class="toolbar">
+          <input type="file" id="file" accept=".csv">
+          <button class="btn" id="btn-parse">Preview CSV</button>
+          <button class="btn secondary" id="btn-validate">Validate</button>
+          <button class="btn" id="btn-import">Import</button>
+          <button class="btn secondary" id="btn-clear">Clear</button>
+          <button class="btn secondary" id="btn-export">Export CSV</button>
+          <span class="pill" id="file-info">No file</span>
+          <span class="pill" id="cols-info"></span>
+          <span class="pill" id="count-info"></span>
+        </div>
+        <div class="muted" style="margin-top:6px">
+          Expected columns: name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, shopify_shop_domain, shopify_shop_id, shopify_public_url, contact_name, contact_title, contact_email, contact_phone, country, state, city, zipcode, address, description, support_email, logo_url, featured, status, has_us_presence, is_dropshipper, notes_admin
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="muted" style="margin-bottom:8px">Preview shows first 200 rows</div>
+        <div class="table-wrap">
+          <table id="preview"><thead></thead><tbody></tbody></table>
+        </div>
+      </section>
+    </main>
   </div>
-  <table id="t"><thead>
-    <tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr>
-  </thead><tbody></tbody></table>
-</main>
-<script>
-const ADMIN_HDR={ "x-admin-email":"collabsbestie@gmail.com","accept":"application/json","content-type":"application/json" };
-async function fetchBrands(){
-  const q=document.getElementById('q').value.trim();
-  const status=document.getElementById('status').value;
-  const url=new URL('/api/admin/brands', location.origin);
-  if(q) url.searchParams.set('q', q);
-  if(status) url.searchParams.set('status', status);
-  url.searchParams.set('limit','100');
-  const res=await fetch(url,{headers:ADMIN_HDR});
-  return res.json();
-}
-function rowHTML(b){
-  const cats=[b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).join(' • ');
-  return `<tr data-id="${b.id}">
-    <td><div style="display:flex;align-items:center;gap:8px">
-      ${b.logo_url?`<img src="${b.logo_url}" style="width:28px;height:28px;object-fit:cover;border-radius:6px">`:``}
-      <a href="${b.website_url}" target="_blank" rel="noopener">${b.name}</a>
-      <span class="badge">${b.domain||''}</span>
-    </div></td>
-    <td>${cats||''}</td>
-    <td>${b.status}</td>
-    <td>${b.featured? 'Yes':'No'}</td>
-    <td>
-      <button class="publish">${b.status==='published'?'Unpublish':'Publish'}</button>
-      <button class="feature">${b.featured? 'Unfeature':'Feature'}</button>
-    </td>
-  </tr>`;
-}
-async function load(){
-  const data=await fetchBrands();
-  const tbody=document.querySelector('#t tbody');
-  tbody.innerHTML='';
-  if(!data.ok){ tbody.innerHTML='<tr><td colspan=5>Failed to load</td></tr>'; return; }
-  for(const b of data.items) tbody.insertAdjacentHTML('beforeend',rowHTML(b));
-}
-async function update(id, patch){
-  const res=await fetch(`/api/admin/brands/${id}`,{method:'PATCH',headers:ADMIN_HDR,body:JSON.stringify(patch)});
-  return res.json();
-}
-document.getElementById('load').onclick=load;
-document.addEventListener('click', async (e)=>{
-  const tr=e.target.closest('tr[data-id]'); if(!tr) return;
-  const id=tr.getAttribute('data-id');
-  if(e.target.classList.contains('publish')){
-    const cur=tr.children[2].textContent.trim();
-    const next=cur==='published'?'draft':'published';
-    await update(id,{status:next}); await load();
-  }
-  if(e.target.classList.contains('feature')){
-    const cur=tr.children[3].textContent.trim()==='Yes';
-    await update(id,{featured:!cur}); await load();
-  }
-});
-load();
-</script>
-</body></html>
+
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h2>Brand details</h2>
+      <button class="close-x" id="drawer-close" aria-label="Close">×</button>
+    </div>
+    <div id="drawer-body" class="muted">Select a row to view details.</div>
+  </aside>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Row click -> open drawer with basic fields (no wiring change)
+    (function(){
+      const drawer = document.getElementById('drawer');
+      const close  = document.getElementById('drawer-close');
+      function openDrawer(html){ document.getElementById('drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); }
+      function closeDrawer(){ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); }
+      close?.addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDrawer(); });
+
+      const tbody = document.querySelector('#preview tbody');
+      tbody?.addEventListener('click', (e)=>{
+        const tr = e.target.closest('tr'); if(!tr) return;
+        const cells = Array.from(tr.children).map(td => td.textContent);
+        const heads = Array.from(document.querySelectorAll('#preview thead th')).map(th => th.textContent);
+        const rows = heads.map((h,i)=>'<div style="margin:6px 0;"><strong>'+h+':</strong> '+(cells[i]||'')+'</div>').join('');
+        openDrawer(rows);
+      });
+
+      // Simple CSV export of currently parsed rows (uses import.js globals if present)
+      document.getElementById('btn-export')?.addEventListener('click', ()=>{
+        if (!window.__BRANDS_ROWS || !window.__BRANDS_COLS){ toast('Nothing to export'); return; }
+        const cols = window.__BRANDS_COLS;
+        const lines = [];
+        lines.push(cols.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(','));
+        for (const r of window.__BRANDS_ROWS){
+          const row = cols.map(c=> {
+            const v = r[c] ?? '';
+            return '"'+String(v).replace(/"/g,'""')+'"';
+          }).join(',');
+          lines.push(row);
+        }
+        const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'brands_export.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+      });
+    })();
+  </script>
+</body>
+</html>
