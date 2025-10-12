@@ -1,5 +1,4 @@
-﻿/api/*   /api/:splat   200
+/api/*   /api/:splat   200
 /auth/*  /auth/:splat  200
 /signup/brand     /signup/   301
 /signup/creator   /signup/   301/dashboard/*    /dashboard/index.html    200
-/api/admin/brands-list   /404   404
