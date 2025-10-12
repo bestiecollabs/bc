@@ -1,0 +1,3 @@
+﻿Generate the tree file after structural changes:
+  tree /F /A > seed\ai_tree.txt
+Exclude: node_modules, .git, .wrangler, .env
