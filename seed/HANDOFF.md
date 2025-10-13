@@ -8,7 +8,7 @@ ENV
 - Domains: bestiecollabs.com, api.bestiecollabs.com
 - D1 database: bestiedb  (binding: DB)
 - Secrets in Cloudflare: OPENAI_API_KEY
-- wrangler.toml: pages_build_output_dir = "cloudflare/html" (UTF-8, no BOM)
+- wrangler.toml: pages_build_output_dir = "." (UTF-8, no BOM)
 
 DEPLOY FLOW
 1) Edit locally in C:\bc\cloudflare\html
@@ -32,3 +32,16 @@ WORK RULES
 WHERE TO BUILD NEXT
 - /dashboard/ entry with session guard
 - Admin CSV import UX for Brands → POST /api/admin/brands/import
+
+## Tags & Protection
+- Tag current state:
+  - git tag v0.1-setup-clean
+  - git push origin --tags
+- Protect main:
+  - GitHub → Settings → Branches → Add rule for “main”
+  - Require status checks: Cloudflare Pages deploy
+
+## Sanity Checks
+- Open latest deploy preview → click all top-nav links
+- GET /api/healthcheck → { ok: true }
+- Hard refresh homepage → emojis + purple eye icon stable

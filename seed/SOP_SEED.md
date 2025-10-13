@@ -3,7 +3,7 @@
 SESSION START
 - Pull latest: git pull origin main
 - Confirm local root: C:\bc\cloudflare\html
-- Confirm wrangler.toml is UTF-8 (no BOM) and pages_build_output_dir="cloudflare/html"
+- Confirm wrangler.toml is UTF-8 (no BOM) and pages_build_output_dir="."
 
 DELIVERY FORMAT
 - Step-by-step
@@ -25,3 +25,7 @@ ROLLBACK
 NOTES
 - Admin-only diagnostics must stay gated via header checks
 - Do not commit .dev.vars or any secrets
+
+## Tag & Rollback
+- Tag stable: git tag v0.1-setup-clean && git push origin --tags
+- Rollback: git revert <sha> … or deploy previous commit in Cloudflare

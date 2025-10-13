@@ -17,7 +17,7 @@ PROD URLS
 
 CONFIG
 - Build command: empty
-- Output directory: cloudflare/html
+- Output directory: .
 - Functions: auto from /functions
 - wrangler.toml controls D1 binding and plaintext vars (UTF-8 no BOM)
 - OPENAI_API_KEY stored as Cloudflare Secret
@@ -33,3 +33,9 @@ SEED RULES (from handoff)
 NEXT TASKS
 1) Admin/Dashboard scaffold at /dashboard/ with session-based welcome
 2) Brands CSV import UI → calls /api/admin/brands/import and reports inserted/skipped/failed
+
+## Quick Commands
+git pull --rebase origin main
+git add -A && git commit -m "msg" && git push origin main
+# Tag:
+git tag v0.1-setup-clean && git push origin --tags
