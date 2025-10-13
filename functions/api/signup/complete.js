@@ -1,4 +1,4 @@
-﻿export async function onRequest(ctx) {
+export async function onRequest(ctx) {
   const { request } = ctx;
   const u = new URL(request.url);
   let email = (u.searchParams.get("email") || "").trim().toLowerCase();

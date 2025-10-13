@@ -1,4 +1,4 @@
-﻿import { assertAdmin } from "../api/admin/chipchip/_lib/db.js";
+import { assertAdmin } from "../api/admin/chipchip/_lib/db.js";
 
 export async function onRequest(context) {
   const { request } = context;

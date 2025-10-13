@@ -1,4 +1,4 @@
-﻿import { assertAdmin, json, notFound, q } from "./chipchip/_lib/db.js";
+import { assertAdmin, json, notFound, q } from "./chipchip/_lib/db.js";
 
 export async function onRequest({ env, request }) {
   const email = assertAdmin(env, request);

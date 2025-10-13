@@ -1,4 +1,4 @@
-﻿export async function onRequestGet(ctx) {
+export async function onRequestGet(ctx) {
   const { request, env } = ctx;
   const isAdmin = (req) => {
     const h = req.headers.get("x-admin-email");

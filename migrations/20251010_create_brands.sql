@@ -1,4 +1,4 @@
-﻿-- Brands table for directory and admin import
+-- Brands table for directory and admin import
 CREATE TABLE IF NOT EXISTS brands (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,

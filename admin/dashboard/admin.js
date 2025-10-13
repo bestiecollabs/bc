@@ -1,4 +1,4 @@
-﻿const S = {
+const S = {
   pageSize: 10,
   brands: { q: "", offset: 0 },
   creators: { q: "", offset: 0 },

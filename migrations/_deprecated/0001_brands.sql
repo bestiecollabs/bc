@@ -1,4 +1,4 @@
-﻿-- 0001_brands.sql
+-- 0001_brands.sql
 -- Brands table for Admin CSV import
 CREATE TABLE IF NOT EXISTS brands (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

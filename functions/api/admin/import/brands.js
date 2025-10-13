@@ -1,4 +1,4 @@
-﻿/**
+/**
  * /api/admin/import/brands
  * Accepts POST only. Content-Type: text/csv or multipart/form-data (field "file")
  */

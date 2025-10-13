@@ -1,4 +1,4 @@
-﻿import { json, q } from "../api/admin/chipchip/_lib/db.js";
+import { json, q } from "../api/admin/chipchip/_lib/db.js";
 
 async function hashPBKDF2(password, saltB64, iterations = 100000) {
   const enc = new TextEncoder();

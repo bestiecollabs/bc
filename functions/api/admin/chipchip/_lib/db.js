@@ -1,4 +1,4 @@
-﻿export function assertAdmin(env, request) {
+export function assertAdmin(env, request) {
   const allow = String(env.ADMIN_ALLOWLIST || "")
     .toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
 

@@ -1,4 +1,4 @@
-﻿# Bestie Collabs · Seed Kit (v2)
+# Bestie Collabs · Seed Kit (v2)
 
 ## Purpose
 Single set of rules for how code is reviewed, changed, and delivered. This file is authoritative.

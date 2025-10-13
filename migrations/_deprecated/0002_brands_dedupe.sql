@@ -1,4 +1,4 @@
-﻿-- 0002_brands_dedupe.sql
+-- 0002_brands_dedupe.sql
 -- Add normalized keys and unique indexes to harden de-dupe
 
 ALTER TABLE brands ADD COLUMN website_host_norm TEXT;

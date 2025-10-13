@@ -1,4 +1,4 @@
-﻿import { assertAdmin, json, notFound, run, ulid, makePublicCode, nowSec } from "../_lib/db.js";
+import { assertAdmin, json, notFound, run, ulid, makePublicCode, nowSec } from "../_lib/db.js";
 import { readCSV } from "../_lib/csv.js";
 
 const EXPECT = [

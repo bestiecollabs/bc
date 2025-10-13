@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
   const expected = ["name","website_url","category_primary","category_secondary","category_tertiary","instagram_url","tiktok_url","shopify_shop_domain","shopify_shop_id","shopify_public_url","contact_name","contact_title","contact_email","contact_phone","country","state","city","zipcode","address","description","support_email","logo_url","featured","status","has_us_presence","is_dropshipper","notes_admin"];
 
   const $ = (s)=>document.querySelector(s);

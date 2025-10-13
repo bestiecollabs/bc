@@ -1,4 +1,4 @@
-﻿Changes:
+Changes:
 - Logo path fixed to "b1.png" (no leading slash). No file moves or renames.
 - Header nav limited to: Brands, Creators, Pricing, Support.
 - Unified button sizing and gradient across site.

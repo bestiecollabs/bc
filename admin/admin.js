@@ -1,4 +1,4 @@
-﻿/* Admin shared utilities: nav active, toast, drawer hook, auth hint via /api/users/me */
+/* Admin shared utilities: nav active, toast, drawer hook, auth hint via /api/users/me */
 (function(){
   // Nav active
   const here = location.pathname.replace(/\/+$/,"/").toLowerCase();

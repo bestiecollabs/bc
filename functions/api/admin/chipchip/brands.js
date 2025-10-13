@@ -1,4 +1,4 @@
-﻿import { assertAdmin, json, notFound } from "./_lib/db.js";
+import { assertAdmin, json, notFound } from "./_lib/db.js";
 
 function esc(v) {
   if (v == null) return "";

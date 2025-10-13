@@ -1,4 +1,4 @@
-﻿/**
+/**
  * /api/admin/config/categories
  * GET -> { ok, categories: [] }
  * PUT/POST body: { categories: ["Apparel","Beauty","Home"] }

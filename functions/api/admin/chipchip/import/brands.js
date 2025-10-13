@@ -1,4 +1,4 @@
-﻿import { assertAdmin, json, notFound, run, ulid, makePublicCode, normalizeWebsite, nowSec } from "../_lib/db.js";
+import { assertAdmin, json, notFound, run, ulid, makePublicCode, normalizeWebsite, nowSec } from "../_lib/db.js";
 import { readCSV } from "../_lib/csv.js";
 
 const EXPECT = ["id","brand_name","website","shortDesc","category_1","category_2","category_3","public_contact","reviews_total","rating_avg","priceRange","estimated_monthly","customer_age_range","customer_sex","social_platform_1","social_platform_2","top_creator_videos_1","top_creator_videos_2","last_seen"];

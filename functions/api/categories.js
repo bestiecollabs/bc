@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GET /api/categories -> { ok, categories: [] }
  */
 export const onRequestGet = async ({ env }) => {

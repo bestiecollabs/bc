@@ -1,4 +1,4 @@
-﻿export const onRequest = async ({ request, env }) => {
+export const onRequest = async ({ request, env }) => {
   const admin = request.headers.get("x-admin-email");
   if (!admin) return json({ ok:false, error:"unauthorized" }, 401);
   if (request.method !== "GET") return json({ ok:false, error:"method_not_allowed" }, 405);

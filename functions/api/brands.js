@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GET /api/brands?category=&q=&featured=&page=&limit=
  * Returns published brands only.
  */

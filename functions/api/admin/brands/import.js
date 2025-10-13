@@ -1,4 +1,4 @@
-﻿/**
+/**
  * POST /api/admin/brands/import
  * Inserts new rows only. Skips duplicates.
  * Duplicate key = website_host_norm OR shopify_domain_norm (normalized).

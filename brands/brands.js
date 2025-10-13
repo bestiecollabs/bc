@@ -1,4 +1,4 @@
-﻿async function loadBrands() {
+async function loadBrands() {
   const qs = new URLSearchParams(location.search);
   const category = qs.get("category") || "";
   const q = qs.get("q") || "";

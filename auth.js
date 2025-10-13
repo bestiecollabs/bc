@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   if (window.__bestieAuth) return; window.__bestieAuth = true;
   async function getMe() {
     try {
