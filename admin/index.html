@@ -1,0 +1,48 @@
+﻿<!doctype html>
+<meta charset="utf-8">
+<title>Bestie Admin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="/admin/style.css">
+<div class="wrap">
+  <header class="head">
+    <h1>Bestie Admin</h1>
+    <div id="authBadge" class="badge">checking…</div>
+  </header>
+
+  <section>
+    <h2>Brands</h2>
+    <div class="row">
+      <input id="brandId" type="number" placeholder="Brand ID">
+      <button id="brandDelete" disabled>Delete</button>
+      <button id="brandUndo" disabled>Undo</button>
+      <button id="brandRefresh">Refresh</button>
+    </div>
+    <table id="brandTable"><thead><tr>
+      <th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Action</th>
+    </tr></thead><tbody></tbody></table>
+    <pre id="brandOut" class="out"></pre>
+  </section>
+
+  <section>
+    <h2>Creators</h2>
+    <div class="row">
+      <input id="openId" placeholder="creator open_id">
+      <button id="creatorDelete" disabled>Delete</button>
+      <button id="creatorUndo" disabled>Undo</button>
+      <button id="creatorRefresh">Refresh</button>
+    </div>
+    <table id="creatorTable"><thead><tr>
+      <th>open_id</th><th>Name</th><th>Role</th><th>Deleted</th><th>Action</th>
+    </tr></thead><tbody></tbody></table>
+    <pre id="creatorOut" class="out"></pre>
+  </section>
+
+  <section>
+    <h2>Recycle Bin</h2>
+    <button id="binRefresh">Refresh</button>
+    <table id="binTable"><thead><tr>
+      <th>When</th><th>Table</th><th>Entity</th><th>Undo</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+</div>
+<script type="module" src="/admin/app.js"></script>
