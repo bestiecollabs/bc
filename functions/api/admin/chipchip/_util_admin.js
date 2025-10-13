@@ -1,14 +1,24 @@
 ﻿export function getAdminEmail(request) {
   const h = request.headers;
-  const email = h.get('cf-access-authenticated-user-email') || h.get('x-admin-email');
-  if (email && typeof email === 'string') return email.toLowerCase();
-  const cookie = h.get('cookie') || '';
-  const m = cookie.match(/(?:^|;\s*)bestie_email=([^;]+)/i);
-  return m ? decodeURIComponent(m[1]).toLowerCase() : null;
+  let email =
+    h.get('cf-access-authenticated-user-email') ||
+    h.get('cf-access-email') ||
+    h.get('x-admin-email') ||
+    '';
+  email = (email || '').trim().toLowerCase();
+  if (!email) {
+    const cookie = h.get('cookie') || '';
+    const m = cookie.match(/(?:^|;\s*)bestie_email=([^;]+)/i);
+    if (m) email = decodeURIComponent(m[1]).trim().toLowerCase();
+  }
+  return email || null;
 }
 export function ensureAdminOrThrow(request, env) {
   const email = getAdminEmail(request);
-  const allow = String(env.ADMIN_ALLOWLIST || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+  const allow = String(env.ADMIN_ALLOWLIST || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
   if (!email || !allow.includes(email)) { const err = new Error('unauthorized'); err.status = 401; throw err; }
   return email;
 }
