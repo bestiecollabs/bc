@@ -2,7 +2,7 @@ name = "bc"
 compatibility_date = "2024-11-01"
 
 # Tell Cloudflare Pages where your static site lives
-pages_build_output_dir = "cloudflare/html"
+pages_build_output_dir = "."
 
 # Keep your D1 binding for the project
 [[d1_databases]]
