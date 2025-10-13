@@ -216,3 +216,17 @@ footer a:hover{background:rgba(0,0,0,.03)}
 }
 .pw-eye svg{width:20px; height:20px; display:block;}
 .pw-eye:active{transform:translateY(-50%);} /* prevent press nudge */
+
+/* Lock show-password eye position in all states */
+.input-wrap{position:relative;}
+.input-wrap .pw-eye,
+.input-wrap .pw-eye:hover,
+.input-wrap .pw-eye:focus,
+.input-wrap .pw-eye:active{
+  position:absolute; top:50%; right:10px; transform:translateY(-50%);
+  display:flex; align-items:center; justify-content:center;
+  width:28px; height:28px; padding:0; margin:0; border:0; background:transparent;
+  line-height:1; vertical-align:middle; cursor:pointer; box-sizing:border-box;
+  transition:none; outline:0;
+}
+.input-wrap .pw-eye svg{width:20px; height:20px; display:block;}
