@@ -1,47 +1,32 @@
-﻿# HANDOFF.md
+﻿# HANDOFF.md — Active Handoff (2025-10-13 12:56 PST)
 
-We left off at: Cloudflare Pages deploy is green. Emojis fixed. Functions build succeeds.  
-Next: start Admin/Dashboard and Brands import flow.
+We left off at: Cloudflare deploy is green, Functions compile, emojis fixed.  
+Next focus: **Admin Dashboard** + **Brands CSV import report UI**.
 
-ENV
-- Cloudflare Pages project: bc
-- Domains: bestiecollabs.com, api.bestiecollabs.com
-- D1 database: bestiedb  (binding: DB)
-- Secrets in Cloudflare: OPENAI_API_KEY
-- wrangler.toml: pages_build_output_dir = "." (UTF-8, no BOM)
+## Environment
+- Pages project: **bc**
+- Domains: **bestiecollabs.com**, **api.bestiecollabs.com**
+- D1: **bestiedb** (binding DB)
+- Secrets: **OPENAI_API_KEY** (Cloudflare)
+- wrangler: UTF-8 (no BOM), pages_build_output_dir="cloudflare/html"
 
-DEPLOY FLOW
-1) Edit locally in C:\bc\cloudflare\html
-2) git pull origin main
-3) git add -A && git commit -m "msg" && git push origin main
-4) Cloudflare auto-deploys (root = cloudflare/html). Functions auto-detected from /functions.
+## Deploy flow
+1) \git pull --rebase origin main\
+2) Edit locally in **C:\bc\cloudflare\html**
+3) \git add -A && git commit -m "msg" && git push origin main\
+4) Cloudflare auto-deploys (Functions from \/functions\)
 
-CHECKS
-- https://api.bestiecollabs.com/api/healthcheck → { ok: true }
-- Pages → Custom domains “Active”, SSL “Full”
-- DNS → CNAME www → bestiecollabs.com, apex flattened to Pages
-- Retry deployment shows no wrangler TOML parse/BOM errors
+## Verify
+- \GET /api/healthcheck\ → \{ ok:true }\
+- Custom domains Active, SSL Full, DNS apex flattened + www CNAME.
+- No wrangler parse/BOM errors in deploy logs.
 
-WORK RULES
-- Step-by-step. Full file contents. Exact paths. PowerShell-first delivery.
-- No patches. Fix root causes in real files.
-- Keep structure and names. No new folders without approval.
-- Production-first. Main branch only.
-- Small, verifiable changes. Explain “what it does” and “what to expect”.
+## Guardrails (Rules v3.0)
+- PowerShell-first. Full files. Exact paths. No patches/backups.
+- Keep structure and names. Production-first on main.
+- Explain “what it does / what to expect”.
 
-WHERE TO BUILD NEXT
-- /dashboard/ entry with session guard
-- Admin CSV import UX for Brands → POST /api/admin/brands/import
+## Next 2 tasks (do now)
+1) \/admin/dashboard/\ shell + session guard (non-admin → /login). KPIs from D1.
+2) CSV import UI → \POST /api/admin/brands/import\ with dry-run + commit, show inserted/skipped/failed.
 
-## Tags & Protection
-- Tag current state:
-  - git tag v0.1-setup-clean
-  - git push origin --tags
-- Protect main:
-  - GitHub → Settings → Branches → Add rule for “main”
-  - Require status checks: Cloudflare Pages deploy
-
-## Sanity Checks
-- Open latest deploy preview → click all top-nav links
-- GET /api/healthcheck → { ok: true }
-- Hard refresh homepage → emojis + purple eye icon stable
