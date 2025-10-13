@@ -1,4 +1,4 @@
-﻿import * as impl from "../../brands/import.js";
+import * as impl from "../brands/import.js";
 
 /**
  * POST /api/admin/chipchip/brands-import
