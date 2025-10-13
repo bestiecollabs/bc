@@ -155,3 +155,25 @@ if(uploadForm){
     await loadBrands();
   });
 }
+/* CSV Template Download */
+const TEMPLATE_HEADERS = [
+  "name","slug","website_url","category_primary","category_secondary","category_tertiary",
+  "instagram_url","tiktok_url","shopify_shop_domain","description","contact_email","logo_url",
+  "status","featured","has_us_presence","is_dropshipper","notes_admin"
+];
+const dlBtn = document.querySelector("#downloadTpl");
+if (dlBtn) {
+  dlBtn.addEventListener("click", () => {
+    const header = TEMPLATE_HEADERS.join(",");
+    const csv = header + "\n";
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "brand_upload_template.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+}
