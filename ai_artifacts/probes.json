@@ -1,5 +1,0 @@
-﻿{
-    "url":  "https://bestiecollabs.com/api/users/me",
-    "status":  "error",
-    "error":  "Invoke-WebRequest : Cannot convert \u0027System.Object[]\u0027 to the type \u0027System.Collections.IDictionary\u0027 required by parameter \u0027Headers\u0027. Specified method is not supported.\r\nAt line:3 char:64\r\n+ ... nvoke-WebRequest -UseBasicParsing -Uri $url -Headers $headers -Method ...\r\n+                                                          ~~~~~~~~\r\n    + CategoryInfo          : InvalidArgument: (:) [Invoke-WebRequest], ParameterBindingException\r\n    + FullyQualifiedErrorId : CannotConvertArgument,Microsoft.PowerShell.Commands.InvokeWebRequestCommand\r\n \r\n"
-}
