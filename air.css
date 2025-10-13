@@ -244,3 +244,11 @@ footer a:hover{background:rgba(0,0,0,.03)}
   color: inherit; cursor:pointer; transition:none; pointer-events:auto; z-index:1;
 }
 .input-wrap .pw-eye svg{width:20px; height:20px; display:block;}
+
+/* Eye icon color (royal purple) */
+.input-wrap .pw-eye,
+.input-wrap .pw-eye:hover,
+.input-wrap .pw-eye:focus,
+.input-wrap .pw-eye:active{
+  color:#663399;         /* royal purple */
+}
