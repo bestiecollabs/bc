@@ -134,3 +134,24 @@ $("#creatorUndo").onclick   = ()=>creatorUndo(openId.value.trim());
 
 await whoami();
 await Promise.all([loadBrands(), loadCreators(), loadBin()]);
+/* CSV Upload */
+const uploadForm = document.querySelector("#uploadForm");
+const csvFile = document.querySelector("#csvFile");
+const uploadOut = document.querySelector("#uploadOut");
+
+if(uploadForm){
+  uploadForm.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    if(!csvFile.files?.[0]){ alert("Choose a CSV"); return; }
+    const fd = new FormData();
+    fd.set("file", csvFile.files[0], csvFile.files[0].name);
+    const r = await fetch("/api/admin/chipchip/brands/upload", {
+      method: "POST",
+      headers: { "x-admin-email": PREVIEW_HEADER_EMAIL }, // dev header
+      body: fd
+    });
+    const text = await r.text();
+    uploadOut.textContent = text;
+    await loadBrands();
+  });
+}
