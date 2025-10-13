@@ -1,13 +1,35 @@
-﻿# [AI_README]  {replace with date/time}
-Project: Bestie Collabs (prod-only), Cloudflare Pages + Workers, static HTML/CSS/JS.
-Env: Production. DB: D1 binding "DB", database_id=7ccf7968-cb51-4001-a81b-ca235b8d2403
-Open Issues:
-- Confirm branch protection and required checks on main.
-- Confirm Cloudflare Access policy for bc_admin_gpt is active.
+﻿# AI_README.md
 
-Next 2 Tasks:
-1) Enable required checks (link-check, D1 dry-run) on PRs.
-2) Add CODEOWNERS for /functions/**, /auth.js, /wrangler.toml.
+PROJECT
+- Bestie Collabs
 
-Notes:
-- Use this top block as the active snapshot. Keep older blocks below.
+STACK
+- Static HTML + vanilla JS on Cloudflare Pages
+- Pages Functions in /functions
+- D1 database bestiedb (binding DB)
+- Repo: https://github.com/bestiecollabs/bc  branch main
+- Local root: C:\bc\cloudflare\html
+
+PROD URLS
+- App: https://bestiecollabs.com
+- API: https://api.bestiecollabs.com
+- Health: /api/healthcheck → { ok: true }
+
+CONFIG
+- Build command: empty
+- Output directory: cloudflare/html
+- Functions: auto from /functions
+- wrangler.toml controls D1 binding and plaintext vars (UTF-8 no BOM)
+- OPENAI_API_KEY stored as Cloudflare Secret
+
+SEED RULES (from handoff)
+- Q&A first when starting a new task
+- Full code via PowerShell. Exact paths. No backups or temp files.
+- Minimal edits. No new folders without approval.
+- No patches; address root cause.
+- Keep code style and structure consistent.
+- Deploy from main. Verify deployment UI and health endpoints.
+
+NEXT TASKS
+1) Admin/Dashboard scaffold at /dashboard/ with session-based welcome
+2) Brands CSV import UI → calls /api/admin/brands/import and reports inserted/skipped/failed
