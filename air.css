@@ -201,3 +201,9 @@ footer a:hover{background:rgba(0,0,0,.03)}
 }
 .login-page .remember-row input[type="checkbox"]{accent-color:var(--fun)}
 
+/* --- Emoji rendering helper --- */
+.emoji{
+  font-family: "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",
+               system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;
+  font-variant-emoji: emoji; /* ignored by some engines, harmless hint */
+}
