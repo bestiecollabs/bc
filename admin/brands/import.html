@@ -1,74 +1,147 @@
-﻿<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Import Brands</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="/air.css" rel="stylesheet">
-  <script defer src="/auth.js"></script>
-  <style>
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    table{width:100%;border-collapse:collapse}
-    th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .btn{padding:8px 12px;border:1px solid #c7d2fe;border-radius:10px;cursor:pointer;background:#4C6FFF;color:#fff}
-    .muted{color:#6b7280}
-    .badge{font-size:12px;padding:2px 6px;border-radius:999px;background:#eef2ff}
-    .ok{background:#dcfce7}
-    .err{background:#fee2e2}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-    input[type=file]{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
-  </style>
-</head>
-<body>
-<main class="wrap">
-  <h1>Import Brands</h1>
+﻿<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><title>Admin · Import Brands</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/air.css" rel="stylesheet"><script defer src="/auth.js"></script>
+<style>
+:root{--navw:220px}
+.layout{display:grid;grid-template-columns:var(--navw) 1fr;min-height:100vh}
+nav{border-right:1px solid #e5e7eb;padding:16px}
+nav h2{font-size:16px;margin:0 0 12px 0}
+nav a{display:block;padding:8px 10px;border-radius:8px;color:#111827;text-decoration:none}
+nav a.active,nav a:hover{background:#eef2ff}
+main{padding:16px}
+.wrap{max-width:1200px;margin:0 auto}
+.btn{padding:8px 12px;border:1px solid #c7d2fe;border-radius:10px;cursor:pointer;background:#4C6FFF;color:#fff}
+.muted{color:#6b7280}
+.badge{font-size:12px;padding:2px 6px;border-radius:999px;background:#eef2ff}
+.ok{background:#dcfce7}.err{background:#fee2e2}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #e5e7eb;padding:6px;vertical-align:top}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+input[type=file],select,.input{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+</style></head><body>
+<div class="layout">
+  <nav>
+    <h2>Admin</h2>
+    <a href="/admin/"      >Dashboard</a>
+    <a href="/admin/brands/" >Brands</a>
+    <a href="/admin/brands/import.html" class="active">Import</a>
+    <a href="/admin/imports/">Past Imports</a>
+  </nav>
+  <main>
+  <div class="wrap">
+    <h1>Import Brands</h1>
 
-  <section>
-    <h3>1) Upload CSV</h3>
-    <div class="row">
-      <input id="file" type="file" accept=".csv">
-      <button class="btn" id="upload">Upload & Preview</button>
-      <span id="uout" class="muted"></span>
-    </div>
-  </section>
+    <section>
+      <h3>1) Upload CSV</h3>
+      <div class="controls">
+        <input id="file" type="file" accept=".csv">
+        <button class="btn" id="upload">Upload & Preview</button>
+        <span id="uout" class="muted"></span>
+        <a class="btn" href="data:text/csv;charset=utf-8,<?xml version='1.0'?>name,website_url,category_primary,instagram_url,tiktok_url,price_low,price_high,affiliate_program,cookie_days,customer_age_min,customer_age_max,contact_email,contact_form_url,brand_values,monthly_site_visits,markets_primary" download="brands_template.csv">CSV Template</a>
+      </div>
+      <div class="muted">Notes: slug auto-generated as 6 digits. domain derived from website_url. cookie_days defaults to 30. markets_primary defaults to US.</div>
+    </section>
 
-  <section style="margin-top:16px">
-    <h3>2) Latest Batches</h3>
-    <div id="batches" class="grid"></div>
-  </section>
+    <section style="margin-top:16px">
+      <h3>2) Latest Batches</h3>
+      <div id="batches" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
+    </section>
 
-  <section style="margin-top:16px;display:none" id="rowsSec">
-    <div class="row">
-      <h3 style="margin:0">3) Preview Rows</h3>
-      <label class="row" style="margin-left:auto"><input type="checkbox" id="selAll"> Select all</label>
-      <button class="btn" id="pushLive">Push to Live</button>
-      <button class="btn" id="saveDraft">Save as Draft</button>
-      <span id="actout" class="muted"></span>
-    </div>
-    <div id="rows"></div>
-  </section>
-</main>
-
+    <section style="margin-top:16px;display:none" id="rowsSec">
+      <div class="controls">
+        <h3 style="margin:0">3) Preview Rows</h3>
+        <span style="flex:1"></span>
+        <label><input type="checkbox" id="selAll"> Select all</label>
+        <select id="filter">
+          <option value="">All</option>
+          <option value="valid">Valid</option>
+          <option value="invalid">Invalid</option>
+          <option value="us">US</option>
+          <option value="nonus">Non-US</option>
+        </select>
+        <input id="q" class="input" placeholder="Filter text">
+        <button class="btn" id="apply">Apply</button>
+        <label class="muted"><input type="checkbox" id="allowNonUS"> Allow non-US publish</label>
+        <button class="btn" id="pushLive">Push to Live</button>
+        <button class="btn" id="saveDraft">Save as Draft</button>
+        <span id="actout" class="muted"></span>
+      </div>
+      <div style="overflow:auto">
+        <table id="tbl"><thead><tr>
+          <th><input type="checkbox" id="hdrSel"></th>
+          <th>#</th>
+          <th>Name</th><th>Slug</th><th>Website</th><th>Domain</th>
+          <th>Market</th><th>Cat P/S/T</th><th>IG</th><th>TT</th>
+          <th>Price Low</th><th>Price High</th><th>Aff Prog</th><th>Cookie</th>
+          <th>Age Min</th><th>Age Max</th>
+          <th>Contact Email</th><th>Contact Form</th>
+          <th>Values</th><th>Monthly Visits</th>
+          <th>Valid</th><th>Errors</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </div>
+  </main>
+</div>
 <script>
-let currentBatchId = null;
-async function migrate(){
-  await fetch("/api/admin/migrate/brands_staging");
-}
+let currentBatchId = null, currentRows = [];
+async function migrate(){ await fetch("/api/admin/migrate/brands_extras"); }
 async function listBatches(){
-  const r = await fetch("/api/admin/import/brands/batches");
-  const j = await r.json();
+  const r = await fetch("/api/admin/import/brands/batches"); const j = await r.json();
   const el = document.getElementById("batches");
   el.innerHTML = (j.batches||[]).map(b=>`
-    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px">
+    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff">
       <div><strong>#${b.id}</strong> · ${b.created_at}</div>
       <div class="muted">status: ${b.status}</div>
       <button class="btn" data-batch="${b.id}">Load rows</button>
-    </div>
-  `).join("");
-  el.querySelectorAll("button[data-batch]").forEach(btn=>{
-    btn.onclick = ()=> loadRows(btn.getAttribute("data-batch"));
-  });
+    </div>`).join("");
+  el.querySelectorAll("button[data-batch]").forEach(btn=>btn.onclick=()=>loadRows(btn.getAttribute("data-batch")));
+}
+function matchFilter(it){
+  const f = document.getElementById("filter").value;
+  const q = document.getElementById("q").value.toLowerCase();
+  const d = JSON.parse(it.parsed_json);
+  if (f==="valid" && !it.valid) return false;
+  if (f==="invalid" && it.valid) return false;
+  const mp = (d.markets_primary||"").toUpperCase();
+  if (f==="us" && mp!=="US") return false;
+  if (f==="nonus" && mp==="US") return false;
+  if (q){
+    const blob = JSON.stringify(d).toLowerCase();
+    if (!blob.includes(q)) return false;
+  }
+  return true;
+}
+function renderRows(rows){
+  const tbody = document.querySelector("#tbl tbody");
+  tbody.innerHTML = rows.map(it=>{
+    const d = JSON.parse(it.parsed_json);
+    const errs = JSON.parse(it.errors_json||"[]");
+    return `<tr data-row="${it.id}">
+      <td><input type="checkbox" class="rowSel" checked></td>
+      <td>${it.row_num}</td>
+      <td>${d.name||""}</td>
+      <td>${d.slug||""}</td>
+      <td><a href="${d.website_url||"#"}" target="_blank" rel="noopener">${d.website_url||""}</a></td>
+      <td>${d.domain||""}</td>
+      <td>${(d.markets_primary||"")}</td>
+      <td>${[d.category_primary,d.category_secondary,d.category_tertiary].filter(Boolean).join(", ")}</td>
+      <td>${d.instagram_url? `<a href="${d.instagram_url}" target="_blank" rel="noopener">IG</a>`:""}</td>
+      <td>${d.tiktok_url? `<a href="${d.tiktok_url}" target="_blank" rel="noopener">TT</a>`:""}</td>
+      <td>${d.price_low??""}</td>
+      <td>${d.price_high??""}</td>
+      <td>${d.affiliate_program? "Yes":"No"}</td>
+      <td>${d.cookie_days??""}</td>
+      <td>${d.customer_age_min??""}</td>
+      <td>${d.customer_age_max??""}</td>
+      <td>${d.contact_email||""}</td>
+      <td>${d.contact_form_url? `<a href="${d.contact_form_url}" target="_blank" rel="noopener">form</a>`:""}</td>
+      <td>${d.brand_values||""}</td>
+      <td>${d.monthly_site_visits??""}</td>
+      <td>${it.valid? `<span class="badge ok">valid</span>`: `<span class="badge err">invalid</span>`}</td>
+      <td>${errs.join("; ")}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("hdrSel").onchange = ()=>{ tbody.querySelectorAll(".rowSel").forEach(cb=>cb.checked = document.getElementById("hdrSel").checked); };
 }
 async function uploadCSV(){
   const f = document.getElementById("file").files[0];
@@ -81,47 +154,22 @@ async function uploadCSV(){
 }
 async function loadRows(batchId){
   currentBatchId = batchId;
-  const r = await fetch(`/api/admin/import/brands/batches/${batchId}/rows?limit=200`);
-  const j = await r.json();
-  const rows = j.items || [];
-  const sec = document.getElementById("rowsSec"); sec.style.display = "block";
-  const selAll = document.getElementById("selAll");
-  selAll.checked = true;
-  const html = [];
-  html.push(`<table><thead><tr>
-    <th><input type="checkbox" id="hdrSel"></th>
-    <th>#</th>
-    <th>Name</th><th>Slug</th><th>Website</th><th>Domain</th>
-    <th>Cat</th><th>Social</th><th>Logo</th><th>Valid</th><th>Errors</th>
-  </tr></thead><tbody>`);
-  for (const it of rows){
-    const d = JSON.parse(it.parsed_json);
-    const errs = JSON.parse(it.errors_json||"[]");
-    html.push(`<tr data-row="${it.id}">
-      <td><input type="checkbox" class="rowSel" checked></td>
-      <td>${it.row_num}</td>
-      <td>${d.name||""}</td>
-      <td>${d.slug||""}</td>
-      <td><a href="${d.website_url||"#"}" target="_blank" rel="noopener">${d.website_url||""}</a></td>
-      <td>${d.domain||""}</td>
-      <td>${[d.category_primary,d.category_secondary,d.category_tertiary].filter(Boolean).join(", ")}</td>
-      <td>${[d.instagram_url,d.tiktok_url].filter(Boolean).join(" · ")}</td>
-      <td>${d.logo_url? `<a href="${d.logo_url}" target="_blank" rel="noopener">logo</a>`:""}</td>
-      <td>${it.valid? `<span class="badge ok">valid</span>`: `<span class="badge err">invalid</span>`}</td>
-      <td>${errs.join("; ")}</td>
-    </tr>`);
-  }
-  html.push(`</tbody></table>`);
-  const rowsDiv = document.getElementById("rows");
-  rowsDiv.innerHTML = html.join("");
-  const hdr = document.getElementById("hdrSel");
-  hdr.onchange = ()=>{ rowsDiv.querySelectorAll(".rowSel").forEach(cb=>cb.checked = hdr.checked); };
+  const r = await fetch(`/api/admin/import/brands/batches/${batchId}/rows?limit=500`); const j = await r.json();
+  currentRows = j.items || [];
+  document.getElementById("rowsSec").style.display = "block";
+  document.getElementById("selAll").checked = true;
+  applyFilters();
+}
+function applyFilters(){
+  const filtered = currentRows.filter(matchFilter);
+  renderRows(filtered);
 }
 async function bulkAction(action){
-  const rowsDiv = document.getElementById("rows");
-  const ids = Array.from(rowsDiv.querySelectorAll("tr[data-row]")).filter(tr=>tr.querySelector(".rowSel").checked).map(tr=>Number(tr.getAttribute("data-row")));
+  const tbody = document.querySelector("#tbl tbody");
+  const ids = Array.from(tbody.querySelectorAll("tr[data-row]")).filter(tr=>tr.querySelector(".rowSel").checked).map(tr=>Number(tr.getAttribute("data-row")));
   if(!ids.length){ document.getElementById("actout").textContent = "select at least one row"; return; }
-  const r = await fetch(`/api/admin/import/brands/batches/${currentBatchId}/commit`, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ action, row_ids: ids })});
+  const allow_non_us = document.getElementById("allowNonUS").checked ? 1 : 0;
+  const r = await fetch(`/api/admin/import/brands/batches/${currentBatchId}/commit`, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ action, row_ids: ids, allow_non_us })});
   const j = await r.json();
   document.getElementById("actout").textContent = j.ok ? "done" : (j.error||"error");
 }
@@ -130,8 +178,8 @@ window.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("upload").onclick = uploadCSV;
   document.getElementById("pushLive").onclick = ()=>bulkAction("live");
   document.getElementById("saveDraft").onclick = ()=>bulkAction("draft");
+  document.getElementById("apply").onclick = applyFilters;
   await listBatches();
 });
 </script>
-</body>
-</html>
+</body></html>

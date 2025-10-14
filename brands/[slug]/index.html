@@ -1,0 +1,50 @@
+﻿<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><title>Brand</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/air.css" rel="stylesheet"><script defer src="/auth.js"></script>
+<style>.wrap{max-width:900px;margin:0 auto;padding:16px}.row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}.logo{width:160px;height:160px;object-fit:contain;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb}.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#eef2ff;display:inline-block;margin-right:6px}.a{color:#4C6FFF;text-decoration:underline}.box{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff;margin-top:12px}</style>
+</head><body>
+<main class="wrap" id="app"></main>
+<script>
+function pathSlug(){ const parts = location.pathname.split("/").filter(Boolean); return parts[1] || ""; }
+async function fetchBrand(slug){
+  const u = new URL(location.origin + "/api/brands"); u.searchParams.set("slug", slug); u.searchParams.set("limit","1");
+  const r = await fetch(u); const j = await r.json(); return (j.items||[])[0] || null;
+}
+async function load(){
+  const slug = pathSlug();
+  if(!slug){ document.getElementById("app").innerHTML = "<p>Missing slug.</p>"; return; }
+  const b = await fetchBrand(slug);
+  if(!b){ document.getElementById("app").innerHTML = "<p>Brand not found.</p>"; return; }
+  const cats = [b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).map(c=>`<span class='pill'>${c}</span>`).join("");
+  const socials = [
+    b.instagram_url ? `<a class='a' href='${b.instagram_url}' target='_blank' rel='noopener'>Instagram</a>` : "",
+    b.tiktok_url ? `<a class='a' href='${b.tiktok_url}' target='_blank' rel='noopener'>TikTok</a>` : ""
+  ].filter(Boolean).join(" · ");
+  document.getElementById("app").innerHTML = `
+    <a class="a" href="/brands/">← All brands</a>
+    <div class="row" style="margin-top:8px">
+      <img class="logo" src="${b.logo_url||""}" alt="">
+      <div>
+        <h1 style="margin:0 0 8px 0">${b.name}${b.featured?' ⭐':''}</h1>
+        <div>${cats}</div>
+        <div class="box">
+          <div><strong>Website:</strong> <a class="a" href="${b.website_url}" target="_blank" rel="noopener">${b.domain||b.website_url}</a></div>
+          ${socials? `<div style="margin-top:6px"><strong>Social:</strong> ${socials}</div>` : ""}
+        </div>
+        ${b.description ? `<div class="box" style="margin-top:12px"><strong>About</strong><div style="margin-top:6px;white-space:pre-wrap">${b.description}</div></div>` : ""}
+        <div class="box" style="margin-top:12px">
+          <strong>Signals</strong>
+          <div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>Age: ${b.customer_age_min??""}–${b.customer_age_max??""}</div>
+            <div>Market: ${b.markets_primary||""}</div>
+            <div>Price: ${b.price_low??""}–${b.price_high??""}</div>
+            <div>Affiliate: ${b.affiliate_program? "Yes": "No"}</div>
+            <div>Cookie days: ${b.cookie_days??""}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+window.addEventListener("DOMContentLoaded", load);
+</script>
+</body></html>
