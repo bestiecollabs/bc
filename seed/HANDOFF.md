@@ -1,32 +1,30 @@
-﻿# HANDOFF.md — Active Handoff (2025-10-13 12:56 PST)
+﻿# Handoff — Bestie Collabs (project: bc)
 
-We left off at: Cloudflare deploy is green, Functions compile, emojis fixed.  
-Next focus: **Admin Dashboard** + **Brands CSV import report UI**.
+**Session:** 2025-10-13T00:00:00Z • Git main@a0ba134
 
-## Environment
-- Pages project: **bc**
-- Domains: **bestiecollabs.com**, **api.bestiecollabs.com**
-- D1: **bestiedb** (binding DB)
-- Secrets: **OPENAI_API_KEY** (Cloudflare)
-- wrangler: UTF-8 (no BOM), pages_build_output_dir="cloudflare/html"
+## Artifacts
+- `/seed/RESUME.md` — human summary
+- `/seed/AI_README.md` — working notes and commands
+- `/seed/CHANGELOG_AI.md` — running log
+- `/seed/state.json` — machine state (not included here)
+- `/seed/ai_tree.txt` — file inventory (optional refresh)
 
-## Deploy flow
-1) \git pull --rebase origin main\
-2) Edit locally in **C:\bc\cloudflare\html**
-3) \git add -A && git commit -m "msg" && git push origin main\
-4) Cloudflare auto-deploys (Functions from \/functions\)
+## Ground truth
+- Pages project: `bc`
+- Domains: bestiecollabs.com, api.bestiecollabs.com
+- Latest preview: https://356f3677.bc-ezy.pages.dev
+- D1: `bestiedb`
+- Admin allowlist: present (len=23). `whoami` for colla***@gmail.com → allowed=true.
 
-## Verify
-- \GET /api/healthcheck\ → \{ ok:true }\
-- Custom domains Active, SSL Full, DNS apex flattened + www CNAME.
-- No wrangler parse/BOM errors in deploy logs.
+## Immediate next steps
+1. Scaffold admin dashboard UI with left navigation and placeholder routes:
+   - Dashboard, Brands, Creators, Recycle Bin, Settings.
+2. Implement CSV brand import endpoint + UI stub.
+3. Build Brand Directory list with filters.
+4. Creator CSV import + Creator Directory.
+5. Confirm `ADMIN_ALLOW_ANY="0"` on prod before each deploy.
 
-## Guardrails (Rules v3.0)
-- PowerShell-first. Full files. Exact paths. No patches/backups.
-- Keep structure and names. Production-first on main.
-- Explain “what it does / what to expect”.
-
-## Next 2 tasks (do now)
-1) \/admin/dashboard/\ shell + session guard (non-admin → /login). KPIs from D1.
-2) CSV import UI → \POST /api/admin/brands/import\ with dry-run + commit, show inserted/skipped/failed.
-
+## Ops reminders
+- Prod deploy: `wrangler pages deployment create . --project-name bc --commit-dirty=true`
+- Preview: `wrangler pages deploy . --project-name bc`
+- Secrets: set on prod only. Do not store values in repo.
