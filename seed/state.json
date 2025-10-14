@@ -1,5 +1,5 @@
 {
-    "generated_at":  "2025-10-14T06:51:29Z",
+    "generated_at":  "2025-10-14T07:18:01Z",
     "project":  {
                     "name":  "bc",
                     "domains":  [
@@ -158,7 +158,7 @@
     "admin":  {
                   "allowlist_has_value":  false,
                   "allowlist_length":  0,
-                  "whoami_email_masked":  "",
+                  "whoami_email_masked":  "co***@gmail.com",
                   "whoami_allowed":  false
               },
     "db":  {
