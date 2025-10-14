@@ -1,353 +1,176 @@
-Folder PATH listing for volume OS
-Volume serial number is 649C-B7E5
-C:.
-|   .dev.vars
-|   .gitattributes
-|   .gitignore
-|   404.html
-|   air.css
-|   auth.js
-|   b1.png
-|   favicon.png
-|   index.html
-|   og.jpg
-|   README.txt
-|   robots.txt
-|   sitemap.xml
-|   users_export.csv
-|   wrangler.toml
-|   _redirects
-|   
-+---.local
-|       .dev.vars
-|       
-+---.wrangler
-|   +---state
-|   |   \---v3
-|   |       +---cache
-|   |       |   \---miniflare-CacheObject
-|   |       +---d1
-|   |       |   \---miniflare-D1DatabaseObject
-|   |       |           2e4bc74ba6f76e797ccda36088478cfe2b2975223c47b4a4749cf40aa4d60806.sqlite
-|   |       |           8114933517a9b411420f47ba808d2995022acc033730265bebba0d890e3c5cea.sqlite
-|   |       |           
-|   |       \---workflows
-|   \---tmp
-|       +---bundle-HU6RiG
-|       |       middleware-insertion-facade.js
-|       |       middleware-loader.entry.ts
-|       |       
-|       +---bundle-p92IYC
-|       |       middleware-insertion-facade.js
-|       |       middleware-loader.entry.ts
-|       |       
-|       +---dev-igsjg1
-|       |       functionsWorker-0.25960231019140934.js
-|       |       functionsWorker-0.25960231019140934.js.map
-|       |       
-|       \---pages-kWT29E
-|               functionsRoutes-0.7656062869946563.mjs
-|               functionsWorker-0.25960231019140934.mjs
-|               functionsWorker-0.25960231019140934.mjs.map
-|               
-+---about
-|       index.html
-|       
-+---account
-|       index.html
-|       
-+---admin
-|   |   admin.js
-|   |   
-|   +---brands
-|   |       import.js
-|   |       index.html
-|   |       
-|   +---dashboard
-|   |       admin.js
-|   |       index.html
-|   |       
-|   \---imports
-|           Brand Upload Template.csv
-|           index.html
-|           
-+---ai_artifacts
-|   |   ai_d1.txt
-|   |   ai_schema_other.sql
-|   |   ai_schema_tables.sql
-|   |   ai_tree.txt
-|   |   probes.json
-|   |   wrangler.toml
-|   |   _redirects
-|   |   
-|   +---admin
-|   |   |   admin.js
-|   |   |   
-|   |   \---dashboard
-|   |           admin.js
-|   |           index.html
-|   |           
-|   +---functions
-|   |   +---api
-|   |   |   |   verify.js
-|   |   |   |   
-|   |   |   +---account
-|   |   |   |       password.js
-|   |   |   |       
-|   |   |   +---address
-|   |   |   |       verify.js
-|   |   |   |       
-|   |   |   +---admin
-|   |   |   |   \---chipchip
-|   |   |   |       |   brands.actions.js
-|   |   |   |       |   brands.js
-|   |   |   |       |   creators.actions.js
-|   |   |   |       |   creators.js
-|   |   |   |       |   recycle.js
-|   |   |   |       |   undo.js
-|   |   |   |       |   whoami.js
-|   |   |   |       |   
-|   |   |   |       \---_lib
-|   |   |   |               csv.js
-|   |   |   |               db.js
-|   |   |   |               
-|   |   |   +---signup
-|   |   |   |       complete.js
-|   |   |   |       
-|   |   |   \---users
-|   |   |           me.js
-|   |   |           
-|   |   +---auth
-|   |   |       login.js
-|   |   |       start.js
-|   |   |       
-|   |   \---dev
-|   |           init.js
-|   |           
-|   \---migrations
-|           2025-10-06_admin_directory.sql
-|           2025-10-06_local_stub_users.sql
-|           
-+---brands
-|       brands.js
-|       index.html
-|       
-+---connected
-|       index.html
-|       
-+---contact
-|       index.html
-|       
-+---cookie
-|       index.html
-|       
-+---creators
-|   |   index.html
-|   |   
-|   \---profile
-|           index.html
-|           
-+---crm
-|   +---brand
-|   |       index.html
-|   |       
-|   \---creator
-|           index.html
-|           
-+---dashboard
-|   |   index.html
-|   |   
-|   +---brand
-|   |   |   index.html
-|   |   |   
-|   |   \---payouts
-|   |           index.html
-|   |           
-|   \---creator
-|       |   index.html
-|       |   
-|       \---earnings
-|               index.html
-|               
-+---dmca
-|       index.html
-|       
-+---docs
-|       SEED_KIT.md
-|       
-+---functions
-|   |   disconnect.js
-|   |   health.js
-|   |   logout.js
-|   |   
-|   +---account
-|   |       index.js
-|   |       
-|   +---api
-|   |   |   brands.js
-|   |   |   categories.js
-|   |   |   creator.js
-|   |   |   creators.js
-|   |   |   db-health.js
-|   |   |   db-stats.js
-|   |   |   db-table-info.js
-|   |   |   db-tables.js
-|   |   |   health.js
-|   |   |   healthcheck.js
-|   |   |   logout.js
-|   |   |   verify.js
-|   |   |   
-|   |   +---account
-|   |   |       address.js
-|   |   |       password.js
-|   |   |       profile.js
-|   |   |       
-|   |   +---address
-|   |   |       verify.js
-|   |   |       
-|   |   +---admin
-|   |   |   |   ping.js
-|   |   |   |   
-|   |   |   +---brands
-|   |   |   |       import.js
-|   |   |   |       index.js
-|   |   |   |       ping.js
-|   |   |   |       [id].js
-|   |   |   |       
-|   |   |   +---chipchip
-|   |   |   |   |   brands-import.js
-|   |   |   |   |   brands.actions.js
-|   |   |   |   |   brands.js
-|   |   |   |   |   creators.actions.js
-|   |   |   |   |   creators.js
-|   |   |   |   |   recycle.js
-|   |   |   |   |   undo.js
-|   |   |   |   |   whoami.js
-|   |   |   |   |   
-|   |   |   |   +---audit
-|   |   |   |   |       index.js
-|   |   |   |   |       
-|   |   |   |   +---import
-|   |   |   |   |       brands.js
-|   |   |   |   |       creators.js
-|   |   |   |   |       
-|   |   |   |   +---users
-|   |   |   |   |       index.js
-|   |   |   |   |       
-|   |   |   |   \---_lib
-|   |   |   |           csv.js
-|   |   |   |           db.js
-|   |   |   |           
-|   |   |   +---config
-|   |   |   |   \---categories
-|   |   |   |           index.js
-|   |   |   |           
-|   |   |   \---import
-|   |   |           brands.js
-|   |   |           
-|   |   +---debug
-|   |   +---signup
-|   |   |       complete.js
-|   |   |       
-|   |   \---users
-|   |           me.js
-|   |           
-|   +---auth
-|   |       login.js
-|   |       start.js
-|   |       
-|   +---connect
-|   |       instagram.js
-|   |       tiktok.js
-|   |       
-|   +---db
-|   |       ping.js
-|   |       
-|   +---debug
-|   |       auth.js
-|   |       
-|   +---dev
-|   |       init.js
-|   |       
-|   \---oauth
-|       \---tiktok
-|               callback.js
-|               
-+---join
-|   +---brand
-|   |       index.html
-|   |       
-|   \---creator
-|           index.html
-|           
-+---login
-|       index.html
-|       
-+---migrations
-|   |   2025-10-06_admin_directory.sql
-|   |   20251010_config.sql
-|   |   20251010_create_brands.sql
-|   |   
-|   \---_deprecated
-|           0001_brands.sql
-|           0002_brands_dedupe.sql
-|           
-+---node_modules
-|   +---.cache
-|   |   \---wrangler
-|   |           pages.json
-|   |           wrangler-account.json
-|   |           
-|   \---.mf
-|           cf.json
-|           
-+---pricing
-|       index.html
-|       
-+---privacy
-|       index.html
-|       
-+---score
-|   +---brand
-|   |       index.html
-|   |       
-|   \---creator
-|           index.html
-|           
-+---scripts
-+---seed
-|       AI_README.md
-|       ai_tree.txt
-|       CHANGELOG_AI.md
-|       HANDOFF.md
-|       RULES.md
-|       SESSIONS.md
-|       SOP_SEED.md
-|       
-+---settings
-|   +---brand
-|   |       index.html
-|   |       
-|   \---creator
-|           index.html
-|           
-+---signup
-|       index.html
-|       
-+---snippets
-|       footer.html
-|       header.html
-|       
-+---styles
-|       bestie-home.css
-|       bestie-shared.css
-|       
-+---support
-|       index.html
-|       
-+---terms
-|       index.html
-|       
-\---tools
-        fix-css.js
-        
+.dev.vars	64
+.gitattributes	177
+.gitignore	101
+404.html	2538
+air.css	8956
+auth.js	1324
+b1.png	283204
+favicon.png	283204
+index.html	8329
+og.jpg	89209
+README.md	725
+README.txt	730
+robots.txt	74
+sitemap.xml	2691
+users_export.csv	284
+wrangler.toml	281
+_redirects	138
+.local\.dev.vars	64
+about\index.html	4092
+account\index.html	3020
+admin\admin.js	1144
+admin\app.js	5331
+admin\index.html	4385
+admin\style.css	2494
+admin\brands\import.js	5172
+admin\brands\index.html	7350
+admin\imports\Brand Upload Template.csv	951
+admin\imports\index.html	1252
+ai_artifacts\ai_d1.txt	2029
+ai_artifacts\ai_schema_other.sql	6498
+ai_artifacts\ai_schema_tables.sql	7311
+ai_artifacts\ai_tree.txt	5500
+ai_artifacts\probes.json	693
+ai_artifacts\wrangler.toml	286
+ai_artifacts\_redirects	180
+ai_artifacts\admin\admin.js	1
+ai_artifacts\admin\dashboard\admin.js	6099
+ai_artifacts\admin\dashboard\index.html	2907
+ai_artifacts\functions\api\verify.js	1920
+ai_artifacts\functions\api\account\password.js	2215
+ai_artifacts\functions\api\address\verify.js	3470
+ai_artifacts\functions\api\admin\chipchip\brands.actions.js	2125
+ai_artifacts\functions\api\admin\chipchip\brands.js	2468
+ai_artifacts\functions\api\admin\chipchip\creators.actions.js	2011
+ai_artifacts\functions\api\admin\chipchip\creators.js	2683
+ai_artifacts\functions\api\admin\chipchip\recycle.js	1070
+ai_artifacts\functions\api\admin\chipchip\undo.js	1296
+ai_artifacts\functions\api\admin\chipchip\whoami.js	257
+ai_artifacts\functions\api\admin\chipchip\_lib\csv.js	1091
+ai_artifacts\functions\api\admin\chipchip\_lib\db.js	3671
+ai_artifacts\functions\api\signup\complete.js	710
+ai_artifacts\functions\api\users\me.js	1196
+ai_artifacts\functions\auth\login.js	1127
+ai_artifacts\functions\auth\start.js	1612
+ai_artifacts\functions\dev\init.js	2881
+ai_artifacts\migrations\2025-10-06_admin_directory.sql	6052
+ai_artifacts\migrations\2025-10-06_local_stub_users.sql	694
+brands\brands.js	1668
+brands\index.html	2598
+connected\index.html	1894
+contact\index.html	2520
+cookie\index.html	2750
+creators\index.html	5094
+creators\profile\index.html	1663
+crm\brand\index.html	2559
+crm\creator\index.html	2511
+dashboard\index.html	3554
+dashboard\brand\index.html	2540
+dashboard\brand\payouts\index.html	2514
+dashboard\creator\index.html	2516
+dashboard\creator\earnings\index.html	2536
+dmca\index.html	2610
+docs\SEED_KIT.md	2231
+functions\disconnect.js	447
+functions\health.js	120
+functions\logout.js	693
+functions\account\index.js	390
+functions\api\brands.js	1726
+functions\api\categories.js	388
+functions\api\creator.js	1099
+functions\api\creators.js	638
+functions\api\db-health.js	743
+functions\api\db-stats.js	1157
+functions\api\db-table-info.js	1043
+functions\api\db-tables.js	799
+functions\api\health.js	181
+functions\api\healthcheck.js	253
+functions\api\logout.js	582
+functions\api\ping.js	224
+functions\api\verify.js	1920
+functions\api\account\address.js	2757
+functions\api\account\password.js	2215
+functions\api\account\profile.js	935
+functions\api\address\verify.js	3470
+functions\api\admin\debug-env.js	320
+functions\api\admin\ping.js	381
+functions\api\admin\whoami.js	469
+functions\api\admin\brands\import.js	5934
+functions\api\admin\brands\index.js	1695
+functions\api\admin\brands\ping.js	159
+functions\api\admin\brands\[id].js	1669
+functions\api\admin\chipchip\brands-import.js	246
+functions\api\admin\chipchip\brands.actions.js	2125
+functions\api\admin\chipchip\brands.js	2401
+functions\api\admin\chipchip\creators.actions.js	2011
+functions\api\admin\chipchip\creators.js	2682
+functions\api\admin\chipchip\recycle.js	1069
+functions\api\admin\chipchip\undo.js	1296
+functions\api\admin\chipchip\whoami.js	256
+functions\api\admin\chipchip\_util_admin.js	1230
+functions\api\admin\chipchip\audit\index.js	469
+functions\api\admin\chipchip\brands\delete.js	1350
+functions\api\admin\chipchip\brands\list.js	532
+functions\api\admin\chipchip\brands\undo.js	1021
+functions\api\admin\chipchip\brands\upload.js	5628
+functions\api\admin\chipchip\creators\delete.js	1384
+functions\api\admin\chipchip\creators\list.js	532
+functions\api\admin\chipchip\creators\undo.js	1032
+functions\api\admin\chipchip\import\brands.js	5863
+functions\api\admin\chipchip\import\creators.js	9863
+functions\api\admin\chipchip\recycle-bin\list.js	539
+functions\api\admin\chipchip\users\index.js	4903
+functions\api\admin\chipchip\_lib\csv.js	1091
+functions\api\admin\chipchip\_lib\db.js	3669
+functions\api\admin\config\categories\index.js	1381
+functions\api\admin\import\brands.js	8349
+functions\api\signup\complete.js	1364
+functions\api\users\me.js	1106
+functions\auth\login.js	2470
+functions\auth\start.js	1612
+functions\connect\instagram.js	230
+functions\connect\tiktok.js	871
+functions\db\ping.js	266
+functions\debug\auth.js	1365
+functions\dev\init.js	2881
+functions\oauth\tiktok\callback.js	4177
+join\brand\index.html	2590
+join\creator\index.html	2616
+login\index.html	12748
+migrations\2025-10-06_admin_directory.sql	6052
+migrations\2025-10-13-add-deleted-at.sql	278
+migrations\20251010_config.sql	165
+migrations\20251010_create_brands.sql	1195
+migrations\_deprecated\0001_brands.sql	1697
+migrations\_deprecated\0002_brands_dedupe.sql	1856
+pricing\index.html	3420
+privacy\index.html	4596
+score\brand\index.html	2509
+score\creator\index.html	2522
+scripts\deploy-preview.ps1	93
+scripts\deploy-prod.ps1	143
+scripts\get-preview.ps1	257
+scripts\seed-append-changelog.ps1	1203
+scripts\seed-write-ai-readme.ps1	1912
+scripts\seed-write-handoff.ps1	1081
+scripts\seed-write-resume.ps1	1328
+scripts\seed-write-state.ps1	3199
+scripts\seed-write-tree.ps1	672
+seed\AI_README.md	2901
+seed\ai_tree.txt	6137
+seed\CHANGELOG_AI.md	313
+seed\HANDOFF.md	1244
+seed\RULES.md	366
+seed\SESSIONS.md	103
+seed\SOP_SEED.md	863
+seed\state.json	911
+settings\brand\index.html	2540
+settings\creator\index.html	2552
+signup\index.html	17924
+snippets\footer.html	1379
+snippets\header.html	1381
+styles\bestie-home.css	2230
+styles\bestie-shared.css	2137
+support\index.html	3404
+terms\index.html	9532
+tools\fix-css.js	3473

@@ -1,0 +1,28 @@
+{
+    "generated_at":  "2025-10-14T05:25:10Z",
+    "project":  {
+                    "name":  "bc",
+                    "domains":  [
+                                    "bestiecollabs.com",
+                                    "api.bestiecollabs.com"
+                                ],
+                    "preview_url":  "https://c2c22926.bc-ezy.pages.dev"
+                },
+    "tools":  {
+                  "wrangler":  "4.42.1",
+                  "node":  "v22.19.0"
+              },
+    "git":  {
+                "branch":  "main",
+                "sha":  "499b162d1908"
+            },
+    "admin":  {
+                  "allowlist_has_value":  true,
+                  "allowlist_length":  23,
+                  "whoami_email_masked":  "co***@gmail.com",
+                  "whoami_allowed":  true
+              },
+    "db":  {
+               "d1_name":  "bestiedb"
+           }
+}
