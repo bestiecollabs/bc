@@ -1,8 +1,8 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Admin · Brands</title>
+  <title>Admin Â· Brands</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="/air.css" rel="stylesheet">
   <script defer src="/auth.js"></script>
@@ -61,7 +61,7 @@
         <div class="toolbar">
           <input type="file" id="file" accept=".csv">
           <button class="btn" id="btn-parse">Preview CSV</button>
-          <button class="btn secondary" id="btn-validate">Validate</button>
+          <button class="btn" id="template">Create Template</button> <button class="btn secondary" id="btn-validate">Validate</button>
           <button class="btn" id="btn-import">Import</button>
           <button class="btn secondary" id="btn-clear">Clear</button>
           <button class="btn secondary" id="btn-export">Export CSV</button>
@@ -70,8 +70,7 @@
           <span class="pill" id="count-info"></span>
         </div>
         <div class="muted" style="margin-top:6px">
-          Expected columns: name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, shopify_shop_domain, shopify_shop_id, shopify_public_url, contact_name, contact_title, contact_email, contact_phone, country, state, city, zipcode, address, description, support_email, logo_url, featured, status, has_us_presence, is_dropshipper, notes_admin
-        </div>
+          `Expected columns: name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, logo_url, featured, description, country, state, city, zipcode, address, contact_name, contact_title, contact_email, contact_phone, customer_age_min, customer_age_max, price_low, price_high, affiliate_program, affiliate_cookie_days, monthly_visits, brand_values, gifting_ok, shopify_shop_id, shopify_public_url, shopify_shop_domain, notes_admin`n
       </section>
 
       <section class="card">
@@ -86,7 +85,7 @@
   <aside id="drawer" class="drawer" aria-hidden="true">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <h2>Brand details</h2>
-      <button class="close-x" id="drawer-close" aria-label="Close">×</button>
+      <button class="close-x" id="drawer-close" aria-label="Close">Ã—</button>
     </div>
     <div id="drawer-body" class="muted">Select a row to view details.</div>
   </aside>
@@ -135,3 +134,19 @@
   </script>
 </body>
 </html>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('template');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const r = await fetch('/api/admin/import/brands/template');
+    const b = await r.blob();
+    const url = URL.createObjectURL(b);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'brands_template.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+});
+</script>

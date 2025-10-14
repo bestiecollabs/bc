@@ -1,1 +1,3 @@
 ﻿/brands/:slug        /brands/:slug/   301
+/brands/:slug   /brands/detail/?slug=:slug   200
+
