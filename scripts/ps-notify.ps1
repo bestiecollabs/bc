@@ -11,11 +11,15 @@ function Invoke-Step {
   )
   $oldEA = $ErrorActionPreference
   $ErrorActionPreference = "Stop"
-  $pre = $global:LASTEXITCODE
-  $global:LASTEXITCODE = 0
+  if(-not (Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue)){
+    $global:LASTEXITCODE = 0
+  } else {
+    $global:LASTEXITCODE = 0
+  }
   try {
     if($Quiet){ & $Do | Out-Null } else { & $Do }
     $post = $global:LASTEXITCODE
+    if($null -eq $post){ $post = 0 }
     if($post -ne 0){ throw "Process exit code $post" }
     Write-Host "[OK] $($Name)" -ForegroundColor DarkMagenta
     return $true
