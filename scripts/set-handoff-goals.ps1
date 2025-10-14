@@ -38,7 +38,7 @@ if($sha -is [array]){ $sha = ($sha -join "") }
 $sha = "$sha".Trim()
 if([string]::IsNullOrWhiteSpace($sha)){ $sha = "no-sha" }
 
-$when  = NowPst()
+$when  = NowPst
 $stamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 
 # ai_readme
