@@ -1,25 +1,36 @@
-# Return latest preview URL for project "bc"
+# Return latest preview URL for Pages project from seed\state.json
 param(
-  [string]$ProjectName = "bc"
+  [string]$RepoRoot = "C:\bc\cloudflare\html"
 )
 
-# Ask Wrangler for deployments as JSON
-$json = wrangler pages deployment list --project-name $ProjectName --format json | Out-String
-if([string]::IsNullOrWhiteSpace($json)){ throw "No data from Wrangler." }
+$ErrorActionPreference = "Stop"
 
-$data = $json | ConvertFrom-Json
-if(-not $data){ throw "Invalid JSON from Wrangler." }
+# Load preview pattern and project name from seed\state.json
+$seed = Join-Path $RepoRoot "seed"
+$statePath = Join-Path $seed "state.json"
+if(-not (Test-Path $statePath)){ throw "Missing seed\state.json. Run scripts\update-seed.ps1 first." }
+$state = Get-Content $statePath -Raw | ConvertFrom-Json
+$project = if($state.project.name){ $state.project.name } else { "bc" }
+$pattern = if($state.project.preview_pattern){ $state.project.preview_pattern } else { "*.bc-ezy.pages.dev" }
 
-# Prefer 'is_latest' if present, else newest by created_on
-$latest = $data | Where-Object { $_.is_latest } | Select-Object -First 1
-if(-not $latest){
-  $latest = $data | Sort-Object { Get-Date $_.created_on } -Descending | Select-Object -First 1
+# Convert a wildcard host pattern (e.g., *.bc-ezy.pages.dev) into a URL regex
+function Convert-HostPatternToRegex([string]$pat){
+  # escape dots
+  $rx = [regex]::Escape($pat)
+  # replace escaped asterisk with a single-label matcher
+  $rx = $rx -replace "\\\*", "[^\.\/\s]+"
+  return "^https://$rx$"
 }
-if(-not $latest){ throw "No deployments found for $ProjectName." }
 
-# Expect a preview URL in 'url' or 'urls'
-$url = $latest.url
-if(-not $url -and $latest.urls){ $url = $latest.urls | Select-Object -First 1 }
+$regex = Convert-HostPatternToRegex $pattern
+$rx = [regex]$regex
 
-if(-not $url){ throw "No preview URL on latest deployment." }
-$url
+# Call Wrangler and parse text output for the first matching URL
+$text = wrangler pages deployment list --project-name $project | Out-String
+if([string]::IsNullOrWhiteSpace($text)){ throw "No output from Wrangler." }
+
+# Extract the first URL that matches the derived regex
+$urls = [regex]::Matches($text, "https://[^\s]+") | ForEach-Object { $_.Value }
+$match = $urls | Where-Object { $_ -match $rx } | Select-Object -First 1
+if(-not $match){ throw "No preview URL found matching $pattern for project '$project'." }
+$match
