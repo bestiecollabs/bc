@@ -1,4 +1,4 @@
-# Bestie Collabs · Seed Kit (v2)
+﻿# Bestie Collabs · Seed Kit (v2)
 
 ## Purpose
 Single set of rules for how code is reviewed, changed, and delivered. This file is authoritative.
@@ -28,7 +28,7 @@ Single set of rules for how code is reviewed, changed, and delivered. This file 
 3) **Plan:** List highest-leverage changes. Do not alter unrelated modules.
 4) **Implement:** Apply minimal diffs via full-file PowerShell writes.
 5) **Verify:** State exact endpoints or pages to test and expected outputs.
-6) **Deploy:** `wrangler pages deploy . --project-name bestiecollabs`.
+6) **Deploy:** `wrangler pages deploy . --project-name bc`.
 
 ## Files to Request When Needed
 - `/functions/**` (all Functions)
