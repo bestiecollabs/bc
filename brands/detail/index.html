@@ -18,20 +18,38 @@
 <body>
 <main class="wrap" id="app"></main>
 <script>
+async function fetchBySlug(slug){
+  // Try slug= first
+  let u = new URL(location.origin + "/api/brands");
+  u.searchParams.set("slug", slug);
+  u.searchParams.set("limit","1");
+  let r = await fetch(u); let j = await r.json();
+  if (j && j.items && j.items.length) return j.items[0];
+
+  // Fallback to q=
+  u = new URL(location.origin + "/api/brands");
+  u.searchParams.set("q", slug);
+  u.searchParams.set("limit","50");
+  r = await fetch(u); j = await r.json();
+  if (j && j.items) {
+    const hit = j.items.find(x => x.slug === slug) || j.items[0];
+    if (hit) return hit;
+  }
+  return null;
+}
+
 async function load(){
   const slug = new URL(location.href).searchParams.get("slug")||"";
   if(!slug){ document.getElementById("app").innerHTML = "<p>Missing slug.</p>"; return; }
-  const url = new URL(location.origin + "/api/brands");
-  url.searchParams.set("q", slug);
-  url.searchParams.set("limit","50");
-  const r = await fetch(url); const j = await r.json();
-  const b = (j.items||[]).find(x=>x.slug===slug);
+  const b = await fetchBySlug(slug);
   if(!b){ document.getElementById("app").innerHTML = "<p>Brand not found.</p>"; return; }
+
   const cats = [b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).map(c=>`<span class='pill'>${c}</span>`).join("");
   const socials = [
     b.instagram_url ? `<a class='a' href='${b.instagram_url}' target='_blank' rel='noopener'>Instagram</a>` : "",
     b.tiktok_url ? `<a class='a' href='${b.tiktok_url}' target='_blank' rel='noopener'>TikTok</a>` : ""
   ].filter(Boolean).join(" · ");
+
   document.getElementById("app").innerHTML = `
     <a class="a" href="/brands/">← All brands</a>
     <div class="row" style="margin-top:8px">
