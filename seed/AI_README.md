@@ -1,6 +1,6 @@
-# AI_README
+﻿# AI_README
 
-- Generated: 2025-10-14 07:33:59 UTC
+- Generated: 2025-10-14 07:42:41 UTC
 - Project: bc
 - Domains: bestiecollabs.com, api.bestiecollabs.com
 - Preview: *.bc-ezy.pages.dev
@@ -19,3 +19,4 @@
 ## Current focus
 1) Admin dashboard shell with session guard + KPIs.
 2) Brands CSV import report UI wired to /api/admin/brands/import (dry-run + commit).
+

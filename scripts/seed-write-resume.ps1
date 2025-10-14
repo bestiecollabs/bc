@@ -1,11 +1,11 @@
-$Root=(Resolve-Path ".").Path; $SeedDir=Join-Path $Root "seed"
+﻿$Root=(Resolve-Path ".").Path; $SeedDir=Join-Path $Root "seed"
 if(-not(Test-Path $SeedDir)){ New-Item -Type Directory -Force -Path $SeedDir | Out-Null }
 function NowIso(){ (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") }
 $statePath = Join-Path $SeedDir "state.json"
 $state = if(Test-Path $statePath){ Get-Content $statePath -Raw | ConvertFrom-Json } else { $null }
 
 $txt = @"
-# RESUME
+#! resume
 
 Generated: $(NowIso)
 
@@ -23,3 +23,5 @@ D1: $($state.db.d1_name) binding $($state.db.binding)
 $path = Join-Path $SeedDir "RESUME.md"
 [IO.File]::WriteAllText($path,$txt,[Text.UTF8Encoding]::new($false))
 "RESUME.md written -> $path"
+
+

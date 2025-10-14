@@ -1,4 +1,4 @@
-param([string]$AdminEmail = "")
+﻿param([string]$AdminEmail = "")
 $Root=(Resolve-Path ".").Path; $SeedDir=Join-Path $Root "seed"
 if(-not(Test-Path $SeedDir)){ New-Item -Type Directory -Force -Path $SeedDir | Out-Null }
 function NowIso(){ (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss") + " UTC" }
@@ -20,7 +20,7 @@ $sha = if($state){ $state.git.sha } else { "" }
 $d1 = if($state){ $state.db.d1_name } else { "bestiedb" }
 
 $txt = @"
-# AI_README
+#! ai_readme
 
 - Generated: $(NowIso)
 - Project: $proj
@@ -46,3 +46,5 @@ $txt = @"
 $path = Join-Path $SeedDir "AI_README.md"
 [IO.File]::WriteAllText($path,$txt,[Text.UTF8Encoding]::new($false))
 "AI_README.md written -> $path"
+
+

@@ -6,22 +6,18 @@ function Invoke-Step {
   param(
     [Parameter(Mandatory=$true)][string]$Name,
     [Parameter(Mandatory=$true)][scriptblock]$Do,
-    [switch]$Quiet,
-    [switch]$Details
+    [switch]$VerboseOutput,   # show inner output only when requested
+    [switch]$Details          # include error position details
   )
   $oldEA = $ErrorActionPreference
   $ErrorActionPreference = "Stop"
-  if(-not (Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue)){
-    $global:LASTEXITCODE = 0
-  } else {
-    $global:LASTEXITCODE = 0
-  }
+  if(-not (Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue)){ $global:LASTEXITCODE = 0 } else { $global:LASTEXITCODE = 0 }
+
   try {
-    if($Quiet){ & $Do | Out-Null } else { & $Do }
-    $post = $global:LASTEXITCODE
-    if($null -eq $post){ $post = 0 }
+    if($VerboseOutput){ & $Do } else { & $Do | Out-Null }   # silence inner output by default
+    $post = $global:LASTEXITCODE; if($null -eq $post){ $post = 0 }
     if($post -ne 0){ throw "Process exit code $post" }
-    Write-Host "[OK] $($Name)" -ForegroundColor DarkMagenta
+    Write-Host "[OK] $($Name)" -ForegroundColor DarkMagenta   # always prints on success
     return $true
   } catch {
     $msg = $_.Exception.Message
@@ -36,3 +32,7 @@ function Invoke-Step {
     $ErrorActionPreference = $oldEA
   }
 }
+
+# Convenience wrappers that ALWAYS color success
+function Ok([string]$Message){ Write-Host "[OK] $Message" -ForegroundColor DarkMagenta }
+function Err([string]$Message){ Write-Host "[ERR] $Message" -ForegroundColor Red }

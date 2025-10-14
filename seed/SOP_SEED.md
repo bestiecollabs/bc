@@ -1,4 +1,4 @@
-# SOP_SEED.md
+﻿# sop_seed.md
 
 SESSION START
 - Pull latest: git pull origin main
@@ -26,3 +26,5 @@ NOTES
 - Admin-only diagnostics stay gated
 - Do not commit .dev.vars or any secrets
 - New Chat Rule: Every new chat must read the current GitHub codebase and confirm understanding of the rules **before** writing any code. No work starts until the repo context is acknowledged in-chat.- Numbering Rule: Every PowerShell instruction set must be numbered step-by-step (1), 2), 3)...). Each command block must begin with a numbered comment like '# 1) ...'. Refuse unnumbered execution.
+- Numbering Rule (MANDATORY): Every PowerShell instruction set must be numbered step-by-step as '# 1)', '# 2)', '# 3)' with each command block beginning with a numbered comment. Unnumbered requests must be refused with a correction. Do not execute or provide unnumbered PowerShell.
+
