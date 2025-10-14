@@ -5,3 +5,4 @@ Rules:
 4) No React/Vite/Tailwind assumed. Static HTML/CSS/JS.
 5) Preventive enforcement: run D1 dry-run and static checks BEFORE git add/commit/push.
 6) Real DB apply must run with an explicit script, never inside the footer.
+- New Chat Rule: Every new chat must read the current GitHub codebase and confirm understanding of the rules **before** writing any code. No work starts until the repo context is acknowledged in-chat.
