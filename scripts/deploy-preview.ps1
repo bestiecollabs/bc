@@ -1,2 +1,6 @@
-﻿# Deploy a PREVIEW build on Pages project 'bc'
-wrangler pages deploy . --project-name bc
+# Deploy a PREVIEW build for Pages project "bc"
+param(
+  [string]$ProjectName = "bc",
+  [string]$Dir = "."
+)
+wrangler pages deploy $Dir --project-name $ProjectName
