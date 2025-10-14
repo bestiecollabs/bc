@@ -1,4 +1,4 @@
-#! ai_readme.md - Active Snapshot (2025-10-14 01:28 PST)
+#! ai_readme.md - Active Snapshot (2025-10-14 01:30 PST)
 
 PROJECT
 - Bestie Collabs
@@ -7,7 +7,7 @@ STACK
 - Static HTML + vanilla JS on Cloudflare Pages
 - Pages Functions in /functions
 - D1 database bestiedb (binding DB)
-- Repo: https://github.com/bestiecollabs/bc  branch main  sha 9cfcaee
+- Repo: https://github.com/bestiecollabs/bc  branch main  sha f1aa8f6
 - Local root: C:\bc\cloudflare\html
 
 PROD URLS

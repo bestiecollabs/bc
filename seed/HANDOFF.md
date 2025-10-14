@@ -1,4 +1,4 @@
-#! handoff.md - v3.2 (2025-10-14 01:28 PST)
+#! handoff.md - v3.2 (2025-10-14 01:30 PST)
 
 We left off: Cloudflare deploy is green, Functions compile.
 
@@ -7,7 +7,7 @@ We left off: Cloudflare deploy is green, Functions compile.
 - Domains: bestiecollabs.com, api.bestiecollabs.com
 - Preview pattern: *.bc-ezy.pages.dev
 - D1: bestiedb (binding DB)
-- Repo: branch main @ 9cfcaee
+- Repo: branch main @ f1aa8f6
 
 ## Deploy flow
 1) Edit locally in C:\bc\cloudflare\html
