@@ -7,9 +7,7 @@ param(
   [string]$AdminEmail = ""
 )
 
-$Root=(Resolve-Path ".").Path
-$SeedDir=Join-Path $Root "seed"
-if(-not(Test-Path $SeedDir)){ New-Item -Type Directory -Force -Path $SeedDir | Out-Null }
+$ErrorActionPreference = "Stop"
 
 function NowIso(){ (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") }
 function MaskEmail([string]$e){
@@ -23,39 +21,50 @@ function ExecGit([string]$args){
   try{ (git $args) 2>$null }catch{ "" }
 }
 
-$gitBranch = (ExecGit "rev-parse --abbrev-ref HEAD").Trim()
-$gitSha    = (ExecGit "rev-parse --short HEAD").Trim()
-$gitRemote = (ExecGit "config --get remote.origin.url").Trim()
+try{
+  $Root=(Resolve-Path ".").Path
+  $SeedDir=Join-Path $Root "seed"
+  if(-not(Test-Path $SeedDir)){ New-Item -Type Directory -Force -Path $SeedDir | Out-Null }
 
-$allowStr = $env:ADMIN_ALLOWLIST
-$allowHas = -not [string]::IsNullOrWhiteSpace($allowStr)
-$allowLen = if($allowHas){ ($allowStr -split ",").Where({$_ -ne ""}).Count } else { 0 }
+  $gitBranch = (ExecGit "rev-parse --abbrev-ref HEAD").Trim()
+  $gitSha    = (ExecGit "rev-parse --short HEAD").Trim()
+  $gitRemote = (ExecGit "config --get remote.origin.url").Trim()
 
-$state = [ordered]@{
-  generated_at = (NowIso)
-  project = [ordered]@{
-    name = $ProjectName
-    domains = $Domains
-    preview_pattern = $PreviewPattern
-    preview_url = ""
+  $allowStr = $env:ADMIN_ALLOWLIST
+  $allowHas = -not [string]::IsNullOrWhiteSpace($allowStr)
+  $allowLen = if($allowHas){ ($allowStr -split ",").Where({$_ -ne ""}).Count } else { 0 }
+
+  $state = [ordered]@{
+    generated_at = (NowIso)
+    project = [ordered]@{
+      name = $ProjectName
+      domains = $Domains
+      preview_pattern = $PreviewPattern
+      preview_url = ""
+    }
+    git = [ordered]@{
+      branch = $gitBranch
+      sha    = $gitSha
+      remote = $gitRemote
+    }
+    admin = [ordered]@{
+      allowlist_has_value = $allowHas
+      allowlist_length    = $allowLen
+      whoami_email_masked = (MaskEmail $AdminEmail)
+      whoami_allowed      = $false
+    }
+    db = [ordered]@{
+      d1_name  = $D1Name
+      binding  = $D1Binding
+    }
   }
-  git = [ordered]@{
-    branch = $gitBranch
-    sha    = $gitSha
-    remote = $gitRemote
-  }
-  admin = [ordered]@{
-    allowlist_has_value = $allowHas
-    allowlist_length    = $allowLen
-    whoami_email_masked = (MaskEmail $AdminEmail)
-    whoami_allowed      = $false
-  }
-  db = [ordered]@{
-    d1_name  = $D1Name
-    binding  = $D1Binding
-  }
+
+  $statePath = Join-Path $SeedDir "state.json"
+  [IO.File]::WriteAllText($statePath, ($state | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
+  Write-Host "state.json written -> $statePath"
+  exit 0
 }
-
-$statePath = Join-Path $SeedDir "state.json"
-[IO.File]::WriteAllText($statePath, ($state | ConvertTo-Json -Depth 8), [Text.UTF8Encoding]::new($false))
-"state.json written -> $statePath"
+catch{
+  Write-Error $_.Exception.Message
+  exit 1
+}
