@@ -1,5 +1,5 @@
 .dev.vars	64
-.gitattributes	177
+.gitattributes	215
 .gitignore	101
 404.html	2538
 air.css	8956
@@ -151,6 +151,7 @@ scripts\deploy-preview.ps1	163
 scripts\deploy-prod.ps1	1778
 scripts\get-preview.ps1	1526
 scripts\prepare-handoff.ps1	0
+scripts\ps-notify.ps1	974
 scripts\README.md	863
 scripts\seed-append-changelog.ps1	718
 scripts\seed-write-ai-readme.ps1	2103
@@ -160,14 +161,14 @@ scripts\seed-write-state.ps1	1903
 scripts\seed-write-tree.ps1	702
 scripts\update-seed.ps1	1506
 seed\ai_readme.md	5181
-seed\ai_tree.txt	6179
-seed\changelog_ai.md	4778
+seed\ai_tree.txt	6295
+seed\changelog_ai.md	17843
 seed\handoff.md	4624
 seed\resume.md	4620
 seed\rules.md	569
 seed\sessions.md	103
 seed\sop_seed.md	908
-seed\state.json	12630
+seed\state.json	12615
 settings\brand\index.html	2540
 settings\creator\index.html	2552
 signup\index.html	17924
