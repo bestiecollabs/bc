@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GET /api/brands?category=&q=&featured=&page=&limit=
  * Returns published brands only.
  */
@@ -20,8 +20,7 @@ export const onRequestGet = async ({ request, env }) => {
 
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const items = await db.prepare(`
-    SELECT id,name,slug,domain,website_url,category_primary,category_secondary,category_tertiary,
-           instagram_url,tiktok_url,logo_url,featured
+    SELECT id,name,slug,domain,website_url,category_primary,category_secondary,category_tertiary, instagram_url,tiktok_url,logo_url,featured,description
     FROM brands
     ${whereSql}
     ORDER BY featured DESC, name ASC
@@ -36,3 +35,4 @@ export const onRequestGet = async ({ request, env }) => {
     items: items?.results ?? []
   }), { headers:{ "content-type":"application/json" }});
 };
+
