@@ -1,0 +1,137 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Import Brands</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/air.css" rel="stylesheet">
+  <script defer src="/auth.js"></script>
+  <style>
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{padding:8px 12px;border:1px solid #c7d2fe;border-radius:10px;cursor:pointer;background:#4C6FFF;color:#fff}
+    .muted{color:#6b7280}
+    .badge{font-size:12px;padding:2px 6px;border-radius:999px;background:#eef2ff}
+    .ok{background:#dcfce7}
+    .err{background:#fee2e2}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    input[type=file]{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Import Brands</h1>
+
+  <section>
+    <h3>1) Upload CSV</h3>
+    <div class="row">
+      <input id="file" type="file" accept=".csv">
+      <button class="btn" id="upload">Upload & Preview</button>
+      <span id="uout" class="muted"></span>
+    </div>
+  </section>
+
+  <section style="margin-top:16px">
+    <h3>2) Latest Batches</h3>
+    <div id="batches" class="grid"></div>
+  </section>
+
+  <section style="margin-top:16px;display:none" id="rowsSec">
+    <div class="row">
+      <h3 style="margin:0">3) Preview Rows</h3>
+      <label class="row" style="margin-left:auto"><input type="checkbox" id="selAll"> Select all</label>
+      <button class="btn" id="pushLive">Push to Live</button>
+      <button class="btn" id="saveDraft">Save as Draft</button>
+      <span id="actout" class="muted"></span>
+    </div>
+    <div id="rows"></div>
+  </section>
+</main>
+
+<script>
+let currentBatchId = null;
+async function migrate(){
+  await fetch("/api/admin/migrate/brands_staging");
+}
+async function listBatches(){
+  const r = await fetch("/api/admin/import/brands/batches");
+  const j = await r.json();
+  const el = document.getElementById("batches");
+  el.innerHTML = (j.batches||[]).map(b=>`
+    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px">
+      <div><strong>#${b.id}</strong> · ${b.created_at}</div>
+      <div class="muted">status: ${b.status}</div>
+      <button class="btn" data-batch="${b.id}">Load rows</button>
+    </div>
+  `).join("");
+  el.querySelectorAll("button[data-batch]").forEach(btn=>{
+    btn.onclick = ()=> loadRows(btn.getAttribute("data-batch"));
+  });
+}
+async function uploadCSV(){
+  const f = document.getElementById("file").files[0];
+  if(!f){ document.getElementById("uout").textContent = "choose a .csv first"; return; }
+  const text = await f.text();
+  const r = await fetch("/api/admin/import/brands/batches",{method:"POST", headers:{ "Content-Type":"text/csv" }, body:text});
+  const j = await r.json();
+  document.getElementById("uout").textContent = j.ok ? `Batch #${j.batch_id} · total ${j.counts.total} (valid ${j.counts.valid}, invalid ${j.counts.invalid})` : (j.error||"upload failed");
+  await listBatches();
+}
+async function loadRows(batchId){
+  currentBatchId = batchId;
+  const r = await fetch(`/api/admin/import/brands/batches/${batchId}/rows?limit=200`);
+  const j = await r.json();
+  const rows = j.items || [];
+  const sec = document.getElementById("rowsSec"); sec.style.display = "block";
+  const selAll = document.getElementById("selAll");
+  selAll.checked = true;
+  const html = [];
+  html.push(`<table><thead><tr>
+    <th><input type="checkbox" id="hdrSel"></th>
+    <th>#</th>
+    <th>Name</th><th>Slug</th><th>Website</th><th>Domain</th>
+    <th>Cat</th><th>Social</th><th>Logo</th><th>Valid</th><th>Errors</th>
+  </tr></thead><tbody>`);
+  for (const it of rows){
+    const d = JSON.parse(it.parsed_json);
+    const errs = JSON.parse(it.errors_json||"[]");
+    html.push(`<tr data-row="${it.id}">
+      <td><input type="checkbox" class="rowSel" checked></td>
+      <td>${it.row_num}</td>
+      <td>${d.name||""}</td>
+      <td>${d.slug||""}</td>
+      <td><a href="${d.website_url||"#"}" target="_blank" rel="noopener">${d.website_url||""}</a></td>
+      <td>${d.domain||""}</td>
+      <td>${[d.category_primary,d.category_secondary,d.category_tertiary].filter(Boolean).join(", ")}</td>
+      <td>${[d.instagram_url,d.tiktok_url].filter(Boolean).join(" · ")}</td>
+      <td>${d.logo_url? `<a href="${d.logo_url}" target="_blank" rel="noopener">logo</a>`:""}</td>
+      <td>${it.valid? `<span class="badge ok">valid</span>`: `<span class="badge err">invalid</span>`}</td>
+      <td>${errs.join("; ")}</td>
+    </tr>`);
+  }
+  html.push(`</tbody></table>`);
+  const rowsDiv = document.getElementById("rows");
+  rowsDiv.innerHTML = html.join("");
+  const hdr = document.getElementById("hdrSel");
+  hdr.onchange = ()=>{ rowsDiv.querySelectorAll(".rowSel").forEach(cb=>cb.checked = hdr.checked); };
+}
+async function bulkAction(action){
+  const rowsDiv = document.getElementById("rows");
+  const ids = Array.from(rowsDiv.querySelectorAll("tr[data-row]")).filter(tr=>tr.querySelector(".rowSel").checked).map(tr=>Number(tr.getAttribute("data-row")));
+  if(!ids.length){ document.getElementById("actout").textContent = "select at least one row"; return; }
+  const r = await fetch(`/api/admin/import/brands/batches/${currentBatchId}/commit`, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ action, row_ids: ids })});
+  const j = await r.json();
+  document.getElementById("actout").textContent = j.ok ? "done" : (j.error||"error");
+}
+window.addEventListener("DOMContentLoaded", async ()=>{
+  await migrate();
+  document.getElementById("upload").onclick = uploadCSV;
+  document.getElementById("pushLive").onclick = ()=>bulkAction("live");
+  document.getElementById("saveDraft").onclick = ()=>bulkAction("draft");
+  await listBatches();
+});
+</script>
+</body>
+</html>
