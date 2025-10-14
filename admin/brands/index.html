@@ -2,151 +2,191 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Admin Â· Brands</title>
+  <title>Import Brands</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="/air.css" rel="stylesheet">
   <script defer src="/auth.js"></script>
-  <script defer src="/admin/admin.js"></script>
-  <script defer src="/admin/brands/import.js"></script>
   <style>
-    :root{ --rail:240px; --gap:12px; --card-pad:16px; --radius:16px; }
-    .layout{ display:grid; grid-template-columns: var(--rail) 1fr; min-height:100vh; }
-    .rail{ background:#f7f9ff; border-right:1px solid #e6ecff; padding:16px; }
-    .rail .logo{ display:flex; gap:8px; align-items:center; margin-bottom:16px; }
-    .rail nav a{ display:block; padding:10px 12px; border-radius:12px; margin-bottom:6px; color:#1b1f33; text-decoration:none; }
-    .rail nav a.active{ background:#e9efff; }
-    .main{ padding:20px; max-width:1280px; width:100%; }
-    .title{ font-size:20px; font-weight:700; margin:0 0 14px; }
-    .toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-    .btn{ appearance:none; border:1px solid #4C6FFF; background:#4C6FFF; color:#fff; padding:10px 14px; border-radius:12px; cursor:pointer; }
-    .btn.secondary{ background:#fff; color:#1b1f33; border-color:#cdd6ff; }
-    .pill{ font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid #e6ecff; }
-    .ok{ color:#0a5; border-color:#bfead3; background:#e9fbf1; }
-    .bad{ color:#b00; border-color:#f4cccc; background:#ffeaea; }
-    .card{ background:#fff; border:1px solid #e6ecff; border-radius:var(--radius); padding:var(--card-pad); box-shadow:0 1px 2px rgba(0,0,0,.04); }
-    .muted{ color:#556; font-size:12px; }
-    .table-wrap{ border:1px solid #eef2ff; border-radius:12px; overflow:auto; max-height:60vh; }
-    table{ width:100%; border-collapse:separate; border-spacing:0; }
-    thead th{ position:sticky; top:0; background:#f9fbff; text-align:left; font-size:12px; color:#556; padding:8px; }
-    tbody td{ border-top:1px solid #eef2ff; padding:8px; font-size:13px; vertical-align:top; }
-    tr:nth-child(even) td{ background:#fcfdff; }
-    .drawer{ position:fixed; top:0; right:-480px; width:480px; height:100vh; background:#fff; border-left:1px solid #e6ecff; box-shadow:-6px 0 16px rgba(0,0,0,.06); transition:right .22s ease; padding:18px; }
-    .drawer.open{ right:0; }
-    .drawer h2{ margin:0 0 10px; font-size:18px; }
-    .close-x{ border:none; background:transparent; font-size:20px; cursor:pointer; }
-    .toast{ position:fixed; right:16px; bottom:16px; background:#1b1f33; color:#fff; padding:12px 14px; border-radius:12px; display:none; }
-    @media (max-width:1024px){ .layout{ grid-template-columns: 64px 1fr; } .rail .label{ display:none; } }
-    @media (max-width:768px){ .toolbar{ gap:8px; } .drawer{ width:100%; } }
+    .wrap{max-width:1200px;margin:0 auto;padding:16px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{padding:8px 12px;border:1px solid #c7d2fe;border-radius:10px;cursor:pointer;background:#4C6FFF;color:#fff}
+    .muted{color:#6b7280}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}
+    input[type=file]{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+    .badge{font-size:12px;padding:2px 6px;border-radius:999px;background:#eef2ff}
+    .ok{background:#dcfce7}
+    .err{background:#fee2e2}
+    .sidebar{width:240px;border-right:1px solid #e5e7eb}
+    .layout{display:grid;grid-template-columns:240px 1fr}
+    .nav a{display:block;padding:8px 12px;border-radius:10px;color:#111}
+    .nav a:hover{background:#f3f4f6}
   </style>
 </head>
 <body>
-  <div class="layout">
-    <aside class="rail">
-      <div class="logo">
-        <img src="/b1.png" alt="Bestie Collabs" width="28" height="28"><strong class="label">Admin</strong>
-      </div>
-      <nav>
-        <a href="/admin/dashboard/">Dashboard</a>
-        <a href="/admin/brands/" class="active" aria-current="page">Brands</a>
-        <a href="/admin/creators/">Creators</a>
-        <a href="/admin/invitations/">Invitations</a>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="wrap" style="padding:12px">
+      <img src="/b1.png" alt="Bestie Collabs" style="height:32px">
+      <nav class="nav" style="margin-top:12px">
+        <a href="/admin/">Dashboard</a>
+        <a href="/admin/brands/">Brands</a>
+        <a href="/admin/brands/import.html"><strong>Import Brands</strong></a>
+        <a href="/brands/">Public Directory</a>
       </nav>
-      <div class="muted" id="admin-user"></div>
-    </aside>
-
-    <main class="main">
-      <h1 class="title">Brands</h1>
-
-      <section class="card" style="margin-bottom:12px">
-        <div class="toolbar">
-          <input type="file" id="file" accept=".csv">
-          <button class="btn" id="btn-parse">Preview CSV</button>
-          <button class="btn" id="template">Create Template</button> <button class="btn secondary" id="btn-validate">Validate</button>
-          <button class="btn" id="btn-import">Import</button>
-          <button class="btn secondary" id="btn-clear">Clear</button>
-          <button class="btn secondary" id="btn-export">Export CSV</button>
-          <span class="pill" id="file-info">No file</span>
-          <span class="pill" id="cols-info"></span>
-          <span class="pill" id="count-info"></span>
-        </div>
-        <div class="muted" style="margin-top:6px">
-          `Expected columns: name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, logo_url, featured, description, country, state, city, zipcode, address, contact_name, contact_title, contact_email, contact_phone, customer_age_min, customer_age_max, price_low, price_high, affiliate_program, affiliate_cookie_days, monthly_visits, brand_values, gifting_ok, shopify_shop_id, shopify_public_url, shopify_shop_domain, notes_admin`n
-      </section>
-
-      <section class="card">
-        <div class="muted" style="margin-bottom:8px">Preview shows first 200 rows</div>
-        <div class="table-wrap">
-          <table id="preview"><thead></thead><tbody></tbody></table>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <aside id="drawer" class="drawer" aria-hidden="true">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h2>Brand details</h2>
-      <button class="close-x" id="drawer-close" aria-label="Close">Ã—</button>
     </div>
-    <div id="drawer-body" class="muted">Select a row to view details.</div>
   </aside>
+  <main>
+    <div class="wrap">
+      <h1>Import Brands</h1>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      <section class="box">
+        <h3>1) Download templates</h3>
+        <div class="row">
+          <button class="btn" id="tplAgent">Agent template</button>
+          <button class="btn" id="tplAdmin">Admin template</button>
+          <span class="muted">Agent = lean for discovery. Admin = full back office.</span>
+        </div>
+      </section>
 
-  <script>
-    // Row click -> open drawer with basic fields (no wiring change)
-    (function(){
-      const drawer = document.getElementById('drawer');
-      const close  = document.getElementById('drawer-close');
-      function openDrawer(html){ document.getElementById('drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); }
-      function closeDrawer(){ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); }
-      close?.addEventListener('click', closeDrawer);
-      document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDrawer(); });
+      <section style="margin-top:16px">
+        <h3>2) Upload CSV</h3>
+        <div class="row">
+          <input id="file" type="file" accept=".csv">
+          <button class="btn" id="upload">Upload & Preview</button>
+          <span id="uout" class="muted"></span>
+        </div>
+        <div class="muted" style="margin-top:8px">
+          Accepted headers:
+          <div style="margin-top:6px">
+            <strong>Agent:</strong>
+            brand_name, website_url, category_primary, instagram_url, tiktok_url, logo_url, description, us_based, contact_email, customer_age_min, customer_age_max, price_low, price_high, has_affiliate_program, monthly_visits, customer_locations, source_url, discovered_at, discovered_by, notes_admin
+          </div>
+          <div style="margin-top:6px">
+            <strong>Admin:</strong>
+            name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, logo_url, featured, description, country, state, city, zipcode, address, contact_name, contact_title, contact_email, contact_phone, customer_age_min, customer_age_max, price_low, price_high, affiliate_program, affiliate_cookie_days, monthly_visits, brand_values, gifting_ok, shopify_shop_id, shopify_public_url, shopify_shop_domain, notes_admin
+          </div>
+        </div>
+      </section>
 
-      const tbody = document.querySelector('#preview tbody');
-      tbody?.addEventListener('click', (e)=>{
-        const tr = e.target.closest('tr'); if(!tr) return;
-        const cells = Array.from(tr.children).map(td => td.textContent);
-        const heads = Array.from(document.querySelectorAll('#preview thead th')).map(th => th.textContent);
-        const rows = heads.map((h,i)=>'<div style="margin:6px 0;"><strong>'+h+':</strong> '+(cells[i]||'')+'</div>').join('');
-        openDrawer(rows);
-      });
+      <section style="margin-top:16px">
+        <h3>3) Latest Batches</h3>
+        <div id="batches" class="grid"></div>
+      </section>
 
-      // Simple CSV export of currently parsed rows (uses import.js globals if present)
-      document.getElementById('btn-export')?.addEventListener('click', ()=>{
-        if (!window.__BRANDS_ROWS || !window.__BRANDS_COLS){ toast('Nothing to export'); return; }
-        const cols = window.__BRANDS_COLS;
-        const lines = [];
-        lines.push(cols.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(','));
-        for (const r of window.__BRANDS_ROWS){
-          const row = cols.map(c=> {
-            const v = r[c] ?? '';
-            return '"'+String(v).replace(/"/g,'""')+'"';
-          }).join(',');
-          lines.push(row);
-        }
-        const blob = new Blob([lines.join('\n')], {type:'text/csv'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'brands_export.csv';
-        document.body.appendChild(a); a.click(); a.remove();
-      });
-    })();
-  </script>
-</body>
-</html>
+      <section style="margin-top:16px;display:none" id="rowsSec">
+        <div class="row">
+          <h3 style="margin:0">4) Preview Rows</h3>
+          <label class="row" style="margin-left:auto"><input type="checkbox" id="selAll" checked> Select all</label>
+          <button class="btn" id="pushLive">Push to Live</button>
+          <button class="btn" id="saveDraft">Save as Draft</button>
+          <span id="actout" class="muted"></span>
+        </div>
+        <div id="rows"></div>
+      </section>
+    </div>
+  </main>
+</div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('template');
-  if (!btn) return;
-  btn.addEventListener('click', async () => {
-    const r = await fetch('/api/admin/import/brands/template');
-    const b = await r.blob();
-    const url = URL.createObjectURL(b);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'brands_template.csv';
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+let currentBatchId = null;
+
+async function migrate(){ try{ await fetch("/api/admin/migrate/brands_staging"); }catch(_){ } }
+
+async function listBatches(){
+  const r = await fetch("/api/admin/import/brands/batches");
+  const j = await r.json();
+  const el = document.getElementById("batches");
+  el.innerHTML = (j.batches||[]).map(b=>`
+    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff">
+      <div><strong>#${b.id}</strong> · ${b.created_at||""}</div>
+      <div class="muted">status: ${b.status}</div>
+      <button class="btn" data-batch="${b.id}">Load rows</button>
+    </div>
+  `).join("");
+  el.querySelectorAll("button[data-batch]").forEach(btn=>{
+    btn.onclick = ()=> loadRows(btn.getAttribute("data-batch"));
   });
+}
+
+async function uploadCSV(){
+  const f = document.getElementById("file").files[0];
+  if(!f){ document.getElementById("uout").textContent = "choose a .csv first"; return; }
+  const text = await f.text();
+  const r = await fetch("/api/admin/import/brands/batches",{method:"POST", headers:{ "Content-Type":"text/csv" }, body:text});
+  const j = await r.json().catch(()=>({ok:false,error:"invalid response"}));
+  document.getElementById("uout").textContent = j.ok ? `Batch #${j.batch_id} · total ${j.counts.total} (valid ${j.counts.valid}, invalid ${j.counts.invalid})` : (j.error||"upload failed");
+  await listBatches();
+}
+
+async function loadRows(batchId){
+  currentBatchId = batchId;
+  const r = await fetch(`/api/admin/import/brands/batches/${batchId}/rows?limit=200`);
+  const j = await r.json();
+  const rows = j.items || [];
+  const sec = document.getElementById("rowsSec"); sec.style.display = "block";
+  const rowsDiv = document.getElementById("rows");
+  const html = [];
+  html.push(`<table><thead><tr>
+    <th><input type="checkbox" id="hdrSel" checked></th>
+    <th>#</th>
+    <th>Name</th><th>Website</th><th>Domain</th>
+    <th>Categories</th><th>Social</th><th>Valid</th><th>Errors</th>
+  </tr></thead><tbody>`);
+  for (const it of rows){
+    const d = JSON.parse(it.parsed_json||"{}");
+    const cats = [d.category_primary,d.category_secondary,d.category_tertiary].filter(Boolean).join(", ");
+    const social = [d.instagram_url,d.tiktok_url].filter(Boolean).join(" · ");
+    html.push(`<tr data-row="${it.id}">
+      <td><input type="checkbox" class="rowSel" checked></td>
+      <td>${it.row_num}</td>
+      <td>${d.name||""}</td>
+      <td><a href="${d.website_url||"#"}" target="_blank" rel="noopener">${d.website_url||""}</a></td>
+      <td>${d.domain||""}</td>
+      <td>${cats}</td>
+      <td>${social}</td>
+      <td>${it.valid? `<span class="badge ok">valid</span>`: `<span class="badge err">invalid</span>`}</td>
+      <td>${(JSON.parse(it.errors_json||"[]")||[]).join("; ")}</td>
+    </tr>`);
+  }
+  html.push(`</tbody></table>`);
+  rowsDiv.innerHTML = html.join("");
+  const hdr = document.getElementById("hdrSel");
+  hdr.onchange = ()=>{ rowsDiv.querySelectorAll(".rowSel").forEach(cb=>cb.checked = hdr.checked); };
+}
+
+async function bulkAction(action){
+  const rowsDiv = document.getElementById("rows");
+  const ids = Array.from(rowsDiv.querySelectorAll("tr[data-row]"))
+    .filter(tr=>tr.querySelector(".rowSel").checked)
+    .map(tr=>Number(tr.getAttribute("data-row")));
+  if(!ids.length){ document.getElementById("actout").textContent = "select at least one row"; return; }
+  const r = await fetch(`/api/admin/import/brands/batches/${currentBatchId}/commit`, {
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ action, row_ids: ids })
+  });
+  const j = await r.json().catch(()=>({ok:false,error:"invalid response"}));
+  document.getElementById("actout").textContent = j.ok ? "done" : (j.error||"error");
+}
+
+function download(url, filename){
+  fetch(url).then(r=>r.blob()).then(b=>{
+    const u = URL.createObjectURL(b);
+    const a = document.createElement("a");
+    a.href=u; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u);
+  });
+}
+
+window.addEventListener("DOMContentLoaded", async ()=>{
+  await migrate();
+  document.getElementById("upload").onclick = uploadCSV;
+  document.getElementById("pushLive").onclick = ()=>bulkAction("live");
+  document.getElementById("saveDraft").onclick = ()=>bulkAction("draft");
+  document.getElementById("tplAgent").onclick = ()=>download("/api/admin/import/brands/template-agent","brands_template_agent.csv");
+  document.getElementById("tplAdmin").onclick = ()=>download("/api/admin/import/brands/template","brands_template.csv");
+  await listBatches();
 });
 </script>
+</body>
+</html>
