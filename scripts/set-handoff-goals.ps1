@@ -1,50 +1,134 @@
 param(
   [Parameter(Mandatory=$true)][string]$Task1,
-  [Parameter(Mandatory=$true)][string]$Task2
+  [Parameter(Mandatory=$true)][string]$Task2,
+  [string]$RepoRoot = "C:\bc\cloudflare\html",
+  [string]$AdminEmail = ""
 )
 $ErrorActionPreference = "Stop"
 
-function Write-Utf8NoBom($Path,$Text){
-  [IO.File]::WriteAllText($Path,$Text,[Text.UTF8Encoding]::new($false))
-}
 function NowPst(){
   $tz = [System.TimeZoneInfo]::FindSystemTimeZoneById("Pacific Standard Time")
   [System.TimeZoneInfo]::ConvertTime([datetime]::UtcNow, $tz).ToString("yyyy-MM-dd HH:mm 'PST'")
 }
+function WUtf8($p,$s){ [IO.File]::WriteAllText($p,$s,[Text.UTF8Encoding]::new($false)) }
+function ExecGit([string[]]$a){ try{ (git @a) }catch{ "" } }
 
-$root = Split-Path -Parent $PSScriptRoot
-$seed = Join-Path $root "seed"
+# load state
+$Seed = Join-Path $RepoRoot "seed"
+if(-not(Test-Path $Seed)){ New-Item -Type Directory -Force -Path $Seed | Out-Null }
+$statePath = Join-Path $Seed "state.json"
+$state = if(Test-Path $statePath){ Get-Content $statePath -Raw | ConvertFrom-Json } else { $null }
 
-# --- Update HANDOFF.md NEXT TASKS block and timestamp line
-$handoff = Join-Path $seed "HANDOFF.md"
-if(Test-Path $handoff){
-  $txt = Get-Content $handoff -Raw
-  # refresh timestamp in title
-  $txt = [regex]::Replace($txt,'^(#\s*HANDOFF\.md[^\(]*\()[^)]+\)',('$1'+(NowPst())+')'),'Multiline'
-  # replace "Next 2 tasks" block
-  $txt = [regex]::Replace($txt,'(?s)##\s*Next\s*2\s*tasks.*?\Z',"## Next 2 tasks (do now)`r`n1) $Task1`r`n2) $Task2`r`n")
-  Write-Utf8NoBom $handoff $txt
-}
+# derive
+$proj    = if($state){ $state.project.name } else { "bc" }
+$domains = if($state){ ($state.project.domains -join ", ") } else { "bestiecollabs.com, api.bestiecollabs.com" }
+$preview = if($state){ $state.project.preview_pattern } else { "*.bc-ezy.pages.dev" }
+$d1name  = if($state){ $state.db.d1_name } else { "bestiedb" }
+$d1bind  = if($state){ $state.db.binding } else { "DB" }
+$branch  = ((ExecGit @("rev-parse","--abbrev-ref","HEAD")) -join "").Trim()
+$sha     = ((ExecGit @("rev-parse","--short","HEAD")) -join "").Trim()
+$when    = NowPst()
 
-# --- Update AI_README.md NEXT TASKS block (keep rest intact)
-$aireadme = Join-Path $seed "AI_README.md"
-if(Test-Path $aireadme){
-  $txt = Get-Content $aireadme -Raw
-  $txt = [regex]::Replace($txt,'(?s)NEXT TASKS.*?---',"NEXT TASKS`r`n1) $Task1`r`n2) $Task2`r`n`r`n---")
-  Write-Utf8NoBom $aireadme $txt
-}
+# texts
+$ai = @"
+#! ai_readme.md — Active Snapshot ($when)
 
-# --- Update RESUME.md TODOs
-$resume = Join-Path $seed "RESUME.md"
-if(Test-Path $resume){
-  $txt = Get-Content $resume -Raw
-  $txt = [regex]::Replace($txt,'(?s)##\s*TODOs.*?##',"## TODOs`r`n- $Task1`r`n- $Task2`r`n`r`n##",'IgnoreCase')
-  Write-Utf8NoBom $resume $txt
-}
+PROJECT
+- Bestie Collabs
 
-# --- Append CHANGELOG_AI.md entry
-$changelog = Join-Path $seed "CHANGELOG_AI.md"
-$entry = "## $(NowPst) - update next tasks`r`n- Task1: $Task1`r`n- Task2: $Task2`r`n"
-Add-Content -Path $changelog -Value $entry -Encoding UTF8
+STACK
+- Static HTML + vanilla JS on Cloudflare Pages
+- Pages Functions in /functions
+- D1 database $d1name (binding $d1bind)
+- Repo: https://github.com/bestiecollabs/$proj  branch $branch  sha $sha
+- Local root: C:\bc\cloudflare\html
 
-Write-Host "[OK] Goals updated" -ForegroundColor DarkMagenta
+PROD URLS
+- App: https://bestiecollabs.com
+- API: https://api.bestiecollabs.com
+- Health: /api/healthcheck -> { ok: true }
+
+SEED RULES (excerpt)
+- Step-by-step. Full file contents. Exact paths. PowerShell-first.
+- No patches. Fix root causes. Keep structure and names.
+- Production-first. Deploy by pushing main.
+- New Chat Rule: Every new chat must read the current GitHub codebase and confirm understanding of the rules before writing any code.
+
+NEXT TASKS
+1) $Task1
+2) $Task2
+
+---
+"@
+
+$handoff = @"
+#! handoff.md — v3.2 ($when)
+
+We left off: Cloudflare deploy is green, Functions compile.
+
+## Environment
+- Pages project: $proj
+- Domains: $domains
+- Preview pattern: $preview
+- D1: $d1name (binding $d1bind)
+- Repo: branch $branch @ $sha
+
+## Deploy flow
+1) Edit locally in C:\bc\cloudflare\html
+2) git add -A && git commit -m "msg" && git push origin main
+3) Cloudflare auto-deploys (Functions from /functions)
+
+## Verify
+- GET /api/healthcheck -> { ok: true }
+- Custom domains Active, SSL Full
+- No wrangler parse/BOM errors
+
+## Guardrails
+- PowerShell-first. Full files. Exact paths. Keep structure and names.
+- Production-first on main. Explain what it does + what to expect.
+- New Chat Rule: Every new chat must read the current GitHub codebase before any work.
+
+## Rollback & Tags
+- Tag stable: git tag v0.1-setup-clean && git push origin --tags
+- Rollback: git revert <sha>  or deploy previous commit in Cloudflare
+
+## Resuming a session
+1) Load seed/state.json and seed/resume.md
+2) Confirm handoff timestamp and tasks
+3) Run scripts/update-seed.ps1
+4) Start with “Next 2 tasks”
+
+## Next 2 tasks (do now)
+1) $Task1
+2) $Task2
+"@
+
+$resume = @"
+#! resume — $when
+
+## TODOs
+- $Task1
+- $Task2
+
+## Context
+Project: $proj
+Domains: $domains
+Preview: $preview
+Git: $branch @ $sha
+D1: $d1name binding $d1bind
+"
+
+# write files (rewrite, no patching)
+WUtf8 (Join-Path $Seed "AI_README.md") $ai
+WUtf8 (Join-Path $Seed "HANDOFF.md")   $handoff
+WUtf8 (Join-Path $Seed "RESUME.md")    $resume
+
+# changelog
+$cl = @()
+$cl += "## $(Get-Date -AsUTC).ToString('yyyy-MM-ddTHH:mm:ssZ') - $branch @ $sha"
+$cl += "- set-handoff-goals: '$Task1' and '$Task2'"
+$cl += ""
+Add-Content -Path (Join-Path $Seed "CHANGELOG_AI.md") -Value ($cl -join [Environment]::NewLine) -Encoding UTF8
+
+Write-Host "Updated: AI_README.md, HANDOFF.md, RESUME.md, CHANGELOG_AI.md"
+exit 0
