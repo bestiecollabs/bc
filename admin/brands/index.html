@@ -205,5 +205,59 @@ async function analyzeCSV(text){
   }
 })();
 </script>
+<!-- injected: analyze button + results -->
+<script>
+(function(){
+  if (document.getElementById("btnAnalyzeFile")) return;
+  function bySel(sel){ return document.querySelector(sel); }
+  function make(tag, attrs){ var el=document.createElement(tag); for (var k in attrs||{}) el.setAttribute(k, attrs[k]); return el; }
+
+  // Find the upload button and file input generically
+  function findUploadBtn(){
+    var btns = Array.from(document.querySelectorAll("button, input[type='button'], input[type='submit']"));
+    return btns.find(b => /upload\s*&\s*preview/i.test(b.textContent||b.value||""));
+  }
+  var uploadBtn = findUploadBtn();
+  var fileInput = bySel("input[type='file']");
+
+  // Create Analyze button and results panel
+  var analyzeBtn = make("button", { id:"btnAnalyzeFile", class:"btn" });
+  analyzeBtn.textContent = "Dry-run Analyze";
+  analyzeBtn.style.marginLeft = "8px";
+
+  var results = make("div", { id:"analyzeResults" });
+  results.style.marginTop = "16px";
+
+  // Insert into DOM
+  if (uploadBtn && uploadBtn.parentNode) {
+    uploadBtn.parentNode.insertBefore(analyzeBtn, uploadBtn.nextSibling);
+    uploadBtn.parentNode.parentNode.insertBefore(results, uploadBtn.parentNode.nextSibling);
+  } else {
+    // Fallback: append to body
+    document.body.appendChild(analyzeBtn);
+    document.body.appendChild(results);
+  }
+
+  // Analyze handler: read selected file and POST to /api/admin/import/brands/analyze
+  analyzeBtn.addEventListener("click", async function(e){
+    e.preventDefault();
+    results.textContent = "Analyzing...";
+    try{
+      if (!fileInput || !fileInput.files || !fileInput.files[0]) { results.textContent = "Select a CSV file first."; return; }
+      const text = await fileInput.files[0].text();
+      const r = await fetch("/api/admin/import/brands/analyze", { method:"POST", headers:{ "Content-Type":"text/csv" }, body: text });
+      const j = await r.json();
+      const h = [];
+      if(!j.ok){ h.push('<div style="color:#b00"><strong>Errors:</strong> ' + (j.errors||[]).join('; ') + '</div>'); }
+      if((j.warnings||[]).length){ h.push('<div style="color:#a60"><strong>Warnings:</strong> ' + j.warnings.join('; ') + '</div>'); }
+      h.push('<div><strong>Counts:</strong> total ' + j.counts.total + ', valid ' + j.counts.valid + ', invalid ' + j.counts.invalid + '</div>');
+      h.push('<details><summary>Rows</summary><pre style="white-space:pre-wrap">' + j.rows.map(r=> (r.line + '\t' + r.status + '\t' + (r.issues||[]).join('|'))).join('\n') + '</pre></details>');
+      results.innerHTML = h.join('');
+    }catch(err){
+      results.textContent = String(err);
+    }
+  });
+})();
+</script>
 </body>
 </html>
