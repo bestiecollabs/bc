@@ -1,6 +1,9 @@
-﻿export async function onRequestGet({ env }) {
+﻿/**
+ * functions/api/admin/migrate/brands_add_columns.js
+ * Adds columns needed by publish upsert. Safe to run multiple times.
+ */
+export async function onRequestGet({ env }) {
   const db = env.DB;
-  // Columns the app expects on table `brands`
   const cols = [
     ["is_public","INTEGER DEFAULT 0"],
     ["country","TEXT"],["state","TEXT"],["city","TEXT"],["zipcode","TEXT"],["address","TEXT"],
@@ -12,12 +15,10 @@
   ];
   try {
     for (const [name, type] of cols) {
-      try { await db.prepare(`ALTER TABLE brands ADD COLUMN ${name} ${type}`).run(); } catch (_) {}
+      try { await db.prepare("ALTER TABLE brands ADD COLUMN " + name + " " + type).run(); } catch (_) {}
     }
-    // Ensure UNIQUE slug for upserts
-    try { await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_brands_slug ON brands(slug)`).run(); } catch (_) {}
-    return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" }});
+    return new Response(JSON.stringify({ ok:true }), { headers:{ "Content-Type":"application/json" }});
   } catch (e) {
-    return new Response(JSON.stringify({ ok:false, error:String(e) }), { status:500, headers:{ "Content-Type":"application/json"}});
+    return new Response(JSON.stringify({ ok:false, error:String(e) }), { status:500, headers:{ "Content-Type":"application/json" }});
   }
 }
