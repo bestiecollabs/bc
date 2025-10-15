@@ -1,0 +1,80 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brand · Bestie Collabs</title>
+  <link rel="icon" href="/favicon.png" />
+  <meta name="theme-color" content="#5E7BFF" />
+  <link rel="stylesheet" href="/air.css" />
+</head>
+<body>
+<header class="site-header" style="border-bottom:1px solid #e5e7eb;background:#fff">
+  <div class="wrap row" style="grid-template-columns:auto 1fr auto;align-items:center">
+    <a class="brandmark" href="/"><img src="/b1.png" alt="Bestie Collabs" style="height:40px"><span class="title">Bestie Collabs</span></a>
+    <nav style="justify-self:center;display:flex;gap:12px">
+      <a href="/about/">About</a><a href="/brands/">Brands</a><a href="/creators/">Creators</a><a href="/pricing/">Pricing</a><a href="/support/">Support</a>
+    </nav>
+    <nav class="auth" style="display:flex;gap:12px">
+      <a data-link="dashboard" href="/account/" style="display:none">Dashboard</a>
+      <a data-link="login" href="/login/">Log in</a>
+      <a data-link="create" href="/signup/">Create account</a>
+      <a data-link="logout" href="/logout" style="display:none">Log out</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero container">
+    <h1 id="name">Brand</h1>
+    <p id="category" class="hero p"></p>
+  </section>
+
+  <section class="container section">
+    <div class="row" style="gap:16px;align-items:flex-start">
+      <div class="card" style="flex:2">
+        <img id="logo" src="/og.jpg" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:12px;margin-bottom:12px">
+        <p id="desc" style="margin-top:0"></p>
+        <p><a id="site" class="btn" href="#" target="_blank" rel="noopener">Visit website</a></p>
+      </div>
+      <div class="card" style="flex:1">
+        <h3 class="funtext">Details</h3>
+        <p><b>Status:</b> <span id="status">draft</span></p>
+        <p><b>Instagram:</b> <a id="ig" href="#" target="_blank" rel="noopener">Open</a></p>
+        <p><b>TikTok:</b> <a id="tt" href="#" target="_blank" rel="noopener">Open</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap" style="border-top:1px solid #e5e7eb;padding-top:16px">
+  <a href="/about/">About</a> · <a href="/brands/">Brands</a> · <a href="/cookie/">Cookie</a> · <a href="/creators/">Creators</a> · <a href="/pricing/">Pricing</a> · <a href="/privacy/">Privacy</a> · <a href="/support/">Support</a> · <a href="/terms/">Terms</a>
+</footer>
+
+<script src="/auth.js"></script>
+<script>
+(async function(){
+  try{
+    const id = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g,'').split('/')[1] || "");
+    const res = await fetch(`/api/brands/${encodeURIComponent(id)}`);
+    const b = await res.json();
+
+    document.title = `${b?.name||'Brand'} · Bestie Collabs`;
+    set('name', b?.name);
+    set('category', b?.category_primary || '');
+    setImg('logo', b?.logo_url);
+    set('desc', b?.description || '');
+    setHref('site', b?.website_url);
+    set('status', b?.status || 'draft');
+    setHref('ig', b?.instagram_url);
+    setHref('tt', b?.tiktok_url);
+  }catch(e){
+    set('name','Brand not found');
+  }
+})();
+function set(id, v){ const el=document.getElementById(id); if(el) el.textContent=String(v||''); }
+function setImg(id, v){ const el=document.getElementById(id); if(el && v){ el.src=v; } }
+function setHref(id, v){ const el=document.getElementById(id); if(el && v){ el.href=v; } else if(el){ el.remove(); } }
+</script>
+</body>
+</html>
