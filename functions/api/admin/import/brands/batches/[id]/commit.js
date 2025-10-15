@@ -1,19 +1,32 @@
 ﻿/**
- * POST body:
- * {
- *   action: "live" | "draft",
- *   row_ids: number[],
- *   admin: 0|1,            // optional override for non-US publish
- *   publish_non_us: 0|1    // alias of admin for clarity
- * }
+ * functions/api/admin/import/brands/batches.js
+ * GET  -> list latest batches
+ * POST -> upload CSV, create batch + rows, return counts
+ * No SQL BEGIN/COMMIT; autocommit + db.batch()
  */
-function extractDomain(url){
-  try{
-    const u = new URL(String(url||"").trim());
-    let d = u.hostname.toLowerCase();
-    if (d.startsWith("www.")) d = d.slice(4);
-    return d;
-  }catch(_){ return ""; }
+
+function parseCSV(text){
+  const rows=[]; let i=0, cur="", inQ=false, row=[];
+  while(i<text.length){
+    const ch=text[i];
+    if(inQ){
+      if(ch === '"' && text[i+1] === '"'){ cur+='"'; i+=2; continue; }
+      if(ch === '"'){ inQ=false; i++; continue; }
+      cur+=ch; i++; continue;
+    }
+    if(ch === '"'){ inQ=true; i++; continue; }
+    if(ch === ','){ row.push(cur); cur=""; i++; continue; }
+    if(ch === '\r'){ i++; continue; }
+    if(ch === '\n'){ row.push(cur); rows.push(row); row=[]; cur=""; i++; continue; }
+    cur+=ch; i++; continue;
+  }
+  row.push(cur); rows.push(row);
+  return rows;
+}
+
+function truthyFlag(v){
+  const s = String(v??"").trim().toLowerCase();
+  return s === "1" || s === "true" || s === "yes" || s === "y";
 }
 function toInt(x, def=0){
   const n = Number.parseInt(String(x??"").trim(), 10);
@@ -23,123 +36,170 @@ function toFloat(x, def=0){
   const n = Number.parseFloat(String(x??"").trim());
   return Number.isFinite(n) ? n : def;
 }
-async function genSlug6(db){
-  for (let i=0;i<8;i++){
-    const s = String(Math.floor(100000 + Math.random()*900000));
-    const hit = await db.prepare("SELECT 1 FROM brands WHERE slug=? LIMIT 1").bind(s).first();
-    if (!hit) return s;
-  }
-  // last resort: time-based fallback
-  return String(Date.now()).slice(-6);
+function extractDomain(url){
+  try{
+    const u = new URL(String(url||"").trim());
+    let d = u.hostname.toLowerCase();
+    if (d.startsWith("www.")) d = d.slice(4);
+    return d;
+  }catch(_){ return ""; }
 }
 
-export async function onRequestPost({ env, params, request }) {
-  const body = await request.json().catch(()=>({}));
-  const action = body.action;
-  const ids = Array.isArray(body.row_ids) ? body.row_ids.map(Number).filter(Boolean) : [];
-  if (!action || !ids.length) {
-    return new Response(JSON.stringify({ ok:false, error:"action and row_ids required" }), { status:400, headers:{ "Content-Type":"application/json" }});
-  }
-  const allowNonUS = (body.admin == 1) || (body.publish_non_us == 1);
+function normalizeRow(row, idx){
+  // Detect Agent vs Admin by presence of brand_name
+  const isAgent = idx["brand_name"] != null;
 
+  if (isAgent){
+    const name = String(row[idx["brand_name"]]||"").trim();
+    const website_url = String(row[idx["website_url"]]||"").trim();
+    const jo = {
+      name,
+      slug: "", // 6-digit numeric generated at commit
+      website_url,
+      domain: extractDomain(website_url),
+      category_primary: String(row[idx["category_primary"]]||"").trim(),
+      category_secondary: idx["category_secondary"]!=null ? String(row[idx["category_secondary"]]||"").trim() : "",
+      category_tertiary: idx["category_tertiary"]!=null ? String(row[idx["category_tertiary"]]||"").trim() : "",
+      instagram_url: String(row[idx["instagram_url"]]||"").trim(),
+      tiktok_url: String(row[idx["tiktok_url"]]||"").trim(),
+      logo_url: idx["logo_url"]!=null ? String(row[idx["logo_url"]]||"").trim() : "",
+      description: String(row[idx["description"]]||"").trim(),
+      // US gating: set country=US if us_based truthy; otherwise blank to require admin override
+      country: truthyFlag(idx["us_based"]!=null ? row[idx["us_based"]] : "") ? "US" : "",
+      state: "",
+      city: "",
+      zipcode: "",
+      address: "",
+      contact_name: "",
+      contact_title: "",
+      contact_email: String(idx["contact_email"]!=null ? row[idx["contact_email"]]||"" : "").trim(),
+      contact_phone: "",
+      customer_age_min: toInt(idx["customer_age_min"]!=null ? row[idx["customer_age_min"]] : "", 0),
+      customer_age_max: toInt(idx["customer_age_max"]!=null ? row[idx["customer_age_max"]] : "", 0),
+      price_low: toFloat(idx["price_low"]!=null ? row[idx["price_low"]] : "", 0),
+      price_high: toFloat(idx["price_high"]!=null ? row[idx["price_high"]] : "", 0),
+      affiliate_program: String(idx["has_affiliate_program"]!=null ? row[idx["has_affiliate_program"]]||"" : "").trim(),
+      affiliate_cookie_days: 30,
+      monthly_visits: toInt(idx["monthly_visits"]!=null ? row[idx["monthly_visits"]] : "", 0),
+      brand_values: "",
+      gifting_ok: 0,
+      // carry agent-only metadata in parsed_json for later enrichment
+      customer_locations: String(idx["customer_locations"]!=null ? row[idx["customer_locations"]]||"" : "").trim(),
+      source_url: String(idx["source_url"]!=null ? row[idx["source_url"]]||"" : "").trim(),
+      discovered_at: String(idx["discovered_at"]!=null ? row[idx["discovered_at"]]||"" : "").trim(),
+      discovered_by: String(idx["discovered_by"]!=null ? row[idx["discovered_by"]]||"" : "").trim(),
+      notes_admin: String(idx["notes_admin"]!=null ? row[idx["notes_admin"]]||"" : "").trim(),
+      featured: 0,
+      is_public: 0
+    };
+    const errs = [];
+    if (!jo.name) errs.push("name required");
+    if (!jo.website_url) errs.push("website_url required");
+    return { jo, valid: errs.length===0 ? 1 : 0, errs };
+  }
+
+  // Admin template path
+  const reqName = String(row[idx["name"]]||"").trim();
+  const reqUrl  = String(row[idx["website_url"]]||"").trim();
+  const jo = {
+    name: reqName,
+    slug: "",
+    website_url: reqUrl,
+    domain: extractDomain(reqUrl),
+    category_primary: String(row[idx["category_primary"]]||"").trim(),
+    category_secondary: idx["category_secondary"]!=null ? String(row[idx["category_secondary"]]||"").trim() : "",
+    category_tertiary: idx["category_tertiary"]!=null ? String(row[idx["category_tertiary"]]||"").trim() : "",
+    instagram_url: String(idx["instagram_url"]!=null ? row[idx["instagram_url"]]||"" : "").trim(),
+    tiktok_url: String(idx["tiktok_url"]!=null ? row[idx["tiktok_url"]]||"" : "").trim(),
+    logo_url: String(idx["logo_url"]!=null ? row[idx["logo_url"]]||"" : "").trim(),
+    description: String(idx["description"]!=null ? row[idx["description"]]||"" : "").trim(),
+    country: String(idx["country"]!=null ? row[idx["country"]]||"" : "").trim(),
+    state: String(idx["state"]!=null ? row[idx["state"]]||"" : "").trim(),
+    city: String(idx["city"]!=null ? row[idx["city"]]||"" : "").trim(),
+    zipcode: String(idx["zipcode"]!=null ? row[idx["zipcode"]]||"" : "").trim(),
+    address: String(idx["address"]!=null ? row[idx["address"]]||"" : "").trim(),
+    contact_name: String(idx["contact_name"]!=null ? row[idx["contact_name"]]||"" : "").trim(),
+    contact_title: String(idx["contact_title"]!=null ? row[idx["contact_title"]]||"" : "").trim(),
+    contact_email: String(idx["contact_email"]!=null ? row[idx["contact_email"]]||"" : "").trim(),
+    contact_phone: String(idx["contact_phone"]!=null ? row[idx["contact_phone"]]||"" : "").trim(),
+    customer_age_min: toInt(idx["customer_age_min"]!=null ? row[idx["customer_age_min"]] : "", 0),
+    customer_age_max: toInt(idx["customer_age_max"]!=null ? row[idx["customer_age_max"]] : "", 0),
+    price_low: toFloat(idx["price_low"]!=null ? row[idx["price_low"]] : "", 0),
+    price_high: toFloat(idx["price_high"]!=null ? row[idx["price_high"]] : "", 0),
+    affiliate_program: String(idx["affiliate_program"]!=null ? row[idx["affiliate_program"]]||"" : "").trim(),
+    affiliate_cookie_days: toInt(idx["affiliate_cookie_days"]!=null ? row[idx["affiliate_cookie_days"]] : "", 30),
+    monthly_visits: toInt(idx["monthly_visits"]!=null ? row[idx["monthly_visits"]] : "", 0),
+    brand_values: String(idx["brand_values"]!=null ? row[idx["brand_values"]]||"" : "").trim(),
+    gifting_ok: toInt(idx["gifting_ok"]!=null ? row[idx["gifting_ok"]] : "", 0),
+    shopify_shop_id: String(idx["shopify_shop_id"]!=null ? row[idx["shopify_shop_id"]]||"" : "").trim(),
+    shopify_public_url: String(idx["shopify_public_url"]!=null ? row[idx["shopify_public_url"]]||"" : "").trim(),
+    shopify_shop_domain: String(idx["shopify_shop_domain"]!=null ? row[idx["shopify_shop_domain"]]||"" : "").trim(),
+    notes_admin: String(idx["notes_admin"]!=null ? row[idx["notes_admin"]]||"" : "").trim(),
+    featured: toInt(idx["featured"]!=null ? row[idx["featured"]] : "", 0),
+    is_public: 0
+  };
+  const errs = [];
+  if (!jo.name) errs.push("name required");
+  if (!jo.website_url) errs.push("website_url required");
+  return { jo, valid: errs.length===0 ? 1 : 0, errs };
+}
+
+export async function onRequestGet({ env }){
+  const rs = await env.DB
+    .prepare("SELECT id,created_at,source_uri,status FROM import_batches ORDER BY id DESC LIMIT 50")
+    .all();
+  return new Response(JSON.stringify({ ok:true, batches: rs.results }), { headers:{ "Content-Type":"application/json" }});
+}
+
+export async function onRequestPost({ request, env }){
   const db = env.DB;
-
-  if (action === "draft") {
-    // keep previous draft behavior, minimal branching
-    const rows = await db.prepare(`SELECT id, parsed_json, errors_json FROM import_rows WHERE batch_id=? AND id IN (${ids.map(()=>"?").join(",")})`).bind(Number(params.id), ...ids).all();
-    const ins = await db.prepare(`INSERT INTO brand_drafts (source_row_id, data_json, issues_json) VALUES (?,?,?)`);
-    for (const r of rows.results) {
-      await ins.bind(r.id, r.parsed_json, r.errors_json).run();
-    }
-    await db.prepare(`UPDATE import_batches SET status=? WHERE id=?`).bind("committed", Number(params.id)).run();
-    return new Response(JSON.stringify({ ok:true }), { headers:{ "Content-Type":"application/json" }});
+  const ct = (request.headers.get("content-type") || "").toLowerCase();
+  if(!ct.includes("text/csv")){
+    return new Response(JSON.stringify({ ok:false, error:"content-type must be text/csv" }), { status:400, headers:{ "Content-Type":"application/json" }});
+  }
+  const body = (await request.text() || "").trim();
+  if(!body){
+    return new Response(JSON.stringify({ ok:false, error:"empty body" }), { status:400, headers:{ "Content-Type":"application/json" }});
   }
 
-  if (action !== "live") {
-    return new Response(JSON.stringify({ ok:false, error:"invalid action" }), { status:400, headers:{ "Content-Type":"application/json" }});
+  const rows = parseCSV(body);
+  if(rows.length < 2){
+    return new Response(JSON.stringify({ ok:false, error:"no rows" }), { status:400, headers:{ "Content-Type":"application/json" }});
   }
 
-  // Live upsert
-  const rows = await db.prepare(`SELECT id, parsed_json FROM import_rows WHERE batch_id=? AND id IN (${ids.map(()=>"?").join(",")})`).bind(Number(params.id), ...ids).all();
+  const headers = rows[0].map(h => String(h||"").trim());
+  const idx = Object.fromEntries(headers.map((h,i)=>[h,i]));
 
-  const up = await db.prepare(`
-    INSERT INTO brands (
-      name,slug,domain,website_url,
-      category_primary,category_secondary,category_tertiary,
-      instagram_url,tiktok_url,logo_url,featured,description,
-      country,state,city,zipcode,address,
-      contact_name,contact_title,contact_email,contact_phone,
-      customer_age_min,customer_age_max,
-      price_low,price_high,
-      affiliate_program,affiliate_cookie_days,
-      monthly_visits,brand_values,gifting_ok,
-      is_public
-    )
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    ON CONFLICT(slug) DO UPDATE SET
-      name=excluded.name,
-      domain=excluded.domain,
-      website_url=excluded.website_url,
-      category_primary=excluded.category_primary,
-      category_secondary=excluded.category_secondary,
-      category_tertiary=excluded.category_tertiary,
-      instagram_url=excluded.instagram_url,
-      tiktok_url=excluded.tiktok_url,
-      logo_url=excluded.logo_url,
-      featured=excluded.featured,
-      description=excluded.description,
-      country=excluded.country,
-      state=excluded.state,
-      city=excluded.city,
-      zipcode=excluded.zipcode,
-      address=excluded.address,
-      contact_name=excluded.contact_name,
-      contact_title=excluded.contact_title,
-      contact_email=excluded.contact_email,
-      contact_phone=excluded.contact_phone,
-      customer_age_min=excluded.customer_age_min,
-      customer_age_max=excluded.customer_age_max,
-      price_low=excluded.price_low,
-      price_high=excluded.price_high,
-      affiliate_program=excluded.affiliate_program,
-      affiliate_cookie_days=excluded.affiliate_cookie_days,
-      monthly_visits=excluded.monthly_visits,
-      brand_values=excluded.brand_values,
-      gifting_ok=excluded.gifting_ok,
-      is_public=excluded.is_public
-  `);
+  try{
+    const now = new Date().toISOString();
+    await db.prepare("INSERT INTO import_batches (source_uri,status,created_at) VALUES (?,?,?)")
+      .bind("inline:csv","new",now).run();
+    const idRow = await db.prepare("SELECT last_insert_rowid() AS id").first();
+    const batchId = Number(idRow?.id || 0);
 
-  // process
-  for (const r of rows.results) {
-    const jo = JSON.parse(r.parsed_json||"{}");
+    const stmts = [];
+    const insert = "INSERT INTO import_rows (batch_id,row_num,parsed_json,errors_json,valid) VALUES (?,?,?,?,?)";
 
-    const name = (jo.name||"").trim();
-    const website_url = (jo.website_url||"").trim();
-    const domain = jo.domain?.trim() || extractDomain(website_url);
+    for(let r=1;r<rows.length;r++){
+      const row = rows[r];
+      if(row.length===1 && String(row[0]||"").trim()==="") continue;
 
-    let slug = (jo.slug||"").trim();
-    if (!/^\d{6}$/.test(slug)) {
-      slug = await genSlug6(db);
+      const { jo, valid, errs } = normalizeRow(row, idx);
+      stmts.push(db.prepare(insert).bind(batchId, r, JSON.stringify(jo), JSON.stringify(errs), valid));
     }
 
-    const country = (jo.country||"").trim().toUpperCase();
-    const isUS = country === "US" || country === "USA" || country === "UNITED STATES";
-    const is_public = (isUS || allowNonUS) ? 1 : 0;
+    if (stmts.length) await db.batch(stmts);
 
-    await up.bind(
-      name, slug, domain, website_url,
-      (jo.category_primary||"").trim(), (jo.category_secondary||"").trim(), (jo.category_tertiary||"").trim(),
-      (jo.instagram_url||"").trim(), (jo.tiktok_url||"").trim(), (jo.logo_url||"").trim(), toInt(jo.featured,0), (jo.description||"").trim(),
-      country, (jo.state||"").trim(), (jo.city||"").trim(), (jo.zipcode||"").trim(), (jo.address||"").trim(),
-      (jo.contact_name||"").trim(), (jo.contact_title||"").trim(), (jo.contact_email||"").trim(), (jo.contact_phone||"").trim(),
-      toInt(jo.customer_age_min,0), toInt(jo.customer_age_max,0),
-      toFloat(jo.price_low,0), toFloat(jo.price_high,0),
-      (jo.affiliate_program||"").trim(), toInt(jo.affiliate_cookie_days,30),
-      toInt(jo.monthly_visits,0), (jo.brand_values||"").trim(), toInt(jo.gifting_ok,0),
-      is_public
-    ).run();
+    const counts = await db.prepare(`
+      SELECT
+        COALESCE(SUM(CASE WHEN valid=1 THEN 1 ELSE 0 END),0) AS valid,
+        COALESCE(SUM(CASE WHEN valid=0 THEN 1 ELSE 0 END),0) AS invalid,
+        COUNT(*) AS total
+      FROM import_rows WHERE batch_id=?`).bind(batchId).first();
+
+    return new Response(JSON.stringify({ ok:true, batch_id: batchId, counts }), { headers:{ "Content-Type":"application/json" }});
+  }catch(e){
+    return new Response(JSON.stringify({ ok:false, error:String(e) }), { status:500, headers:{ "Content-Type":"application/json" }});
   }
-
-  await db.prepare(`UPDATE import_batches SET status=? WHERE id=?`).bind("committed", Number(params.id)).run();
-  return new Response(JSON.stringify({ ok:true }), { headers:{ "Content-Type":"application/json" }});
 }
+
