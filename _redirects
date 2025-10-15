@@ -1,3 +1,5 @@
 ﻿/brands/:slug        /brands/:slug/   301
 /brands/:slug   /brands/detail/?slug=:slug   200
 
+/admin/brands/import      /admin/brands/   301
+/admin/brands/import.html /admin/brands/   301
