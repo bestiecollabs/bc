@@ -22,7 +22,7 @@
     input,button{font:inherit}
     input[type="text"],input[type="number"],input[type="file"],select{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
     .btn{background:var(--accent);border:0;color:#fff;padding:9px 14px;border-radius:10px;cursor:pointer}
-    .btn.secondary{background:#f3f5fb;color:#0d1321;border:1px solid var(--line")}
+    .btn.secondary{background:#f3f5fb;color:#0d1321;border:1px solid var(--line)}
     .muted{color:var(--muted)}
   </style>
 </head>
@@ -67,15 +67,12 @@
         <a class="btn secondary" href="/api/admin/import/brands/template">Download Template</a>
       </div>
       <form id="importForm" style="margin-top:12px">
-  <input id="csv" type="file" accept=".csv"/>
-  <button id="uploadBtn" class="btn"  type="submit">Upload</button>
-  <button id="dryBtn"   class="btn secondary" type="button">Dry run</button>
-  <button id="commitBtn" class="btn" type="button">Commit</button>
+        <input id="csv" type="file" accept=".csv"/>
+        <button id="dryBtn"    class="btn secondary" type="button">Dry run</button>
+        <button id="commitBtn" class="btn"           type="button">Commit</button>
 </form>
-      <div id="uploadStatus" class="muted" style="margin-top:8px"></div>
-    </section>
-  </main>
-
+</section>
+</main>
   <script src="/admin/app.js" defer></script>
   <script src="/admin/brands/import.js" defer></script>
 </body>

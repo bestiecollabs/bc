@@ -1,12 +1,14 @@
-window.apiGet = window.apiGet || (p => fetch(p).then(r=>r.json()));
-window.apiPost = window.apiPost || ((p,b) => fetch(p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b||{})}).then(r=>r.json()));
-const ACCEPTED_HEADERS_11 = [
-  'brand_name','website_url',
-  'category_primary','category_secondary','category_tertiary',
-  'instagram_url','tiktok_url',
-  'description','customer_age_min','customer_age_max','us_based'
-];
+// Minimal helpers
+async function apiGet(p){ const r = await fetch(p); if(!r.ok) throw new Error(p+\" -> \"+r.status); return r.json(); }
+async function apiPost(p,b){ const r = await fetch(p,{method:\"POST\",headers:{\"content-type\":\"application/json\"},body:JSON.stringify(b||{})}); if(!r.ok) throw new Error(p+\" -> \"+r.status); return r.json(); }
 
+// Header validation (keeps instagram_url, tiktok_url)
+const ACCEPTED_HEADERS_11 = [
+  \"brand_name\",\"website_url\",
+  \"category_primary\",\"category_secondary\",\"category_tertiary\",
+  \"instagram_url\",\"tiktok_url\",
+  \"description\",\"customer_age_min\",\"customer_age_max\",\"us_based\"
+];
 function validateCsvHeaderLine(line){
   const got = line.trim().replace(/\r/g,'').split(',').map(s => s.trim());
   const need = ACCEPTED_HEADERS_11;
@@ -14,11 +16,9 @@ function validateCsvHeaderLine(line){
   const extras  = got.filter(h => !need.includes(h));
   return { ok: missing.length===0 && extras.length===0 && got.length===need.length, missing, extras, got };
 }
-
 async function ensureCsvHeaders(file){
-  if (!file) throw new Error('no_file_selected');
   const text = await file.text();
-  const firstLine = (text.split(/\n/)[0] || '').trim();
+  const firstLine = (text.split(/\\n/)[0] || '').trim();
   const chk = validateCsvHeaderLine(firstLine);
   if (!chk.ok){
     const msg = [
@@ -26,226 +26,90 @@ async function ensureCsvHeaders(file){
       chk.missing.length ? ('Missing: ' + chk.missing.join(', ')) : '',
       chk.extras.length ? ('Unexpected: ' + chk.extras.join(', ')) : '',
       'Expected exactly: ' + ACCEPTED_HEADERS_11.join(', ')
-    ].filter(Boolean).join('\n');
+    ].filter(Boolean).join('\\n');
     alert(msg);
     throw new Error('invalid_csv_headers');
   }
-  window.__csv_headers_ok = true;
 }
-// admin/brands/import.js
-(function () {
-  ensureUi();
-  const fileInput = document.getElementById('csvFile');
-  const btnDry = document.getElementById('btnDryRun');
-  const btnCommit = document.getElementById('btnCommit');
-  const progressEl = document.getElementById('progress');
-  const resultsEl = document.getElementById('results');
 
-  btnDry.addEventListener('click', () => runImport({ commit: false }));
-  btnCommit.addEventListener('click', () => runImport({ commit: true }));
+function parseCsv(text){
+  const lines = text.replace(/\\r\\n/g,'\\n').replace(/\\r/g,'\\n').split('\\n').filter(Boolean);
+  const headers = lines[0].split(',').map(s=>s.trim());
+  const rows = lines.slice(1).map(l=>l.split(',').map(s=>s.trim()));
+  return { headers, rows };
+}
 
-  async function runImport({ commit }) {
-    const file = fileInput.files && fileInput.files[0];
-    if (!file) { toast('Select a CSV file first.'); return; }
-    disable(true);
-    resultsEl.innerHTML = '';
-    setProgress(0);
+async function runImport(commit){
+  const fileEl   = document.getElementById('csv');
+  const statusEl = document.getElementById('uploadStatus');
+  if (!fileEl || !fileEl.files || !fileEl.files[0]) { alert('Select a CSV file'); return; }
+  const file = fileEl.files[0];
 
-    try {
-      const batch = await apiPost('/api/admin/import/brands/batches', { mode: commit ? 'commit' : 'dry-run' });
+  await ensureCsvHeaders(file);
 
-      const rows = await parseCsv(file);
-      if (!rows.length) { toast('CSV is empty.'); return; }
+  const text = await file.text();
+  const parsed = parseCsv(text);
+  const headers = parsed.headers;
+  const rowsObjs = parsed.rows.map(r => Object.fromEntries(headers.map((h,i)=>[h,r[i]||''])));
 
-      const chunkSize = 500;
-      let uploaded = 0;
-      for (let i = 0; i < rows.length; i += chunkSize) {
-        const chunk = rows.slice(i, i + chunkSize);
-        await apiPost('/api/admin/import/brands/rows', { batchId: batch.id, rows: chunk });
-        uploaded += chunk.length;
-        setProgress(Math.round((uploaded / rows.length) * 80)); // 0-80% for upload
-      }
+  statusEl.textContent = commit ? 'Committing…' : 'Dry run…';
 
-      const finalize = await apiPost('/api/admin/import/brands/commit', { batchId: batch.id, commit });
+  // 1) create batch
+  const batch = await apiPost('/api/admin/import/brands/batches', { mode: commit ? 'commit' : 'dry-run' });
+  if (!batch || !batch.id){ alert('Failed to create batch'); statusEl.textContent=''; return; }
 
-      renderResults(finalize);
-      setProgress(100);
-      toast(commit ? 'Import committed.' : 'Dry-run complete.');
-    } catch (e) {
-      console.error(e);
-      toast('Import failed. Check console for details.');
-    } finally {
-      disable(false);
+  // 2) send chunks
+  const size = 300;
+  for (let i=0;i<rowsObjs.length;i+=size){
+    const chunk = rowsObjs.slice(i, i+size);
+    const res = await apiPost('/api/admin/import/brands/batches/'+batch.id+'/rows', { batchId: batch.id, rows: chunk });
+    if (!res || res.ok===false){ alert('Rows error'); statusEl.textContent=''; return; }
+    statusEl.textContent = (commit ? 'Committing… ' : 'Dry run… ') + (i+chunk.length) + '/' + rowsObjs.length;
+  }
+
+  // 3) finalize
+  const final = await apiPost('/api/admin/import/brands/batches/'+batch.id+'/commit', { batchId: batch.id, commit: !!commit });
+  if (final && final.ok !== false){
+    statusEl.textContent = commit ? 'Commit complete.' : 'Dry run complete.';
+  } else {
+    statusEl.textContent = 'Finalize error.';
+  }
+}
+
+async function loadBrandsIntoTable(){
+  const tbody = document.getElementById('brandsTbody');
+  if (!tbody) return;
+  try{
+    // Try common endpoints
+    let data=null, errs=[];
+    for (const p of ['/api/admin/brands','/api/admin/brands/list']){
+      try { data = await apiGet(p); if (data) break; } catch(e){ errs.push(String(e)); }
     }
+    if (!data || !Array.isArray(data.rows||data)){ tbody.innerHTML = '<tr><td colspan=\"6\" class=\"muted\">Unable to load brands</td></tr>'; return; }
+    const rows = data.rows || data;
+    if (!rows.length){ tbody.innerHTML = '<tr><td colspan=\"6\" class=\"muted\">No brands yet</td></tr>'; return; }
+    tbody.innerHTML = rows.map(b => {
+      const id = b.id ?? '';
+      const name = b.name ?? '';
+      const slug = b.slug ?? '';
+      const status = b.status ?? 'draft';
+      const del = b.deleted ? 'yes' : '';
+      return `<tr><td>${id}</td><td>${name}</td><td>${slug}</td><td>${status}</td><td>${del}</td><td><button data-del=\"${id}\">Del</button> <button data-undo=\"${id}\">Undo</button></td></tr>`;
+    }).join('');
+  } catch(e){
+    console.error(e);
+    tbody.innerHTML = '<tr><td colspan=\"6\" class=\"muted\">Load error</td></tr>';
   }
-
-  function renderResults(payload) {
-    const { total = 0, created = 0, updated = 0, skipped = 0, errors = [], sample = [] } = payload || {};
-    const parts = [];
-    parts.push(`<div class="card"><div class="card-title">Summary</div>
-      <div class="grid grid-4">
-        <div><b>Total</b><div>${total}</div></div>
-        <div><b>Created</b><div>${created}</div></div>
-        <div><b>Updated</b><div>${updated}</div></div>
-        <div><b>Skipped</b><div>${skipped}</div></div>
-      </div>
-    </div>`);
-    if (errors.length) {
-      parts.push(`<div class="card mt-2"><div class="card-title">Errors (${errors.length})</div>
-        <ol>${errors.slice(0, 100).map(e => `<li>Row ${e.row}: ${escapeHtml(e.message || e.error || 'Unknown error')}</li>`).join('')}</ol>
-        ${errors.length > 100 ? `<div>+${errors.length - 100} more…</div>` : ''}
-      </div>`);
-    }
-    if (sample.length) {
-      parts.push(`<div class="card mt-2"><div class="card-title">Sample</div>
-        <pre>${escapeHtml(JSON.stringify(sample.slice(0, 5), null, 2))}</pre>
-      </div>`);
-    }
-    resultsEl.innerHTML = parts.join('\n');
-  }
-
-  function ensureUi() {
-    let file = document.getElementById('csvFile');
-    let dry = document.getElementById('btnDryRun');
-    let commit = document.getElementById('btnCommit');
-    let progress = document.getElementById('progress');
-    let results = document.getElementById('results');
-
-    if (file && dry && commit && progress && results) return;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML = `
-      <div class="card-title">Brands CSV Import</div>
-      <input type="file" id="csvFile" accept=".csv" />
-      <div class="row mt-1">
-        <button id="btnDryRun" class="btn fun">Dry run</button>
-        <button id="btnCommit" class="btn">Commit</button>
-      </div>
-      <div class="mt-1">
-        <progress id="progress" max="100" value="0" style="width: 100%"></progress>
-      </div>
-      <div id="results" class="mt-2"></div>
-    `;
-    document.body.appendChild(wrap);
-  }
-
-  function setProgress(v) { const el = document.getElementById('progress'); if (el) el.value = v; }
-  function disable(flag) { ['csvFile','btnDryRun','btnCommit'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = flag; }); }
-
-  async function apiPost(path, body) {
-    const res = await fetch(path, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(body || {})
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(`POST ${path} failed: ${res.status} ${text}`);
-    }
-    return res.json();
-  }
-
-  function parseCsv(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(reader.error);
-      reader.onload = () => {
-        try {
-          const text = String(reader.result || '');
-          const rows = csvToObjects(text);
-          resolve(rows);
-        } catch (e) { reject(e); }
-      };
-      reader.readAsText(file);
-    });
-  }
-
-  function csvToObjects(text) {
-    const lines = splitCsvLines(text);
-    if (!lines.length) return [];
-    const headers = parseCsvLine(lines[0]).map(h => h.trim());
-    const out = [];
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-      const vals = parseCsvLine(lines[i]);
-      const obj = {};
-      headers.forEach((h, idx) => obj[h] = vals[idx] ?? '');
-      out.push(obj);
-    }
-    return out;
-  }
-
-  function splitCsvLines(text) {
-    const lines = [];
-    let cur = '';
-    let inQ = false;
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
-      if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; continue; }
-      if (c === '"') { inQ = !inQ; continue; }
-      if (!inQ && (c === '\n' || c === '\r')) { if (cur.length) { lines.push(cur); cur = ''; } continue; }
-      cur += c;
-    }
-    if (cur.length) lines.push(cur);
-    return lines;
-  }
-
-  function parseCsvLine(line) {
-    const vals = [];
-    let cur = '';
-    let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; continue; }
-      if (c === '"') { inQ = !inQ; continue; }
-      if (!inQ && c === ',') { vals.push(cur); cur = ''; continue; }
-      cur += c;
-    }
-    vals.push(cur);
-    return vals;
-  }
-
-  function toast(msg) { if (window.alert) alert(msg); else console.log(msg); }
-  function escapeHtml(s) { return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-})();
+}
 
 document.addEventListener('DOMContentLoaded', function(){
-  var fileEl = document.getElementById('csv') || document.querySelector('input[type=""file""]');
-  var formEl = document.getElementById('importForm') || document.querySelector('form');
+  const dry    = document.getElementById('dryBtn');
+  const commit = document.getElementById('commitBtn');
+  const refresh= document.getElementById('refreshBtn');
 
-  if (fileEl){
-    fileEl.addEventListener('change', async function(){
-      try { await ensureCsvHeaders(fileEl.files && fileEl.files[0]); }
-      catch(e){ console.error(e); }
-    });
-  }
+  if (dry)    dry.addEventListener('click',  ()=>runImport(false));
+  if (commit) commit.addEventListener('click',()=>runImport(true));
+  if (refresh)refresh.addEventListener('click',loadBrandsIntoTable);
 
-  async function guardSubmit(e){
-    try {
-      var f = (fileEl && fileEl.files && fileEl.files[0]) ? fileEl.files[0] : null;
-      await ensureCsvHeaders(f);
-    } catch(e){
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }
-
-  if (formEl){
-    formEl.addEventListener('submit', guardSubmit, true);
-  }
-
-  // Also guard common import buttons if they bypass <form>
-  document.querySelectorAll('[data-action=""import""], #importSubmit, button[type=""submit""]').forEach(function(btn){
-    btn.addEventListener('click', async function(e){
-      try {
-        var f = (fileEl && fileEl.files && fileEl.files[0]) ? fileEl.files[0] : null;
-        await ensureCsvHeaders(f);
-      } catch(err){
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }, true);
-  });
+  loadBrandsIntoTable();
 });
