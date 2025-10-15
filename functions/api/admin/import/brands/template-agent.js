@@ -10,10 +10,10 @@
     "customer_locations","source_url","discovered_at","discovered_by",
     "notes_admin"
   ].join(",");
-  return new Response(headers + "\n", {
+  return new Response(headers.join(",") + "\r\n", {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": "attachment; filename=brands_template_agent.csv"
+      "Content-Disposition": "attachment; filename=brand_import_template.csv"
     }
   });
 }
