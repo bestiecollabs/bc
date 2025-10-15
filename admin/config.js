@@ -1,0 +1,1 @@
+window.ADMIN_EMAIL = (localStorage.getItem("adminEmail") || "collabsbestie@gmail.com");

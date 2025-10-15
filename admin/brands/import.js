@@ -3,8 +3,21 @@
   function q(id){ return document.getElementById(id); }
   function log(x){ try{ console.log(x); }catch(e){} }
 
-  async function apiGet(p){ const r = await fetch(p); if(!r.ok) throw new Error(p+" -> "+r.status); return r.json(); }
-  async function apiPost(p,b){ const r = await fetch(p,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b||{})}); if(!r.ok) throw new Error(p+" -> "+r.status); return r.json(); }
+  async function apiGet(p){
+  const r = await fetch(p, { credentials: 'include', headers: { 'x-admin-email': (window.ADMIN_EMAIL||'') } });
+  if(!r.ok) throw new Error(p + ' -> ' + r.status);
+  return r.json();
+}
+  async function apiPost(p,b){
+  const r = await fetch(p, {
+    method:'POST',
+    credentials:'include',
+    headers:{ 'content-type':'application/json', 'x-admin-email': (window.ADMIN_EMAIL||'') },
+    body: JSON.stringify(b||{})
+  });
+  if(!r.ok) throw new Error(p + ' -> ' + r.status);
+  return r.json();
+},body:JSON.stringify(b||{})}); if(!r.ok) throw new Error(p+" -> "+r.status); return r.json(); }
 
   function parseCsv(text){
     const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n").filter(Boolean);
