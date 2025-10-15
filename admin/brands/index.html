@@ -184,5 +184,26 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 await listBatches();
 });
 </script>
+<div id="analyzeResults" style="margin-top:16px"></div>
+<script>
+async function analyzeCSV(text){
+  const r = await fetch("/api/admin/import/brands/analyze", { method:"POST", headers:{ "Content-Type":"text/csv" }, body:text });
+  const j = await r.json();
+  const el = document.getElementById("analyzeResults");
+  const h = [];
+  if(!j.ok){ h.push(`<div style="color:#b00"><strong>Errors:</strong> ${ (j.errors||[]).join("; ") }</div>`); }
+  if((j.warnings||[]).length){ h.push(`<div style="color:#a60"><strong>Warnings:</strong> ${ j.warnings.join("; ") }</div>`); }
+  h.push(`<div><strong>Counts:</strong> total ${j.counts.total}, valid ${j.counts.valid}, invalid ${j.counts.invalid}</div>`);
+  h.push(`<details><summary>Rows</summary><pre style="white-space:pre-wrap">${j.rows.map(r=>`${r.line}\t${r.status}\t${(r.issues||[]).join("|")}`).join("\n")}</pre></details>`);
+  el.innerHTML = h.join("");
+}
+(function attachAnalyze(){
+  const ta = document.querySelector("textarea#csvInput") || document.querySelector("textarea");
+  const btn = document.getElementById("btnAnalyze");
+  if(btn && ta){
+    btn.addEventListener("click", async (e)=>{ e.preventDefault(); await analyzeCSV(ta.value || ""); });
+  }
+})();
+</script>
 </body>
 </html>
