@@ -4,7 +4,7 @@
 
   const url = new URL(request.url);
   const limit = clampInt(url.searchParams.get("limit"), 1, 100, 50);
-  const offset = clampInt(url.searchParams.get("offset"), 0, 10_000, 0);
+  const offset = clampInt(url.searchParams.get("offset"), 0, 10000, 0);
   const q = (url.searchParams.get("q") || "").trim();
   const category = (url.searchParams.get("category") || "").trim();
 
@@ -18,7 +18,7 @@
 
   if (q) {
     where.push("(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)");
-    const like = `%${q.toLowerCase()}%`;
+    const like = "%" + q.toLowerCase() + "%";
     binds.push(like, like);
   }
   if (category) {
@@ -26,27 +26,27 @@
     binds.push(category.toLowerCase());
   }
 
-  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const whereSql = where.length ? "WHERE " + where.join(" AND ") : "";
 
   const rows = await db.prepare(
-    `SELECT id, name, website_url, category_primary, description, logo_url,
-            instagram_url, tiktok_url, status
-       FROM brands
-       ${whereSql}
-       ORDER BY updated_at DESC, id DESC
-       LIMIT ? OFFSET ?`
+    "SELECT id, name, website_url, category_primary, description, logo_url, " +
+    "instagram_url, tiktok_url, status " +
+    "FROM brands " +
+    whereSql +
+    " ORDER BY updated_at DESC, id DESC " +
+    "LIMIT ? OFFSET ?"
   ).bind(...binds, limit, offset).all();
 
   const totalRow = await db.prepare(
-    `SELECT COUNT(*) AS c FROM brands ${whereSql}`
+    "SELECT COUNT(*) AS c FROM brands " + whereSql
   ).bind(...binds).first();
 
   return json({
     ok: true,
-    total: totalRow?.c ?? 0,
-    limit,
-    offset,
-    items: rows?.results ?? []
+    total: totalRow ? (totalRow.c || 0) : 0,
+    limit: limit,
+    offset: offset,
+    items: rows && rows.results ? rows.results : []
   });
 };
 
