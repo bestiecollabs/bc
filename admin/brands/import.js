@@ -1,3 +1,5 @@
+window.apiGet = window.apiGet || (p => fetch(p).then(r=>r.json()));
+window.apiPost = window.apiPost || ((p,b) => fetch(p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b||{})}).then(r=>r.json()));
 const ACCEPTED_HEADERS_11 = [
   'brand_name','website_url',
   'category_primary','category_secondary','category_tertiary',

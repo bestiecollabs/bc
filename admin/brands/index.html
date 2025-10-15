@@ -65,23 +65,14 @@
       <p class="muted">Required headers: brand_name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, description, customer_age_min, customer_age_max, us_based</p>
       <div class="controls" style="gap:12px;flex-wrap:wrap">
         <a class="btn secondary" href="/api/admin/import/brands/template">Download Template</a>
-        <a class="btn secondary" href="/api/admin/import/brands/template-agent">Download Template (agent)</a>
       </div>
       <form id="importForm" style="margin-top:12px">
-        <input id="csv" type="file" accept=".csv"/>
-        <button id="uploadBtn" class="btn" type="submit">Upload</button>
-      </form>
+  <input id="csv" type="file" accept=".csv"/>
+  <button id="uploadBtn" class="btn"  type="submit">Upload</button>
+  <button id="dryBtn"   class="btn secondary" type="button">Dry run</button>
+  <button id="commitBtn" class="btn" type="button">Commit</button>
+</form>
       <div id="uploadStatus" class="muted" style="margin-top:8px"></div>
-    </section>
-
-    <section class="card">
-      <h3 style="margin:0 0 8px 0;">Brands CSV Import</h3>
-      <div class="controls" style="gap:8px">
-        <input id="csv2" type="file" accept=".csv"/>
-        <button id="dryBtn" class="btn secondary" type="button">Dry run</button>
-        <button id="commitBtn" class="btn" type="button">Commit</button>
-      </div>
-      <div id="dryRunStatus" class="muted" style="margin-top:8px"></div>
     </section>
   </main>
 
