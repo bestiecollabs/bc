@@ -1,130 +1,178 @@
-﻿/* Agent template headers shim */
-(function ensureBrandTemplate(){
-  if (window.BrandTemplate) return;
-  var s=document.createElement("script");
-  s.src="/admin/lib/brandTemplate.js";
-  s.async=false;
-  document.head.appendChild(s);
-})();
-var EXPECTED_AGENT_HEADERS = (window.BrandTemplate && window.BrandTemplate.HEADERS) || [
-  "brand_name","website_url",
-  "category_primary","category_secondary","category_tertiary",
-  "instagram_url","tiktok_url",
-  "description",
-  "customer_age_min","customer_age_max",
-  "us_based"
-];
-(function(){
-  const expected = ["name","website_url","category_primary","category_secondary","category_tertiary","instagram_url","tiktok_url","shopify_shop_domain","shopify_shop_id","shopify_public_url","contact_name","contact_title","contact_email","contact_phone","country","state","city","zipcode","address","description","support_email","logo_url","featured","status","has_us_presence","is_dropshipper","notes_admin"];
+﻿// admin/brands/import.js
+(function () {
+  ensureUi();
+  const fileInput = document.getElementById('csvFile');
+  const btnDry = document.getElementById('btnDryRun');
+  const btnCommit = document.getElementById('btnCommit');
+  const progressEl = document.getElementById('progress');
+  const resultsEl = document.getElementById('results');
 
-  const $ = (s)=>document.querySelector(s);
-  const file = $("#file");
-  const info = { file: $("#file-info"), cols: $("#cols-info"), count: $("#count-info") };
-  const btnParse = $("#btn-parse"), btnClear = $("#btn-clear"), btnValidate = $("#btn-validate"), btnImport = $("#btn-import");
-  const thead = document.querySelector("#preview thead"), tbody = document.querySelector("#preview tbody");
+  btnDry.addEventListener('click', () => runImport({ commit: false }));
+  btnCommit.addEventListener('click', () => runImport({ commit: true }));
 
-  let rows = []; let cols = [];
-  window.__BRANDS_ROWS = rows; window.__BRANDS_COLS = cols;
+  async function runImport({ commit }) {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) { toast('Select a CSV file first.'); return; }
+    disable(true);
+    resultsEl.innerHTML = '';
+    setProgress(0);
 
-  function setPill(el, txt, ok){
-    el.textContent = txt;
-    el.className = "pill " + (ok==null ? "" : ok ? "ok" : "bad");
+    try {
+      const batch = await apiPost('/api/admin/import/brands/batches', { mode: commit ? 'commit' : 'dry-run' });
+
+      const rows = await parseCsv(file);
+      if (!rows.length) { toast('CSV is empty.'); return; }
+
+      const chunkSize = 500;
+      let uploaded = 0;
+      for (let i = 0; i < rows.length; i += chunkSize) {
+        const chunk = rows.slice(i, i + chunkSize);
+        await apiPost('/api/admin/import/brands/rows', { batchId: batch.id, rows: chunk });
+        uploaded += chunk.length;
+        setProgress(Math.round((uploaded / rows.length) * 80)); // 0-80% for upload
+      }
+
+      const finalize = await apiPost('/api/admin/import/brands/commit', { batchId: batch.id, commit });
+
+      renderResults(finalize);
+      setProgress(100);
+      toast(commit ? 'Import committed.' : 'Dry-run complete.');
+    } catch (e) {
+      console.error(e);
+      toast('Import failed. Check console for details.');
+    } finally {
+      disable(false);
+    }
   }
 
-  function csvParse(text){
-    const out = []; let row = [], col = "", i = 0, q = false;
-    while(i < text.length){
-      const ch = text[i++];
-      if (q){
-        if (ch === '"'){ if (text[i] === '"'){ col += '"'; i++; } else { q = false; } }
-        else { col += ch; }
-      } else {
-        if (ch === '"'){ q = true; }
-        else if (ch === ","){ row.push(col); col = ""; }
-        else if (ch === "\n"){ row.push(col); out.push(row); row = []; col = ""; }
-        else if (ch === "\r"){ }
-        else { col += ch; }
-      }
+  function renderResults(payload) {
+    const { total = 0, created = 0, updated = 0, skipped = 0, errors = [], sample = [] } = payload || {};
+    const parts = [];
+    parts.push(`<div class="card"><div class="card-title">Summary</div>
+      <div class="grid grid-4">
+        <div><b>Total</b><div>${total}</div></div>
+        <div><b>Created</b><div>${created}</div></div>
+        <div><b>Updated</b><div>${updated}</div></div>
+        <div><b>Skipped</b><div>${skipped}</div></div>
+      </div>
+    </div>`);
+    if (errors.length) {
+      parts.push(`<div class="card mt-2"><div class="card-title">Errors (${errors.length})</div>
+        <ol>${errors.slice(0, 100).map(e => `<li>Row ${e.row}: ${escapeHtml(e.message || e.error || 'Unknown error')}</li>`).join('')}</ol>
+        ${errors.length > 100 ? `<div>+${errors.length - 100} more…</div>` : ''}
+      </div>`);
     }
-    if (col.length || row.length) { row.push(col); out.push(row); }
+    if (sample.length) {
+      parts.push(`<div class="card mt-2"><div class="card-title">Sample</div>
+        <pre>${escapeHtml(JSON.stringify(sample.slice(0, 5), null, 2))}</pre>
+      </div>`);
+    }
+    resultsEl.innerHTML = parts.join('\n');
+  }
+
+  function ensureUi() {
+    let file = document.getElementById('csvFile');
+    let dry = document.getElementById('btnDryRun');
+    let commit = document.getElementById('btnCommit');
+    let progress = document.getElementById('progress');
+    let results = document.getElementById('results');
+
+    if (file && dry && commit && progress && results) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML = `
+      <div class="card-title">Brands CSV Import</div>
+      <input type="file" id="csvFile" accept=".csv" />
+      <div class="row mt-1">
+        <button id="btnDryRun" class="btn fun">Dry run</button>
+        <button id="btnCommit" class="btn">Commit</button>
+      </div>
+      <div class="mt-1">
+        <progress id="progress" max="100" value="0" style="width: 100%"></progress>
+      </div>
+      <div id="results" class="mt-2"></div>
+    `;
+    document.body.appendChild(wrap);
+  }
+
+  function setProgress(v) { const el = document.getElementById('progress'); if (el) el.value = v; }
+  function disable(flag) { ['csvFile','btnDryRun','btnCommit'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = flag; }); }
+
+  async function apiPost(path, body) {
+    const res = await fetch(path, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body || {})
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`POST ${path} failed: ${res.status} ${text}`);
+    }
+    return res.json();
+  }
+
+  function parseCsv(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error);
+      reader.onload = () => {
+        try {
+          const text = String(reader.result || '');
+          const rows = csvToObjects(text);
+          resolve(rows);
+        } catch (e) { reject(e); }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  function csvToObjects(text) {
+    const lines = splitCsvLines(text);
+    if (!lines.length) return [];
+    const headers = parseCsvLine(lines[0]).map(h => h.trim());
+    const out = [];
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      const vals = parseCsvLine(lines[i]);
+      const obj = {};
+      headers.forEach((h, idx) => obj[h] = vals[idx] ?? '');
+      out.push(obj);
+    }
     return out;
   }
 
-  function toObjects(matrix){
-    if (!matrix.length) return [];
-    const header = matrix[0].map(h => h.trim());
-    const body = matrix.slice(1);
-    cols = header; window.__BRANDS_COLS = cols;
-    return body.filter(r => r.some(c=> String(c||"").trim().length)).map(r=>{
-      const obj = {};
-      for (let i=0;i<header.length;i++){ obj[header[i]] = r[i] ?? ""; }
-      return obj;
-    });
-  }
-
-  function renderPreview(objs){
-    thead.innerHTML = ""; tbody.innerHTML = "";
-    const trh = document.createElement("tr");
-    cols.forEach(c=>{ const th = document.createElement("th"); th.textContent = c; trh.appendChild(th); });
-    thead.appendChild(trh);
-    const limit = Math.min(200, objs.length);
-    for (let i=0;i<limit;i++){
-      const tr = document.createElement("tr");
-      cols.forEach(c=>{ const td = document.createElement("td"); td.textContent = objs[i][c] ?? ""; tr.appendChild(td); });
-      tbody.appendChild(tr);
+  function splitCsvLines(text) {
+    const lines = [];
+    let cur = '';
+    let inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; continue; }
+      if (c === '"') { inQ = !inQ; continue; }
+      if (!inQ && (c === '\n' || c === '\r')) { if (cur.length) { lines.push(cur); cur = ''; } continue; }
+      cur += c;
     }
-    setPill(info.count, `${limit} shown / ${objs.length} total`, true);
-    setPill(info.cols, `${cols.length} columns`, null);
+    if (cur.length) lines.push(cur);
+    return lines;
   }
 
-  btnParse?.addEventListener("click", async ()=>{
-    const f = file.files?.[0]; if (!f){ toast("Select a CSV file"); return; }
-    setPill(info.file, `${f.name} (${f.size} bytes)`, null);
-    const text = await f.text();
-    const matrix = csvParse(text);
-    const objs = toObjects(matrix);
-    rows = objs; window.__BRANDS_ROWS = rows;
-    renderPreview(objs);
-    const missing = expected.filter(x => !cols.includes(x));
-    setPill(info.cols, `${cols.length} columns` + (missing.length? ` Â· missing: ${missing.join(", ")}` : ""), missing.length === 0);
-    toast("CSV parsed");
-  });
-
-  btnClear?.addEventListener("click", ()=>{
-    file.value = ""; rows = []; cols = []; window.__BRANDS_ROWS = rows; window.__BRANDS_COLS = cols;
-    thead.innerHTML = ""; tbody.innerHTML = "";
-    setPill(info.file, "No file", null); setPill(info.cols, "", null); setPill(info.count, "", null);
-  });
-
-  btnValidate?.addEventListener("click", ()=>{
-    if (!rows.length){ toast("Load a CSV first"); return; }
-    const missing = expected.filter(x => !cols.includes(x));
-    if (missing.length){ toast("Missing columns: " + missing.join(", ")); return; }
-    const bad = []; for (let i=0;i<rows.length;i++){ const r = rows[i]; if (!r.name || !r.website_url) bad.push(i+2); }
-    if (bad.length) toast(`Validation found ${bad.length} rows missing name/website_url. Example row ${bad[0]}`); else toast("Validation passed");
-  });
-
-  async function postBatch(batch){
-    const res = await fetch("/api/admin/chipchip/brands-import", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ rows: batch })
-    });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return res.json().catch(()=> ({}));
-  }
-
-  btnImport?.addEventListener("click", async ()=>{
-    if (!rows.length){ toast("Load a CSV first"); return; }
-    const missing = expected.filter(x => !cols.includes(x));
-    if (missing.length){ toast("Missing columns: " + missing.join(", ")); return; }
-    const size = 100; let ok = 0;
-    for (let i=0;i<rows.length;i+=size){
-      const batch = rows.slice(i, i+size);
-      try { await postBatch(batch); ok += batch.length; toast(`Imported ${ok} / ${rows.length}`); }
-      catch(e){ console.error(e); toast(`Batch failed at ${i+1} (${e.message})`); break; }
+  function parseCsvLine(line) {
+    const vals = [];
+    let cur = '';
+    let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; continue; }
+      if (c === '"') { inQ = !inQ; continue; }
+      if (!inQ && c === ',') { vals.push(cur); cur = ''; continue; }
+      cur += c;
     }
-    if (ok === rows.length) toast("Import complete");
-  });
+    vals.push(cur);
+    return vals;
+  }
+
+  function toast(msg) { if (window.alert) alert(msg); else console.log(msg); }
+  function escapeHtml(s) { return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 })();
