@@ -1,28 +1,32 @@
-#! ai_readme.md - Active Snapshot (2025-10-14 01:30 PST)
+﻿[AI_README 2025-10-14 22:29 PST]
+Context: Cloudflare Pages project = bc. Branch = main. Commit = a118ead4744074e7ff965761ac0110b8d724b18a.
+Today’s work:
+- Fixed template-agent Worker: correct 11-column Brand Template + filename.
+- Cleaned Admin/Brands page copy; aligned accepted headers to Agent list.
+- Added dry-run analyzer endpoint (/api/admin/import/brands/analyze) and UI.
+- Verified Worker via PowerShell test. Purged caches. Confirmed behavior.
 
-PROJECT
-- Bestie Collabs
+Final Brand Template headers:
+brand_name,website_url,category_primary,category_secondary,category_tertiary,instagram_url,tiktok_url,description,customer_age_min,customer_age_max,us_based
 
-STACK
-- Static HTML + vanilla JS on Cloudflare Pages
-- Pages Functions in /functions
-- D1 database bestiedb (binding DB)
-- Repo: https://github.com/bestiecollabs/bc  branch main  sha f1aa8f6
-- Local root: C:\bc\cloudflare\html
+Next 2 Tasks:
+1) Commit pipeline for imports: turn dry-run results into upsert (dry-run + commit with clear report).
+2) Public /brands directory: list + detail pages sourced from DB.
 
-PROD URLS
-- App: https://bestiecollabs.com
-- API: https://api.bestiecollabs.com
-- Health: /api/healthcheck -> { ok: true }
+---
+[AI_README 2025-10-14 22:26 PST]
+Context: Cloudflare Pages project = bc. Branch = main. Commit = a118ead4744074e7ff965761ac0110b8d724b18a.
+Today’s work:
+- Fixed template-agent Worker: correct 11-column Brand Template + filename.
+- Cleaned Admin/Brands page copy; aligned accepted headers to Agent list.
+- Added dry-run analyzer endpoint (/api/admin/import/brands/analyze) and UI.
+- Verified Worker via PowerShell test. Purged caches. Confirmed behavior.
 
-SEED RULES (excerpt)
-- Step-by-step. Full file contents. Exact paths. PowerShell-first.
-- No patches. Fix root causes. Keep structure and names.
-- Production-first. Deploy by pushing main.
-- New Chat Rule: Every new chat must read the current GitHub codebase and confirm the rules before writing any code.
+Final Brand Template headers:
+brand_name,website_url,category_primary,category_secondary,category_tertiary,instagram_url,tiktok_url,description,customer_age_min,customer_age_max,us_based
 
-NEXT TASKS
-1) Finish brand import feature (dry-run + commit, clear report)
-2) Create public brand directory (/brands/) with list + detail
+Next 2 Tasks:
+1) Commit pipeline for imports: turn dry-run results into upsert (dry-run + commit with clear report).
+2) Public /brands directory: list + detail pages sourced from DB.
 
 ---

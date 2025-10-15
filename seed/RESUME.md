@@ -1,12 +1,12 @@
-#! resume - 2025-10-14 01:30 PST
+﻿# RESUME (2025-10-14 22:26 PST)
 
-## TODOs
-- Finish brand import feature (dry-run + commit, clear report)
-- Create public brand directory (/brands/) with list + detail
+Pick up here:
 
-## Context
-Project: bc
-Domains: bestiecollabs.com, api.bestiecollabs.com
-Preview: *.bc-ezy.pages.dev
-Git: main @ f1aa8f6
-D1: bestiedb binding DB
+1) Import Commit Pipeline
+   - Implement POST /api/admin/import/brands/commit.
+   - Input: CSV text or analyzer payload id. Output: JSON report with inserted/updated/skipped/failed.
+   - Idempotency by (website_url) + optional dry-run flag.
+
+2) Public Brand Directory (/brands)
+   - Render list from DB with pagination + filters.
+   - Detail: /brands/{slug} uses DB fields; hide sensitive admin-only fields.

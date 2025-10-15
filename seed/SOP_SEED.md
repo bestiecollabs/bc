@@ -1,30 +1,8 @@
-﻿# sop_seed.md
+﻿# SOP_SEED v3.0
 
-SESSION START
-- Pull latest: git pull origin main
-- Confirm local root: C:\bc\cloudflare\html
-- Confirm wrangler.toml is UTF-8 (no BOM), pages_build_output_dir="."
-- Trigger to regenerate docs: "prepare for a handoff"
-
-DELIVERY FORMAT
-- Step-by-step
-- Full copy-paste code
-- Exact paths
-- What it does + What to expect
-- PowerShell-first
-
-VERIFY
-- Cloudflare Deployments: build success, functions compiled
-- /api/healthcheck returns ok
-- No TOML BOM error in logs
-
-ROLLBACK
-- Tag stable: git tag v0.1-setup-clean && git push origin --tags
-- Revert: git revert <sha>  or redeploy previous commit in Cloudflare
-
-NOTES
-- Admin-only diagnostics stay gated
-- Do not commit .dev.vars or any secrets
-- New Chat Rule: Every new chat must read the current GitHub codebase and confirm understanding of the rules **before** writing any code. No work starts until the repo context is acknowledged in-chat.- Numbering Rule: Every PowerShell instruction set must be numbered step-by-step (1), 2), 3)...). Each command block must begin with a numbered comment like '# 1) ...'. Refuse unnumbered execution.
-- Numbering Rule (MANDATORY): Every PowerShell instruction set must be numbered step-by-step as '# 1)', '# 2)', '# 3)' with each command block beginning with a numbered comment. Unnumbered requests must be refused with a correction. Do not execute or provide unnumbered PowerShell.
-
+1) Read /seed/handoff.md and /seed/ai_readme.md first.
+2) Confirm environment via /seed/state.json and git status.
+3) Follow 'Next 2 Tasks' exactly before adding new scopes.
+4) When editing, write full files. Commit with precise messages.
+5) Verify via listed endpoints. Capture outputs in /seed/sessions.md.
+6) Regenerate /seed files before ending a session.
