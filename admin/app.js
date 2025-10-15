@@ -164,3 +164,22 @@ $("#creatorUndo").onclick   = ()=>creatorUndo($("#openId").value.trim());
 /* Init */
 await whoami();
 await Promise.all([loadBrands(), loadCreators(), loadBin()]);
+
+/* CSV download handler */
+document.addEventListener("DOMContentLoaded", function(){
+  var btn = document.getElementById("downloadTpl");
+  if (!btn || !window.BrandTemplate) return;
+  btn.addEventListener("click", function(e){
+    e.preventDefault();
+    var header = BrandTemplate.HEADERS.join(",");
+    var csv = header + "\r\n";
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = BrandTemplate.FILENAME;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 0);
+  });
+});
