@@ -1,59 +1,76 @@
-﻿<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><title>Brands</title><meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="/air.css" rel="stylesheet"><script defer src="/auth.js"></script>
-<style>.wrap{max-width:1100px;margin:0 auto;padding:16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}.card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}.logo{width:100%;height:120px;object-fit:contain;background:#f9fafb;border-radius:8px}.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#eef2ff;display:inline-block;margin-right:6px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.btn{padding:8px 12px;border:1px solid #c7d2fe;border-radius:10px;cursor:pointer;background:#4C6FFF;color:#fff}.input,select{padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;min-width:220px}.pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}</style>
-</head><body>
-<header class="wrap"><div class="row">
-  <img src="/b1.png" alt="Bestie Collabs" style="height:36px"><h1 style="margin:0 0 0 6px">Brand Directory</h1>
-</div>
-<div class="controls">
-  <input id="q" class="input" placeholder="Search brands or domains">
-  <select id="cat"></select>
-  <label><input type="checkbox" id="featured"> Featured</label>
-  <button class="btn" id="apply">Apply</button>
-</div></header>
-<main class="wrap">
-  <div id="count" style="margin:8px 0;color:#6b7280"></div>
-  <div id="grid" class="grid"></div>
-  <div class="pager"><button class="btn" id="prev">Prev</button><span id="page"></span><button class="btn" id="next">Next</button></div>
-</main>
-<script>
-const s = new URL(location.href).searchParams;
-let page = Math.max(1, parseInt(s.get("page")||"1",10));
-const limit = 20;
-async function loadCategories(){
-  const r = await fetch("/api/categories"); const j = await r.json();
-  const sel = document.getElementById("cat");
-  sel.innerHTML = '<option value="">All categories</option>' + (j.categories||[]).map(c=>'<option>'+c+'</option>').join("");
-}
-async function load(){
-  const q = document.getElementById("q").value.trim();
-  const category = document.getElementById("cat").value.trim();
-  const featured = document.getElementById("featured").checked ? "1" : "";
-  const url = new URL(location.origin + "/api/brands");
-  if(q) url.searchParams.set("q", q);
-  if(category) url.searchParams.set("category", category);
-  if(featured) url.searchParams.set("featured","1");
-  url.searchParams.set("page", String(page));
-  url.searchParams.set("limit", String(limit));
-  const r = await fetch(url); const j = await r.json();
-  document.getElementById("count").textContent = (j.total||0) + " brands";
-  document.getElementById("page").textContent = "Page " + page;
-  const grid = document.getElementById("grid");
-  grid.innerHTML = (j.items||[]).map(b => `
-    <a class="card" href="/brands/${encodeURIComponent(b.slug)}/">
-      <img class="logo" src="${b.logo_url||""}" alt="">
-      <h3 style="margin:8px 0 4px 0">${b.name}${b.featured? ' ⭐':''}</h3>
-      <div class="row">
-        ${[b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).slice(0,3).map(c=>`<span class="pill">${c}</span>`).join("")}
-      </div>
-      <div style="color:#6b7280;margin-top:6px">${b.domain||""}</div>
-    </a>`).join("");
-}
-document.getElementById("apply").onclick = ()=>{ page=1; load(); };
-document.getElementById("prev").onclick = ()=>{ if(page>1){ page--; load(); } };
-document.getElementById("next").onclick = ()=>{ page++; load(); };
-window.addEventListener("DOMContentLoaded", async ()=>{ await loadCategories(); await load(); });
-</script>
-</body></html>
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brands · Bestie Collabs</title>
+  <link rel="icon" href="/favicon.png" />
+  <meta name="theme-color" content="#5E7BFF" />
+  <link rel="stylesheet" href="/air.css" />
+</head>
+<body>
+<header class="site-header" style="border-bottom:1px solid #e5e7eb;background:#fff">
+  <div class="wrap row" style="grid-template-columns:auto 1fr auto;align-items:center">
+    <a class="brandmark" href="/"><img src="/b1.png" alt="Bestie Collabs" style="height:40px"><span class="title">Bestie Collabs</span></a>
+    <nav style="justify-self:center;display:flex;gap:12px">
+      <a href="/about/">About</a><a href="/brands/">Brands</a><a href="/creators/">Creators</a><a href="/pricing/">Pricing</a><a href="/support/">Support</a>
+    </nav>
+    <nav class="auth" style="display:flex;gap:12px">
+      <a data-link="dashboard" href="/account/" style="display:none">Dashboard</a>
+      <a data-link="login" href="/login/">Log in</a>
+      <a data-link="create" href="/signup/">Create account</a>
+      <a data-link="logout" href="/logout" style="display:none">Log out</a>
+    </nav>
+  </div>
+</header>
 
+<main>
+  <section class="hero container">
+    <h1>Brands</h1>
+    <p class="hero p">Browse verified US-based brands.</p>
+  </section>
+
+  <section class="container section">
+    <div id="grid" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"></div>
+    <p id="empty" class="note" style="display:none">No brands yet.</p>
+  </section>
+</main>
+
+<footer class="wrap" style="border-top:1px solid #e5e7eb;padding-top:16px">
+  <a href="/about/">About</a> · <a href="/brands/">Brands</a> · <a href="/cookie/">Cookie</a> · <a href="/creators/">Creators</a> · <a href="/pricing/">Pricing</a> · <a href="/privacy/">Privacy</a> · <a href="/support/">Support</a> · <a href="/terms/">Terms</a>
+</footer>
+
+<script src="/auth.js"></script>
+<script>
+(async function(){
+  try{
+    const res = await fetch('/api/brands?limit=50');
+    const j = await res.json();
+    const items = j?.items || j?.results || [];
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    if(!items.length){ empty.style.display='block'; return; }
+    for(const b of items){
+      const card = document.createElement('a');
+      card.className = 'card';
+      card.href = `/brands/${encodeURIComponent(b.id)}/`;
+      card.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:center">
+          <img src="${b.logo_url||'/og.jpg'}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px">
+          <div>
+            <h3 class="funtext" style="margin:0">${escapeHtml(b.name||'Untitled')}</h3>
+            <p style="margin:4px 0 0 0;font-size:14px;color:#555">${escapeHtml(b.category_primary||'')}</p>
+          </div>
+        </div>
+        <p style="margin:12px 0 0 0;font-size:14px;color:#444">${escapeHtml((b.description||'').slice(0,140))}</p>
+      `;
+      grid.appendChild(card);
+    }
+  }catch(e){
+    document.getElementById('empty').style.display='block';
+  }
+})();
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+</script>
+</body>
+</html>
