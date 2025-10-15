@@ -5,9 +5,6 @@
   Default: push to main. Blocks if not on main, if dirty, or behind origin.  
   Hotfix: add -Wrangler to force a Pages production deployment from the working copy.
 
-- deploy-preview.ps1  
-  Creates a preview deployment on project "bc".
-
 - get-preview.ps1  
   Reads seed/state.json for preview_pattern and returns the latest preview URL parsed from Wrangler output.
 
