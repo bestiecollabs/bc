@@ -1,4 +1,4 @@
-﻿const devEmail = ""; // optional. set to "collabsbestie@gmail.com" for preview-only testing
+const devEmail = ""; // optional. set to "collabsbestie@gmail.com" for preview-only testing
 
 const $ = (q)=>document.querySelector(q);
 const $$ = (q)=>document.querySelectorAll(q);
