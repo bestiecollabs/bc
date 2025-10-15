@@ -1,4 +1,5 @@
-﻿/**
+import { ACCEPTED_HEADERS_11, validateHeaderList } from './_headers.js';
+/**
  * functions/api/admin/import/brands/analyze.js
  * Dry-run CSV analysis for Brand Template. NO DB WRITES.
  * Input: text/csv body with 11 headers.
@@ -77,7 +78,18 @@ export async function onRequestPost({request}) {
       return new Response(JSON.stringify({ ok:false, error:"no rows" }), { status:400, headers:{ "Content-Type":"application/json" }});
     }
     const headers = rows[0].map(h=>String(h||"").trim());
-    const {missing, extra} = validate(headers);
+    {
+  const chk = validateHeaderList(headers);
+  if (!chk.ok){
+    return new Response(JSON.stringify({
+      ok:false,
+      error:"invalid_csv_headers",
+      missing: chk.missing,
+      extras: chk.extras,
+      expected: chk.expected
+    }), { status:400, headers:{ "Content-Type":"application/json" }});
+  }
+}const {missing, extra} = validate(headers);
     const idx = Object.fromEntries(headers.map((h,i)=>[h,i]));
     const errors = [];
     const warnings = [];

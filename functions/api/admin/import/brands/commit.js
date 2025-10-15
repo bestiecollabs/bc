@@ -1,4 +1,5 @@
-﻿export const onRequestPost = async (context) => {
+import { ACCEPTED_HEADERS_11 } from './_headers.js';
+export const onRequestPost = async (context) => {
   const { request, env } = context;
   const db = env.DB || env.bestiedb;
 

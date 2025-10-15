@@ -1,9 +1,21 @@
-﻿<!doctype html>
+<!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Bestie Admin</title>
 <link rel="stylesheet" href="/admin/style.css" />
 <body>
+<aside id="sidenav" class="sidenav">
+  <div class="brand">
+    <img src="/b1.png" alt="Bestie Collabs" width="28" height="28"><strong class="label">Admin</strong>
+  </div>
+  <nav>
+    <a href="/admin/" aria-current="page">Dashboard</a>
+    <a href="/admin/brands/">Brands</a>
+  </nav>
+</aside>
+
+
+
   <aside class="side">
     <div class="brand">Bestie Admin</div>
     <nav class="nav">
@@ -55,8 +67,7 @@
     <!-- CSV Upload -->
     <section id="sec-csv" class="card">
       <h2>CSV Upload <span class="badge b-warn">🟡</span></h2>
-      <p class="muted">Framework only. Wire-up to /api/admin/chipchip/brands/upload (to be added).</p>
-      <div class="uploader">
+<div class="uploader">
         <input id="csvFile" type="file" accept=".csv" />
         <button id="csvUpload" disabled>Upload</button>
       </div>
@@ -120,3 +131,5 @@
   <script type="module" src="/admin/app.js"></script>
 <script src="/admin/lib/brandTemplate.js"></script>
 </body>
+
+

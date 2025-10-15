@@ -1,4 +1,5 @@
-﻿/**
+import { ACCEPTED_HEADERS_11 } from '../../_headers.js';
+/**
  * functions/api/admin/import/brands/batches/[id]/commit.js
  * POST JSON body:
  * { "action":"live"|"draft", "row_ids":[...], "admin":0|1, "publish_non_us":0|1 }

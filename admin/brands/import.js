@@ -1,4 +1,36 @@
-﻿// admin/brands/import.js
+const ACCEPTED_HEADERS_11 = [
+  'brand_name','website_url',
+  'category_primary','category_secondary','category_tertiary',
+  'instagram_url','tiktok_url',
+  'description','customer_age_min','customer_age_max','us_based'
+];
+
+function validateCsvHeaderLine(line){
+  const got = line.trim().replace(/\r/g,'').split(',').map(s => s.trim());
+  const need = ACCEPTED_HEADERS_11;
+  const missing = need.filter(h => !got.includes(h));
+  const extras  = got.filter(h => !need.includes(h));
+  return { ok: missing.length===0 && extras.length===0 && got.length===need.length, missing, extras, got };
+}
+
+async function ensureCsvHeaders(file){
+  if (!file) throw new Error('no_file_selected');
+  const text = await file.text();
+  const firstLine = (text.split(/\n/)[0] || '').trim();
+  const chk = validateCsvHeaderLine(firstLine);
+  if (!chk.ok){
+    const msg = [
+      'CSV headers invalid.',
+      chk.missing.length ? ('Missing: ' + chk.missing.join(', ')) : '',
+      chk.extras.length ? ('Unexpected: ' + chk.extras.join(', ')) : '',
+      'Expected exactly: ' + ACCEPTED_HEADERS_11.join(', ')
+    ].filter(Boolean).join('\n');
+    alert(msg);
+    throw new Error('invalid_csv_headers');
+  }
+  window.__csv_headers_ok = true;
+}
+// admin/brands/import.js
 (function () {
   ensureUi();
   const fileInput = document.getElementById('csvFile');
@@ -176,3 +208,42 @@
   function toast(msg) { if (window.alert) alert(msg); else console.log(msg); }
   function escapeHtml(s) { return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 })();
+
+document.addEventListener('DOMContentLoaded', function(){
+  var fileEl = document.getElementById('csv') || document.querySelector('input[type=""file""]');
+  var formEl = document.getElementById('importForm') || document.querySelector('form');
+
+  if (fileEl){
+    fileEl.addEventListener('change', async function(){
+      try { await ensureCsvHeaders(fileEl.files && fileEl.files[0]); }
+      catch(e){ console.error(e); }
+    });
+  }
+
+  async function guardSubmit(e){
+    try {
+      var f = (fileEl && fileEl.files && fileEl.files[0]) ? fileEl.files[0] : null;
+      await ensureCsvHeaders(f);
+    } catch(e){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
+  if (formEl){
+    formEl.addEventListener('submit', guardSubmit, true);
+  }
+
+  // Also guard common import buttons if they bypass <form>
+  document.querySelectorAll('[data-action=""import""], #importSubmit, button[type=""submit""]').forEach(function(btn){
+    btn.addEventListener('click', async function(e){
+      try {
+        var f = (fileEl && fileEl.files && fileEl.files[0]) ? fileEl.files[0] : null;
+        await ensureCsvHeaders(f);
+      } catch(err){
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  });
+});

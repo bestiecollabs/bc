@@ -1,0 +1,59 @@
+/* Admin Dark (Air theme) */
+:root {
+  --bg: #0b1020;
+  --bg-elev: #11162a;
+  --text: #e7ecff;
+  --muted: #9aa6d1;
+  --accent: #4C6FFF; /* Air accent */
+  --danger: #ff5a5a;
+  --ok: #29d391;
+  --card: #0f1530;
+  --border: #1f2a4a;
+  --shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+
+html, body { background: var(--bg); color: var(--text); }
+a { color: var(--accent); }
+a:hover { opacity: .9; }
+
+/* Sidenav from earlier injection */
+#sidenav.sidenav {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+  background: var(--bg-elev); border-right: 1px solid var(--border);
+  padding: 16px 12px; box-shadow: var(--shadow);
+}
+#sidenav .brand { display:flex; align-items:center; gap:10px; color: var(--text); margin-bottom: 16px; }
+#sidenav nav a {
+  display:block; padding:10px 12px; margin:4px 0; border-radius: 10px;
+  color: var(--text); text-decoration:none;
+}
+#sidenav nav a[aria-current="page"], #sidenav nav a.active {
+  background: rgba(76,111,255,.15); border: 1px solid rgba(76,111,255,.35);
+}
+#sidenav nav a:hover { background: rgba(255,255,255,.06); }
+
+/* Main layout assumes a left rail */
+main, .content, .container {
+  margin-left: 260px; padding: 24px; max-width: 1200px;
+}
+
+/* Cards, tables, buttons */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; background: var(--card); }
+th, td { border-bottom: 1px solid var(--border); padding: 10px 12px; color: var(--text); }
+thead th { color: var(--muted); font-weight: 600; }
+.muted, .help, small { color: var(--muted); }
+
+button, .btn {
+  background: var(--accent); color: #fff; border: 0; padding: 10px 14px;
+  border-radius: 12px; cursor: pointer; box-shadow: var(--shadow);
+}
+button.secondary, .btn.secondary { background: var(--bg-elev); color: var(--text); border:1px solid var(--border); }
+button:disabled { opacity:.6; cursor:not-allowed; }
+
+/* Inputs */
+input[type="text"], input[type="number"], input[type="url"], input[type="file"], textarea, select {
+  background: var(--bg-elev); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+}
+input::placeholder, textarea::placeholder { color: var(--muted); }
