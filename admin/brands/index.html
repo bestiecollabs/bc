@@ -1,1 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Bestie Admin · Brands</title>
+  <link rel="stylesheet" href="/admin/admin-dark.css"/>
+</head>
+<body>
+  <aside id="sidenav" class="sidenav">
+    <div class="brand">
+      <img src="/b1.png" alt="Bestie Collabs" width="28" height="28"><strong class="label">Admin</strong>
+    </div>
+    <nav>
+      <a href="/admin/">Overview</a>
+      <a href="/admin/brands/" aria-current="page">Brands</a>
+      <a href="/admin/csv/">CSV Upload</a>
+      <a href="/admin/creators/">Creators</a>
+      <a href="/admin/recycle/">Recycle Bin</a>
+      <a href="/admin/settings/">Settings</a>
+    </nav>
+  </aside>
 
+  <main class="container">
+    <h1>Brands</h1>
+
+    <section class="card" id="brands-list">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="margin:0;">Directory</h2>
+        <div>
+          <input id="brandId" type="number" placeholder="Brand ID" style="width:120px"/>
+          <button id="deleteBtn" class="btn secondary">Delete</button>
+          <button id="undoBtn" class="btn secondary">Undo</button>
+          <button id="refreshBtn" class="btn">Refresh</button>
+        </div>
+      </div>
+      <table id="brandsTable" style="margin-top:12px">
+        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Action</th></tr></thead>
+        <tbody id="brandsTbody"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="card" id="csv-upload" style="margin-top:16px">
+      <h2 style="margin:0 0 8px 0;">CSV Upload</h2>
+      <p class="muted">Required headers: brand_name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, description, customer_age_min, customer_age_max, us_based</p>
+      <form id="importForm">
+        <input id="csv" type="file" accept=".csv" />
+        <button id="uploadBtn" class="btn" type="submit">Upload</button>
+      </form>
+      <div id="uploadStatus" class="muted" style="margin-top:8px"></div>
+    </section>
+  </main>
+
+  <script src="/admin/app.js" defer></script>
+  <script src="/admin/brands/import.js" defer></script>
+</body>
+</html>
