@@ -70,7 +70,7 @@
       </section>
 
       <section style="margin-top:16px">
-        <h3>3) Latest Batches</h3>
+
         <div id="batches" class="grid"></div>
       </section>
 
@@ -183,8 +183,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("pushLive").onclick = ()=>bulkAction("live");
   document.getElementById("saveDraft").onclick = ()=>bulkAction("draft");
   document.getElementById("tplAgent").onclick = ()=>download("/api/admin/import/brands/template-agent","brands_template_agent.csv");
-  document.getElementById("tplAdmin").onclick = ()=>download("/api/admin/import/brands/template","brands_template.csv");
-  await listBatches();
+await listBatches();
 });
 </script>
 </body>
