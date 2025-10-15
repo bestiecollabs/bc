@@ -2,18 +2,17 @@
   const headers = [
     "brand_name","website_url",
     "category_primary","category_secondary","category_tertiary",
-    "instagram_url","tiktok_url","logo_url",
-    "description","us_based","contact_email",
+    "instagram_url","tiktok_url",
+    "description",
     "customer_age_min","customer_age_max",
-    "price_low","price_high",
-    "has_affiliate_program","monthly_visits",
-    "customer_locations","source_url","discovered_at","discovered_by",
-    "notes_admin"
-  ].join(",");
-  return new Response(headers.join(",") + "\r\n", {
+    "us_based"
+  ];
+  const csv = headers.join(",") + "\r\n";
+  return new Response(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": "attachment; filename=brand_import_template.csv"
+      "Content-Disposition": "attachment; filename=brand_import_template.csv",
+      "Cache-Control": "no-store"
     }
   });
 }
