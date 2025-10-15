@@ -40,7 +40,7 @@ input[type=file],select,.input{border:1px solid #e5e7eb;border-radius:10px;paddi
       </div>
       <div class="controls">
         <button class="btn" id="createTemplate">Create Template</button>
-        <a class="linkbtn" href="/admin/brands/brands_template.csv" download>Download Template</a>
+        
         <span class="muted">Slug auto-generated as 6 digits. Domain derived from website_url. cookie_days defaults to 30. markets_primary defaults to US.</span>
       </div>
     </section>
@@ -87,23 +87,6 @@ input[type=file],select,.input{border:1px solid #e5e7eb;border-radius:10px;paddi
   </main>
 </div>
 <script>
-const TEMPLATE_HEADERS = [
-  "name","website_url","category_primary","category_secondary","category_tertiary",
-  "instagram_url","tiktok_url","price_low","price_high","affiliate_program","cookie_days",
-  "customer_age_min","customer_age_max","contact_email","contact_form_url","brand_values",
-  "monthly_site_visits","markets_primary","description","featured","logo_url"
-];
-const TEMPLATE_SAMPLE = {
-  name:"Glow Beauty Co",website_url:"https://glowbeauty.co",
-  category_primary:"Beauty",category_secondary:"Personal Care",category_tertiary:"Cosmetics",
-  instagram_url:"https://www.instagram.com/glowbeauty",tiktok_url:"https://www.tiktok.com/@glowbeauty",
-  price_low:"12.00",price_high:"48.00",affiliate_program:"1",cookie_days:"30",
-  customer_age_min:"18",customer_age_max:"44",contact_email:"hello@glowbeauty.co",
-  contact_form_url:"https://glowbeauty.co/contact",brand_values:"clean, sensitive-skin",
-  monthly_site_visits:"1200000",markets_primary:"US",description:"Clean skincare for sensitive skin.",
-  featured:"1",logo_url:"https://cdn.example.com/logos/glow.png"
-};
-
 function csvEscape(v){
   const s = String(v==null?"":v);
   if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
@@ -213,8 +196,6 @@ function downloadBlob(filename, text){
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
 }
 function createTemplate(){
-  const csv = makeCsv(TEMPLATE_HEADERS, [TEMPLATE_SAMPLE]);
-  downloadBlob("brands_template.csv", csv);
 }
 window.addEventListener("DOMContentLoaded", async ()=>{
   await migrate();
