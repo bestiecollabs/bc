@@ -45,3 +45,4 @@ if(-not $Wrangler){
 # Wrangler hotfix deploy to production (use sparingly)
 wrangler pages deployment create $Dir --project-name $ProjectName --commit-dirty=true
 Ok "Wrangler production deployment initiated"
+
