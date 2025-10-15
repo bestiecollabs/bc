@@ -1,7 +1,4 @@
-﻿/* admin/lib/brandTemplate.js
-   Single source of truth for the Agent CSV template used by Admin.
-   Exposes window.BrandTemplate with HEADERS and FILENAME.
-*/
+﻿/* admin/lib/brandTemplate.js */
 (function (root) {
   var BrandTemplate = {
     FILENAME: "brand_import_template.csv",
