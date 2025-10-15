@@ -38,3 +38,10 @@
 
 [2025-10-14 22:26 PST] Handled Brand Template regressions, unified headers, added dry-run analyzer, verified Worker, and refreshed Admin UI.
 Branch=main Commit=a118ead4744074e7ff965761ac0110b8d724b18a
+[2025-10-15 10:50 PST] v3.0 handoff — part 1 of 2 — LATEST ACTIVE SESSION
+- Remove duplicate page: /admin/brands/import; add 301 redirects to /admin/brands/.
+- Confirm admin gating: allowlist present; ADMIN_ALLOW_ANY set to 0.
+- Harden deploy script: scripts/deploy-prod.ps1 (preflights; robust ahead/behind parsing).
+- Retire scripts/deploy-preview.ps1; prod-only deploy workflow.
+- Canonical CSV Import at /admin/brands/ verified.
+
