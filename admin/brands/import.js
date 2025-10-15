@@ -1,3 +1,19 @@
+﻿/* Agent template headers shim */
+(function ensureBrandTemplate(){
+  if (window.BrandTemplate) return;
+  var s=document.createElement("script");
+  s.src="/admin/lib/brandTemplate.js";
+  s.async=false;
+  document.head.appendChild(s);
+})();
+var EXPECTED_AGENT_HEADERS = (window.BrandTemplate && window.BrandTemplate.HEADERS) || [
+  "brand_name","website_url",
+  "category_primary","category_secondary","category_tertiary",
+  "instagram_url","tiktok_url",
+  "description",
+  "customer_age_min","customer_age_max",
+  "us_based"
+];
 (function(){
   const expected = ["name","website_url","category_primary","category_secondary","category_tertiary","instagram_url","tiktok_url","shopify_shop_domain","shopify_shop_id","shopify_public_url","contact_name","contact_title","contact_email","contact_phone","country","state","city","zipcode","address","description","support_email","logo_url","featured","status","has_us_presence","is_dropshipper","notes_admin"];
 
@@ -70,7 +86,7 @@
     rows = objs; window.__BRANDS_ROWS = rows;
     renderPreview(objs);
     const missing = expected.filter(x => !cols.includes(x));
-    setPill(info.cols, `${cols.length} columns` + (missing.length? ` · missing: ${missing.join(", ")}` : ""), missing.length === 0);
+    setPill(info.cols, `${cols.length} columns` + (missing.length? ` Â· missing: ${missing.join(", ")}` : ""), missing.length === 0);
     toast("CSV parsed");
   });
 

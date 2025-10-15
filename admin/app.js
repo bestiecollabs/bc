@@ -1,3 +1,11 @@
+﻿/* ensure BrandTemplate is loaded for Admin */
+(function ensureBrandTemplate(){
+  if (window.BrandTemplate) return;
+  var s=document.createElement("script");
+  s.src="/admin/lib/brandTemplate.js";
+  s.async=false;
+  document.head.appendChild(s);
+})();
 const devEmail = ""; // optional. set to "collabsbestie@gmail.com" for preview-only testing
 
 const $ = (q)=>document.querySelector(q);
