@@ -1,4 +1,6 @@
-﻿/* ensure BrandTemplate is loaded for Admin */
+(async function(){
+  if (location.pathname.toLowerCase().startsWith('/admin/brands/')) return; // skip legacy UI on brands
+/* ensure BrandTemplate is loaded for Admin */
 (function ensureBrandTemplate(){
   if (window.BrandTemplate) return;
   var s=document.createElement("script");
@@ -183,3 +185,4 @@ document.addEventListener("DOMContentLoaded", function(){
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 0);
   });
 });
+})();
