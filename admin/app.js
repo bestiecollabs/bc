@@ -1,4 +1,4 @@
-﻿(async function(){
+(async function(){
   if (location.pathname.toLowerCase().startsWith('/admin/brands/')) return; // skip legacy UI on brands
 /* ensure BrandTemplate is loaded for Admin */
 (function ensureBrandTemplate(){
@@ -186,3 +186,42 @@ document.addEventListener("DOMContentLoaded", function(){
   });
 });
 })();
+
+
+function apiPost(p, body){
+  const url0 = String(p);
+  const url = url0.startsWith("/api/") ? ("https://api.bestiecollabs.com" + url0) : url0;
+
+  const isBatches = url.includes("/api/admin/import/brands/batches") && !/\/commit$/.test(url);
+  const isCommit  = /\/commit$/.test(url) && url.includes("/api/admin/import/brands/batches/");
+
+  if (isBatches){
+    const getCsv = async () => {
+      if (typeof body === "string") return body;
+      if (body && body.file instanceof File) return await body.file.text();
+      const f = document.getElementById("file")?.files?.[0];
+      return f ? await f.text() : "";
+    };
+    return getCsv().then(csv => fetch(url, {
+      method: "POST",
+      headers: { "content-type":"text/plain", "x-admin-email": (window.ADMIN_EMAIL||"") },
+      credentials: "include",
+      body: csv
+    }));
+  }
+
+  if (isCommit){
+    return fetch(url, {
+      method: "POST",
+      headers: { "x-admin-email": (window.ADMIN_EMAIL||"") },
+      credentials: "include"
+    });
+  }
+
+  const isString = typeof body === "string";
+  const headers = isString
+    ? { "content-type":"text/plain", "x-admin-email": (window.ADMIN_EMAIL||"") }
+    : { "content-type":"application/json", "x-admin-email": (window.ADMIN_EMAIL||"") };
+  const payload = isString ? body : JSON.stringify(body||{});
+  return fetch(url, { method:"POST", headers, credentials:"include", body: payload });
+}
