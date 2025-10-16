@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
   const fileInput = document.getElementById("file");
   const dryBtn = document.getElementById("dryrun") || Array.from(document.querySelectorAll("button")).find(b => b.textContent.trim().toLowerCase() === "dry run");
   const commitBtn = document.getElementById("commit") || Array.from(document.querySelectorAll("button")).find(b => b.textContent.trim().toLowerCase() === "commit");
