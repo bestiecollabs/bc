@@ -1,4 +1,4 @@
-import { ACCEPTED_HEADERS_11 } from './_headers.js';
+﻿import { ACCEPTED_HEADERS_11 } from './_headers.js';
 export const onRequestPost = async (context) => {
   const { request, env } = context;
   const db = env.DB || env.bestiedb;
@@ -105,3 +105,14 @@ export const onRequestPost = async (context) => {
 function val(s){ const t = String(s ?? "").trim(); return t ? t : null; }
 function truthy(v){ return String(v).trim().toLowerCase() === "true" || String(v).trim() === "1" || String(v).trim().toLowerCase() === "yes"; }
 function json(b,s=200){ return new Response(JSON.stringify(b),{ status:s, headers:{ "content-type":"application/json" } }); }
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST,OPTIONS",
+      "Access-Control-Allow-Headers": "content-type"
+    }
+  });
+}
