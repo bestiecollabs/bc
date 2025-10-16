@@ -56,7 +56,11 @@
       </div>
       <table id="brandsTable" style="margin-top:12px">
         <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Action</th></tr></thead>
-        <tbody id="brandsTbody"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
+        <div id="brandsHelp" class="muted" style="margin:10px 0; display:none;">
+  No brands yet. If you just committed a batch and still see this, the API hasn't returned rows.
+  <button id="refreshBrandsBtn" class="btn" style="margin-left:8px;">Refresh</button>
+</div>
+<tbody id="brandsTbody"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
       </table>
     </section>
 
@@ -78,5 +82,6 @@
   <script src="/admin/brands/import.js?v=20251016a" defer></script>
 </body>
 </html>
+
 
 

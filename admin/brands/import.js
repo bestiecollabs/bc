@@ -6,7 +6,7 @@
   }
 
   // tiny helpers
-  function q(id){ return document.getElementById(id); }
+  function q(id){ return document.getElementById(id); } function qs(s){ return document.querySelector(s); }
   function showStatus(msg){
     var el = document.getElementById("uploadStatus") || document.querySelector(".muted");
     if(el) el.textContent = String(msg);
@@ -45,12 +45,34 @@
 
   // table loader
   async function loadBrands(){
-    var tbody = q("brandsTbody");
-    if(!tbody) return;
-    try{
-      var data = null, paths = ["/api/admin/brands", "/api/admin/brands/list"];
-      for(var i=0;i<paths.length;i++){
-        try{ data = await apiGet(paths[i]); if(data) break; }catch(_){}
+  var tbody = q("brandsTbody");
+  var help = q("brandsHelp");
+  if(!tbody){ return; }
+  try{
+    var data = null, paths = ["/api/admin/brands","/api/admin/brands/list"];
+    for(var i=0;i<paths.length;i++){
+      try{ data = await apiGet(paths[i]); if(data) break; }catch(_){}
+    }
+    var rows = (data && (data.rows||data.items||data)) || [];
+    if(!rows.length){
+      tbody.innerHTML = '<tr><td colspan="6" class="muted">No brands yet</td></tr>';
+      if(help){ help.style.display = "block"; }
+      return;
+    }
+    if(help){ help.style.display = "none"; }
+    var html = "";
+    for(var j=0;j<rows.length;j++){
+      var b = rows[j] || {};
+      html += '<tr><td>'+(b.id||"")+'</td><td>'+(b.name||"")+'</td><td>'+(b.slug||"")+
+              '</td><td>'+((b.status||"published"))+'</td><td>'+(b.deleted?"yes":"")+'</td><td></td></tr>';
+    }
+    tbody.innerHTML = html;
+  }catch(e){
+    console.error(e);
+    tbody.innerHTML = '<tr><td colspan="6" class="muted">Load error</td></tr>';
+    if(help){ help.style.display = "block"; }
+  }
+}catch(_){}
       }
       var rows = (data && (data.rows||data.items||data)) || [];
       if(!rows.length){ tbody.innerHTML = '<tr><td colspan="6" class="muted">No brands yet</td></tr>'; return; }
@@ -138,6 +160,8 @@
 
   // wire UI
   document.addEventListener("DOMContentLoaded", function(){
+  var r = q("refreshBrandsBtn");
+  if(r){ r.addEventListener("click", function(){ loadBrands(); }); }
     var dry = q("dryBtn") || q("dryrun") || Array.from(document.querySelectorAll("button")).find(function(b){return b.textContent.trim().toLowerCase()==="dry run";});
     var commit = q("commitBtn") || q("commit") || Array.from(document.querySelectorAll("button")).find(function(b){return b.textContent.trim().toLowerCase()==="commit";});
     if(dry)    dry.addEventListener("click",  function(){ uploadCsvAndMaybeCommit(false); });
