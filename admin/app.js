@@ -225,3 +225,56 @@ function apiPost(p, body){
   const payload = isString ? body : JSON.stringify(body||{});
   return fetch(url, { method:"POST", headers, credentials:"include", body: payload });
 }
+
+/* csv-uploader: explicit handlers for Brands import */
+(function(){
+  const API = "https://api.bestiecollabs.com";
+  const ADMIN = (window.ADMIN_EMAIL||"");
+
+  function el(id){ return document.getElementById(id); }
+  function show(msg){
+    const o = document.getElementById("actout") || document.querySelector(".muted");
+    if (o) o.textContent = String(msg);
+  }
+
+  async function uploadCSV(){
+    const f = el("file")?.files?.[0];
+    if(!f) throw new Error("select a CSV file");
+    const r = await fetch(`${API}/api/admin/import/brands/batches`, {
+      method:"POST",
+      headers:{ "content-type":"text/plain", "x-admin-email": ADMIN },
+      credentials:"include",
+      body: await f.text()
+    });
+    if(!r.ok) throw new Error(`batches -> ${r.status}`);
+    return r.json();
+  }
+
+  const dry = el("dryrun");
+  if (dry && !dry._wired){
+    dry._wired = true;
+    dry.addEventListener("click", async ()=>{
+      try {
+        const j = await uploadCSV();
+        show(`parsed: total=${j.counts?.total||0} valid=${j.counts?.valid||0} invalid=${j.counts?.invalid||0} (batch ${j.batch_id})`);
+      } catch(e){ show("error: "+e.message); }
+    });
+  }
+
+  const commit = el("commit");
+  if (commit && !commit._wired){
+    commit._wired = true;
+    commit.addEventListener("click", async ()=>{
+      try {
+        const j = await uploadCSV();
+        const r = await fetch(`${API}/api/admin/import/brands/batches/${j.batch_id}/commit`, {
+          method:"POST",
+          headers:{ "x-admin-email": ADMIN },
+          credentials:"include"
+        });
+        const cj = await r.json().catch(()=>({}));
+        show(cj.ok ? "publish ok" : ("commit failed: "+(cj.error||r.status)));
+      } catch(e){ show("error: "+e.message); }
+    });
+  }
+})();
