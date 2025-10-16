@@ -1,4 +1,4 @@
-(async function(){
+﻿(async function(){
   if (location.pathname.toLowerCase().startsWith('/admin/brands/')) return; // skip legacy UI on brands
 /* ensure BrandTemplate is loaded for Admin */
 (function ensureBrandTemplate(){
