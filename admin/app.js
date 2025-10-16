@@ -1,5 +1,5 @@
-(async function(){
-  if (location.pathname.toLowerCase().startsWith('/admin/brands/')) return; // skip legacy UI on brands
+﻿(async function(){
+/* disabled: legacy guard for /admin/brands/ */// skip legacy UI on brands
 /* ensure BrandTemplate is loaded for Admin */
 (function ensureBrandTemplate(){
   if (window.BrandTemplate) return;
@@ -277,4 +277,56 @@ function apiPost(p, body){
       } catch(e){ show("error: "+e.message); }
     });
   }
+})();
+/* BrandsImportUI wired */
+;(function BrandsImportUI(){
+  try {
+    var p = location.pathname.toLowerCase();
+    if (!p.startsWith('/admin/brands/')) return;
+
+    var \$ = function(s){ return document.querySelector(s); };
+    var file   = \#file;
+    var dryBtn = \#dryrun;
+    var comBtn = \#commit;
+    if (!file || !dryBtn || !comBtn) return;
+
+    var adminEmail = (window.ADMIN_EMAIL || 'collabsbestie@gmail.com');
+    var headers = { 'x-admin-email': adminEmail };
+    var batchId = null;
+
+    dryBtn.addEventListener('click', async function(){
+      try {
+        var f = file.files && file.files[0];
+        if (!f) { alert('Choose a CSV first'); return; }
+        var text = await f.text();
+        var resp = await fetch('/api/admin/import/brands/batches', {
+          method: 'POST',
+          headers: Object.assign({ 'content-type': 'text/plain' }, headers),
+          body: text
+        });
+        var j = await resp.json();
+        if (!j || !j.ok) { alert('Dry run failed'); return; }
+        batchId = j.id;
+        window.BRAND_IMPORT_ID = j.id;
+        var c = (j.counts || {});
+        alert('Dry run OK. ID ' + j.id + '. Total ' + (c.total ?? '?') + ', Valid ' + (c.valid ?? '?') + ', Invalid ' + (c.invalid ?? '?'));
+      } catch (e) { console.error(e); alert('Dry run error'); }
+    });
+
+    comBtn.addEventListener('click', async function(){
+      try {
+        if (!batchId) batchId = window.BRAND_IMPORT_ID;
+        if (!batchId) { alert('Run Dry run first'); return; }
+        var payload = { batchId: batchId, action: 'draft', allow_non_us: 0 };
+        var resp = await fetch('/api/admin/import/brands/batches/' + batchId + '/commit', {
+          method: 'POST',
+          headers: Object.assign({ 'content-type': 'application/json' }, headers),
+          body: JSON.stringify(payload)
+        });
+        var j = await resp.json();
+        if (j && j.ok && j.committed) { alert('Commit OK for ' + batchId); }
+        else { alert('Commit failed'); }
+      } catch (e) { console.error(e); alert('Commit error'); }
+    });
+  } catch (e) { console.error(e); }
 })();
