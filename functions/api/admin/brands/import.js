@@ -1,5 +1,5 @@
-/**
- * POST /api/admin/brands/import
+﻿/**
+ * POST /api/admin/brands
  * Inserts new rows only. Skips duplicates.
  * Duplicate key = website_host_norm OR shopify_domain_norm (normalized).
  * Response: { ok, inserted, skipped_duplicate, failed }
@@ -151,3 +151,4 @@ function buildInsert(n, website_host_norm, shopify_domain_norm){
 
 function now(){ return new Date().toISOString(); }
 function json(obj, status=200){ return new Response(JSON.stringify(obj), { status, headers:{ "content-type":"application/json; charset=utf-8" } }); }
+

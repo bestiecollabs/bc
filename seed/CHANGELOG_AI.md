@@ -39,9 +39,25 @@
 [2025-10-14 22:26 PST] Handled Brand Template regressions, unified headers, added dry-run analyzer, verified Worker, and refreshed Admin UI.
 Branch=main Commit=a118ead4744074e7ff965761ac0110b8d724b18a
 [2025-10-15 10:50 PST] v3.0 handoff — part 1 of 2 — LATEST ACTIVE SESSION
-- Remove duplicate page: /admin/brands/import; add 301 redirects to /admin/brands/.
+- Remove duplicate page: /admin/brands; add 301 redirects to /admin/brands/.
 - Confirm admin gating: allowlist present; ADMIN_ALLOW_ANY set to 0.
 - Harden deploy script: scripts/deploy-prod.ps1 (preflights; robust ahead/behind parsing).
 - Retire scripts/deploy-preview.ps1; prod-only deploy workflow.
 - Canonical CSV Import at /admin/brands/ verified.
+
+
+[2025-10-15 17:59 PST] v3.0 • Part 1 of 2 • Latest Active Session
+- Added seed/AI_README.md session block and baseline operating spec
+- Documented CSV header contract (11 columns) and admin header x-admin-email
+- Declared API endpoints and Cloudflare Pages Functions router expectations
+- Action items queued for Part 2: verify POST handlers under batches/{id}/rows and batches/{id}/commit
+## 2025-10-15 20:22 PST � Part 1 of 2 (Handoff v3.0)
+- Added/updated /seed/AI_README.md with Latest Active Session block.
+- Documented environment variable NAMES (Cloudflare/GitHub) for future assistants:
+  CF_ACCESS_CLIENT_ID, CF_ACCESS_CLIENT_SECRET,
+  CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, CLOUDFLARE_WORKER_DOMAIN, D1_DATABASE_ID,
+  SHOPIFY_API_KEY, SHOPIFY_API_SECRET, SHOPIFY_SCOPES, SHOPIFY_ENCRYPTION_KEY,
+  TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, TIKTOK_WEBHOOK_VERIFY_TOKEN.
+- No secret values stored in repo; values live in Cloudflare Pages and GitHub.
+- Next (Part 2): Public Brand Directory surface post-CSV commit.
 

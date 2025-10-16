@@ -1,4 +1,4 @@
-$Root=(Resolve-Path ".").Path; $SeedDir=Join-Path $Root "seed"
+﻿$Root=(Resolve-Path ".").Path; $SeedDir=Join-Path $Root "seed"
 if(-not(Test-Path $SeedDir)){ New-Item -Type Directory -Force -Path $SeedDir | Out-Null }
 function Write-Utf8($p,$s){ [IO.File]::WriteAllText($p,$s,[Text.UTF8Encoding]::new($false)) }
 

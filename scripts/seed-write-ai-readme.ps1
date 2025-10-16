@@ -40,11 +40,12 @@ $txt = @"
 
 ## Current focus
 1) Admin dashboard shell with session guard + KPIs.
-2) Brands CSV import report UI wired to /api/admin/brands/import (dry-run + commit).
+2) Brands CSV import report UI wired to /api/admin/import/brands (dry-run + commit).
 
 "@
 $path = Join-Path $SeedDir "AI_README.md"
 [IO.File]::WriteAllText($path,$txt,[Text.UTF8Encoding]::new($false))
 "AI_README.md written -> $path"
+
 
 

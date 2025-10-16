@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$ProjectName = "bc",
   [string[]]$Domains = @("bestiecollabs.com","api.bestiecollabs.com"),
   [string]$PreviewPattern = "*.bc-ezy.pages.dev",

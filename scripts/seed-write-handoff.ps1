@@ -18,9 +18,10 @@ if($state){
 $lines += ""
 $lines += "## Next two tasks"
 $lines += "1) Admin dashboard shell with session guard + KPIs."
-$lines += "2) Brands CSV import report UI wired to /api/admin/brands/import (dry-run + commit)."
+$lines += "2) Brands CSV import report UI wired to /api/admin/import/brands (dry-run + commit)."
 $path = Join-Path $SeedDir "HANDOFF.md"
 [IO.File]::WriteAllText($path, ($lines -join [Environment]::NewLine), [Text.UTF8Encoding]::new($false))
 "HANDOFF.md written -> $path"
+
 
 

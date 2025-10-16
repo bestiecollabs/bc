@@ -11,7 +11,7 @@ Generated: $(NowIso)
 
 ## TODOs
 - Build /admin/dashboard/ shell with session guard + KPIs.
-- Wire Brands CSV import report UI to /api/admin/brands/import (dry-run + commit).
+- Wire Brands CSV import report UI to /api/admin/import/brands (dry-run + commit).
 
 ## Context
 Project: $($state.project.name)
@@ -23,5 +23,6 @@ D1: $($state.db.d1_name) binding $($state.db.binding)
 $path = Join-Path $SeedDir "RESUME.md"
 [IO.File]::WriteAllText($path,$txt,[Text.UTF8Encoding]::new($false))
 "RESUME.md written -> $path"
+
 
 
