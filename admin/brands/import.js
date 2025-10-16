@@ -1,4 +1,4 @@
-(function(){
+﻿(function(){
   const fileInput = document.getElementById("file");
   const dryBtn = document.getElementById("dryrun") || Array.from(document.querySelectorAll("button")).find(b => b.textContent.trim().toLowerCase() === "dry run");
   const commitBtn = document.getElementById("commit") || Array.from(document.querySelectorAll("button")).find(b => b.textContent.trim().toLowerCase() === "commit");
@@ -8,7 +8,7 @@
   async function uploadCSV(){
     const f = fileInput && fileInput.files && fileInput.files[0];
     if(!f) throw new Error("select a CSV file");
-    const res = await fetch("/api/admin/import/brands/batches", {
+    const res = await fetch("https://api.bestiecollabs.com/api/admin/import/brands/batches", {
       method: "POST",
       headers: { "content-type": "text/plain" },
       body: await f.text()
@@ -27,7 +27,7 @@
   commitBtn && commitBtn.addEventListener("click", async ()=>{
     try{
       const j = await uploadCSV();
-      const r = await fetch(`/api/admin/import/brands/batches/${j.batch_id}/commit`, { method:"POST" });
+      const r = await fetch(`https://api.bestiecollabs.com/api/admin/import/brands/batches/${j.batch_id}/commit`, { method:"POST" });
       const cj = await r.json().catch(()=>({}));
       show(cj.ok ? "publish ok" : ("commit failed: "+(cj.error||r.status)));
     }catch(e){ show("error: "+e.message); }
