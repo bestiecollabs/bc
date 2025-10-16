@@ -1,0 +1,32 @@
+﻿[
+    {
+        "File":  "admin\\brands\\index.html",
+        "Line":  71,
+        "Match":  "id=\"dryBtn\""
+    },
+    {
+        "File":  "admin\\brands\\index.html",
+        "Line":  72,
+        "Match":  "id=\"commitBtn\""
+    },
+    {
+        "File":  "admin\\app.js",
+        "Line":  270,
+        "Match":  "fetch(`${API}/api/admin/import/brands/batches/${j.batch_id}/commit"
+    },
+    {
+        "File":  "ai_artifacts\\functions\\auth\\login.js",
+        "Line":  7,
+        "Match":  "formData("
+    },
+    {
+        "File":  "functions\\api\\admin\\chipchip\\brands-import.js",
+        "Line":  4,
+        "Match":  "/api/admin/chipchip/brands-import"
+    },
+    {
+        "File":  "seed\\resume.md",
+        "Line":  6,
+        "Match":  "/api/admin/import/brands/commit"
+    }
+]
