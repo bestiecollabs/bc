@@ -1,9 +1,10 @@
-import { ACCEPTED_HEADERS_11, validateHeaderList } from './_headers.js';
+const __admin = (req)=>{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const e=String(req.headers.get('x-admin-email')||'').toLowerCase().trim(); if(!e) return [null,{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); s:401,b:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok:false,error:'missing_admin_email'}}]; return [e,null]};
+import { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ACCEPTED_HEADERS_11, validateHeaderList } from './_headers.js';
 /**
  * functions/api/admin/import/brands/analyze.js
  * Dry-run CSV analysis for Brand Template. NO DB WRITES.
  * Input: text/csv body with 11 headers.
- * Output: { ok, counts: { total, valid, invalid }, inserted:0, updated:0, skipped:0, failed, errors:[], warnings:[], rows:[{line,status,issues:[],data:{...}}] }
+ * Output: { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok, counts: { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); total, valid, invalid }, inserted:0, updated:0, skipped:0, failed, errors:[], warnings:[], rows:[{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); line,status,issues:[],data:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ...}}] }
  */
 const REQUIRED = [
   "brand_name","website_url",
@@ -14,19 +15,15 @@ const REQUIRED = [
   "us_based"
 ];
 
-function parseCSV(text){
-  const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n").filter(l=>l.length>0);
+function parseCSV(text){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n").filter(l=>l.length>0);
   const rows = lines.map(l=>l.split(",").map(x=>x.trim()));
   return rows;
 }
 
-function normalize(row, idx){
-  const get = (k)=> {
-    const i = idx[k];
+function normalize(row, idx){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const get = (k)=> { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const i = idx[k];
     return i==null ? "" : String(row[i] ?? "").trim();
   };
-  return {
-    brand_name: get("brand_name"),
+  return { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); brand_name: get("brand_name"),
     website_url: get("website_url"),
     category_primary: get("category_primary"),
     category_secondary: get("category_secondary"),
@@ -40,14 +37,12 @@ function normalize(row, idx){
   };
 }
 
-function validate(hdrs){
-  const missing = REQUIRED.filter(h=>!hdrs.includes(h));
+function validate(hdrs){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const missing = REQUIRED.filter(h=>!hdrs.includes(h));
   const extra = hdrs.filter(h=>!REQUIRED.includes(h));
-  return {missing, extra};
+  return { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); missing, extra};
 }
 
-function checks(rec){
-  const issues = [];
+function checks(rec){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const issues = [];
   const urlOk = (u)=> !u || /^https?:\/\/[^\s]+$/i.test(u);
   const boolOk = (v)=> !v || /^(true|false)$/i.test(v);
   const intOk = (v)=> !v || /^\d+$/.test(v);
@@ -63,59 +58,48 @@ function checks(rec){
   return issues;
 }
 
-export async function onRequestPost({request}) {
-  try{
-    const ct = (request.headers.get("content-type")||"").toLowerCase();
-    if(!ct.includes("text/csv")) {
-      return new Response(JSON.stringify({ ok:false, error:"content-type must be text/csv" }), { status:400, headers:{ "Content-Type":"application/json" }});
+export async function onRequestPost({ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); request}) { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); try{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const ct = (request.headers.get("content-type")||"").toLowerCase();
+    if(!ct.includes("text/csv")) { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); return new Response(JSON.stringify({ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok:false, error:"content-type must be text/csv" }), { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); status:400, headers:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); "Content-Type":"application/json" }});
     }
     const text = await request.text();
-    if(!text.trim()){
-      return new Response(JSON.stringify({ ok:false, error:"empty body" }), { status:400, headers:{ "Content-Type":"application/json" }});
+    if(!text.trim()){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); return new Response(JSON.stringify({ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok:false, error:"empty body" }), { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); status:400, headers:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); "Content-Type":"application/json" }});
     }
     const rows = parseCSV(text);
-    if(rows.length<1){
-      return new Response(JSON.stringify({ ok:false, error:"no rows" }), { status:400, headers:{ "Content-Type":"application/json" }});
+    if(rows.length<1){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); return new Response(JSON.stringify({ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok:false, error:"no rows" }), { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); status:400, headers:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); "Content-Type":"application/json" }});
     }
     const headers = rows[0].map(h=>String(h||"").trim());
-    {
-  const chk = validateHeaderList(headers);
-  if (!chk.ok){
-    return new Response(JSON.stringify({
-      ok:false,
+    { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const chk = validateHeaderList(headers);
+  if (!chk.ok){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); return new Response(JSON.stringify({ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok:false,
       error:"invalid_csv_headers",
       missing: chk.missing,
       extras: chk.extras,
       expected: chk.expected
-    }), { status:400, headers:{ "Content-Type":"application/json" }});
+    }), { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); status:400, headers:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); "Content-Type":"application/json" }});
   }
-}const {missing, extra} = validate(headers);
+}const { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); missing, extra} = validate(headers);
     const idx = Object.fromEntries(headers.map((h,i)=>[h,i]));
     const errors = [];
     const warnings = [];
 
-    if(missing.length){ errors.push(`missing headers: ${missing.join(", ")}`); }
-    if(extra.length){ warnings.push(`ignored extra headers: ${extra.join(", ")}`); }
+    if(missing.length){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); errors.push(`missing headers: ${ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); missing.join(", ")}`); }
+    if(extra.length){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); warnings.push(`ignored extra headers: ${ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); extra.join(", ")}`); }
 
     const outRows = [];
     let valid=0, invalid=0;
 
-    for(let i=1;i<rows.length;i++){
-      const rec = normalize(rows[i], idx);
+    for(let i=1;i<rows.length;i++){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); const rec = normalize(rows[i], idx);
       const issues = checks(rec);
-      if(issues.length){ invalid++; } else { valid++; }
-      outRows.push({ line:i+1, status: issues.length ? "error":"ok", issues, data: rec });
+      if(issues.length){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); invalid++; } else { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); valid++; }
+      outRows.push({ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); line:i+1, status: issues.length ? "error":"ok", issues, data: rec });
     }
 
-    const body = {
-      ok: errors.length===0,
-      counts: { total: rows.length-1, valid, invalid },
+    const body = { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok: errors.length===0,
+      counts: { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); total: rows.length-1, valid, invalid },
       inserted: 0, updated: 0, skipped: 0, failed: invalid,
       errors, warnings,
       rows: outRows
     };
-    return new Response(JSON.stringify(body), { headers:{ "Content-Type":"application/json" }});
-  }catch(e){
-    return new Response(JSON.stringify({ ok:false, error:String(e) }), { status:500, headers:{ "Content-Type":"application/json" }});
+    return new Response(JSON.stringify(body), { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); headers:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); "Content-Type":"application/json" }});
+  }catch(e){ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); return new Response(JSON.stringify({ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); ok:false, error:String(e) }), { const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); status:500, headers:{ const [admin,__err]=__admin(request); if(!admin) return new Response(JSON.stringify(__err.b),{status:__err.s,headers:{\"content-type\":\"application/json\"}}); "Content-Type":"application/json" }});
   }
 }
