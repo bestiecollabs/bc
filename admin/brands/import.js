@@ -165,10 +165,16 @@
       var id = batch.batch_id || batch.id;
       var fin = await apiPostJson("/api/admin/import/brands/batches/" + id + "/commit", { batchId: id, commit: true });
       if(fin && fin.ok){
-        showStatus("Commit complete.");
-        await loadBrands();
-        toast("Publish OK (batch " + id + ")");
-      }else{
+  showStatus("Commit complete.");
+  await loadBrands();
+  // Fallback to batch rows if list is empty
+  try{
+    var hasTbody = document.getElementById("brandsTbody");
+    var isEmpty = hasTbody && /No brands yet|Loading?|Load error/.test(hasTbody.innerHTML);
+    if(isEmpty){ await loadBatchRows(id); }
+  }catch(_){}
+  toast("Publish OK (batch " + id + ")");
+}else{
         showStatus("Finalize error");
       }
     }else{
@@ -186,4 +192,25 @@
     if(refresh) refresh.addEventListener("click", function(){ loadBrands(); });
     loadBrands();
   });
-})();
+})(
+  async function loadBatchRows(id){
+    var tbody = document.getElementById("brandsTbody");
+    if(!tbody || !id) return false;
+    try{
+      var r = await fetch("/api/admin/import/brands/batches/"+id+"/rows", {
+        credentials:"include",
+        headers:{ "x-admin-email": adminEmail() }
+      });
+      if(!r.ok) return false;
+      var j = await r.json().catch(()=>({}));
+      var arr = Array.isArray(j) ? j : (j.items || j.rows || []);
+      if(!arr || !arr.length) return false;
+      var html = arr.map(function(b){
+        return '<tr><td>'+(b.id||"")+'</td><td>'+(b.brand_name||b.name||"")+
+               '</td><td>'+(b.slug||"")+'</td><td>'+(b.status||"committed")+
+               '</td><td>'+(b.deleted?"yes":"")+'</td><td></td></tr>';
+      }).join('');
+      tbody.innerHTML = html;
+      return true;
+    }catch(e){ return false; }
+  }})();
