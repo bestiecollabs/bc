@@ -49,7 +49,7 @@
   var help = q("brandsHelp");
   if(!tbody){ return; }
   try{
-    var data = null, paths = ["/api/admin/brands","/api/admin/brands/list"];
+    var data = null, paths = ["/api/admin/chipchip/brands","/api/admin/brands","/api/admin/brands/list"];
     for(var i=0;i<paths.length;i++){
       try{ data = await apiGet(paths[i]); if(data) break; }catch(_){}
     }
