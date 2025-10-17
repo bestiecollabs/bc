@@ -1,4 +1,7 @@
 ﻿{
   "version": 1,
-  "include": ["/api/*", "/api/debug/*"]
+  "include": [
+    "/api/*",
+    "/api/debug/*"
+  ]
 }
