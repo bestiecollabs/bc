@@ -1,72 +1,236 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Bestie Admin · Brands</title>
-  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin · Brands</title>
+  <link rel="stylesheet" href="/air.css">
+  <style>
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .row{display:flex;gap:8px;align-items:center}
+    .card{background:#fff;border:1px solid #eaeaea;border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:12px 0}
+    .card h2{margin:0 0 8px 0}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    .badge{padding:2px 6px;border:1px solid #ccc;border-radius:6px;font-size:12px}
+    .muted{color:#666}
+    .actions{display:flex;gap:6px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .section-title{margin:16px 0 8px 0}
+  </style>
 </head>
 <body>
-  <aside id="sidenav" class="sidenav">
-    <div class="brand">
-      <img src="/b1.png" alt="Bestie Collabs" width="28" height="28"><strong class="label">Admin</strong>
+<main class="wrap">
+  <h1>Brands Directory</h1>
+
+  <!-- 1) CSV Upload -->
+  <section class="card" id="sec-upload">
+    <h2 class="section-title">CSV Upload</h2>
+    <div class="toolbar">
+      <input id="csvFile" type="file" accept=".csv">
+      <button id="btn-dry" class="btn">Validate</button>
+      <button id="btn-commit" class="btn">Commit</button>
+      <a id="btn-template" class="btn" href="/api/admin/import/brands/template">Download Template</a>
+      <button id="btn-refresh" class="btn outline">Refresh Preview</button>
+      <span id="uploadStatus" class="muted"></span>
     </div>
-    <nav>
-      <a href="/admin/">Overview</a>
-      <a href="/admin/brands/" aria-current="page">Brands</a>
-      <a href="/admin/csv/">CSV Upload</a>
-      <a href="/admin/creators/">Creators</a>
-      <a href="/admin/recycle/">Recycle Bin</a>
-      <a href="/admin/settings/">Settings</a>
-    </nav>
-  </aside>
+    <div class="card" style="padding:0">
+      <table id="tbl-upload">
+        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Actions</th></tr></thead>
+        <tbody><tr><td colspan="6" class="muted">No preview yet</td></tr></tbody>
+      </table>
+    </div>
+  </section>
 
-  <main class="container">
-    <h1>Brands</h1>
+  <!-- 2) In Review (brand_drafts) -->
+  <section class="card" id="sec-review">
+    <h2 class="section-title">In Review</h2>
+    <div class="toolbar">
+      <button id="btn-publish-selected" class="btn">Publish selected</button>
+      <span id="reviewStatus" class="muted"></span>
+    </div>
+    <div class="card" style="padding:0">
+      <table id="tbl-review">
+        <thead><tr><th><input type="checkbox" id="chk-all"></th><th>Brand</th><th>Domain</th><th>Category</th><th>Source Row</th></tr></thead>
+        <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
 
-    <section class="card" id="brands-active">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h2 style="margin:0;">Active Brands</h2>
-        <div>
-          <button id="refreshBtn" class="btn">Refresh</button>
+  <!-- 3) Active Brands -->
+  <section class="card" id="sec-active">
+    <h2 class="section-title">Active Brands</h2>
+    <div class="toolbar row">
+      <input id="qActive" placeholder="Search name or domain" class="input" style="flex:1;padding:8px">
+      <button id="btn-load-active" class="btn">Load</button>
+    </div>
+    <div class="card" style="padding:0">
+      <table id="tbl-active">
+        <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
+        <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4) Unpublished Brands -->
+  <section class="card" id="sec-unpub">
+    <h2 class="section-title">Unpublished Brands</h2>
+    <div class="toolbar row">
+      <input id="qDraft" placeholder="Search name or domain" class="input" style="flex:1;padding:8px">
+      <button id="btn-load-draft" class="btn">Load</button>
+    </div>
+    <div class="card" style="padding:0">
+      <table id="tbl-draft">
+        <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
+        <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5) Deleted Brands -->
+  <section class="card" id="sec-deleted">
+    <h2 class="section-title">Deleted Brands</h2>
+    <div class="muted">Coming soon: this will list soft-deleted brands when the API supports a deleted filter.</div>
+  </section>
+</main>
+
+<script type="module">
+  const ADMIN_HDR = { "x-admin-email":"collabsbestie@gmail.com", "accept":"application/json", "content-type":"application/json" };
+
+  // ------- Helpers
+  const byId = (x)=>document.getElementById(x);
+  function cats(b){ return [b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).join(' • '); }
+  function rowBrand(b){
+    return `<tr data-id="${b.id}">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${b.logo_url? `<img src="${b.logo_url}" style="width:28px;height:28px;object-fit:cover;border-radius:6px">`:""}
+          <a href="${b.website_url||'#'}" target="_blank" rel="noopener">${b.name||''}</a>
+          <span class="badge">${b.domain||''}</span>
         </div>
-      </div>
-      <table id="brandsTableActive" style="margin-top:12px">
-        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Action</th></tr></thead>
-        <tbody id="brandsActiveBody"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
-      </table>
-    </section>
+      </td>
+      <td>${cats(b)||''}</td>
+      <td>${b.status||''}</td>
+      <td>${b.featured? 'Yes':'No'}</td>
+      <td class="actions">
+        <button class="btn xs publish">${(b.status||'')==='published'?'Unpublish':'Publish'}</button>
+        <button class="btn xs outline feature">${b.featured? 'Unfeature':'Feature'}</button>
+      </td>
+    </tr>`;
+  }
 
-    <section class="card" id="brands-drafts" style="margin-top:16px">
-      <h2 style="margin:0;">Unpublished Brands</h2>
-      <table id="brandsTableDrafts" style="margin-top:12px">
-        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Action</th></tr></thead>
-        <tbody id="brandsDraftBody"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
-      </table>
-    </section>
+  // ------- In Review (brand_drafts)
+  async function loadDrafts(){
+    const tbody = byId('tbl-review').querySelector('tbody');
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    const res = await fetch('/api/admin/brands/drafts', { headers: ADMIN_HDR });
+    const data = await res.json().catch(()=>({ok:false, items:[]}));
+    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
+    if(!Array.isArray(data.items) || !data.items.length){
+      tbody.innerHTML = '<tr><td colspan="5" class="muted">No drafts in review</td></tr>'; return;
+    }
+    const rows = data.items.map(d=>{
+      let v = {};
+      try { v = JSON.parse(d.data_json||'{}'); } catch {}
+      const domain = v.domain || '';
+      const name = v.name || '(no name)';
+      const cat  = v.category_primary || '';
+      return `<tr data-draft-id="${d.id}">
+        <td><input type="checkbox" class="chk"></td>
+        <td>${name}</td>
+        <td>${domain}</td>
+        <td>${cat}</td>
+        <td>${d.source_row_id ?? ''}</td>
+      </tr>`;
+    }).join('');
+    tbody.innerHTML = rows;
+  }
+  byId('chk-all').addEventListener('change', e=>{
+    const on = e.target.checked;
+    document.querySelectorAll('#tbl-review .chk').forEach(c=>{ c.checked = on; });
+  });
+  byId('btn-publish-selected').addEventListener('click', async ()=>{
+    const ids = Array.from(document.querySelectorAll('#tbl-review .chk:checked'))
+      .map(chk => Number(chk.closest('tr')?.getAttribute('data-draft-id'))).filter(Boolean);
+    if(!ids.length){ byId('reviewStatus').textContent = 'Select at least one draft'; return; }
+    byId('reviewStatus').textContent = 'Publishing…';
+    const res = await fetch('/api/admin/brands/drafts/publish', {
+      method:'POST', headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
+    });
+    const j = await res.json().catch(()=>({ok:false}));
+    byId('reviewStatus').textContent = j.ok ? 'Published' : 'Publish failed';
+    await loadDrafts(); // refresh
+    await loadActive();
+  });
 
-    <section class="card" id="brands-deleted" style="margin-top:16px">
-      <h2 style="margin:0;">Deleted Brands</h2>
-      <table id="brandsTableDeleted" style="margin-top:12px">
-        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Action</th></tr></thead>
-        <tbody id="brandsDeletedBody"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
-      </table>
-    </section>
+  // ------- Admin brands list (published / draft)
+  async function fetchBrands(status, q=""){
+    const url = new URL('/api/admin/brands', location.origin);
+    if(q) url.searchParams.set('q', q);
+    if(status) url.searchParams.set('status', status);
+    url.searchParams.set('limit','100');
+    const res = await fetch(url, { headers: ADMIN_HDR });
+    return res.json().catch(()=>({ok:false, items:[]}));
+  }
+  async function loadActive(){
+    const tbody = byId('tbl-active').querySelector('tbody');
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    const q = byId('qActive').value.trim();
+    const data = await fetchBrands('published', q);
+    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
+    tbody.innerHTML = data.items.map(rowBrand).join('') || '<tr><td colspan="5" class="muted">None</td></tr>';
+  }
+  async function loadDraft(){
+    const tbody = byId('tbl-draft').querySelector('tbody');
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    const q = byId('qDraft').value.trim();
+    const data = await fetchBrands('draft', q);
+    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
+    tbody.innerHTML = data.items.map(rowBrand).join('') || '<tr><td colspan="5" class="muted">None</td></tr>';
+  }
+  byId('btn-load-active').addEventListener('click', loadActive);
+  byId('btn-load-draft').addEventListener('click', loadDraft);
 
-    <section class="card" id="csv-upload" style="margin-top:16px">
-      <h2 style="margin:0 0 8px 0;">CSV Upload</h2>
-      <p class="muted">Required headers: brand_name, website_url, category_primary, category_secondary, category_tertiary, instagram_url, tiktok_url, description, customer_age_min, customer_age_max, us_based</p>
-      <form id="importForm">
-        <input id="csv" type="file" accept=".csv" />
-        <button id="uploadBtn" class="btn" type="submit">Upload</button>
-      </form>
-      <div id="uploadStatus" class="muted" style="margin-top:8px"></div>
-    </section>
-  </main>
+  // ------- Publish/Feature toggles for brands rows
+  async function updateBrand(id, patch){
+    const res = await fetch(`/api/admin/brands/${id}`, { method:'PATCH', headers: ADMIN_HDR, body: JSON.stringify(patch) });
+    return res.json();
+  }
+  document.addEventListener('click', async (e)=>{
+    const tr = e.target.closest('tr[data-id]');
+    if(!tr) return;
+    const id = tr.getAttribute('data-id');
+    if(e.target.classList.contains('publish')){
+      const cur = tr.children[2].textContent.trim();
+      const next = cur==='published' ? 'draft' : 'published';
+      await updateBrand(id,{ status: next });
+      await loadActive(); await loadDraft();
+    }
+    if(e.target.classList.contains('feature')){
+      const isYes = tr.children[3].textContent.trim()==='Yes';
+      await updateBrand(id,{ featured: !isYes });
+      await loadActive(); await loadDraft();
+    }
+  });
 
-  <script src="/admin/app.js" defer></script>
-  <script src="/admin/brands/import.js" defer></script>
-  <script src="/admin/brands/table.js?v=20251017b" defer></script>
+  // ------- CSV Upload hooks (import.js drives the actual calls)
+  // Buttons are wired to the existing import module API.
+  async function loadUploadPreview(){
+    // import.js exposes loadBrands() after its module loads
+    if(typeof window.loadBrands === 'function'){ window.loadBrands(); }
+  }
+  byId('btn-dry').addEventListener('click', ()=> window.runImport && window.runImport(false));
+  byId('btn-commit').addEventListener('click', ()=> window.runImport && window.runImport(true));
+  byId('btn-refresh').addEventListener('click', ()=> loadUploadPreview());
+
+  // Initial load
+  loadDrafts();
+  loadActive();
+  loadDraft();
+  loadUploadPreview();
+</script>
+
+<!-- Keep import.js last so its globals attach after DOM is ready -->
+<script type="module" src="/admin/brands/import.js"></script>
 </body>
 </html>
-
