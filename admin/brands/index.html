@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin · Brands</title>
+  <title>Admin Â· Brands</title>
   <link rel="stylesheet" href="/air.css">
   <style>
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
@@ -53,7 +53,7 @@
     <div class="card" style="padding:0">
       <table id="tbl-review">
         <thead><tr><th><input type="checkbox" id="chk-all"></th><th>Brand</th><th>Domain</th><th>Category</th><th>Source Row</th></tr></thead>
-        <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+        <tbody><tr><td colspan="5" class="muted">Loadingâ€¦</td></tr></tbody>
       </table>
     </div>
   </section>
@@ -68,7 +68,7 @@
     <div class="card" style="padding:0">
       <table id="tbl-active">
         <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-        <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+        <tbody><tr><td colspan="5" class="muted">Loadingâ€¦</td></tr></tbody>
       </table>
     </div>
   </section>
@@ -83,7 +83,7 @@
     <div class="card" style="padding:0">
       <table id="tbl-draft">
         <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-        <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+        <tbody><tr><td colspan="5" class="muted">Loadingâ€¦</td></tr></tbody>
       </table>
     </div>
   </section>
@@ -105,7 +105,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
 
   // ------- Helpers
   const byId = (x)=>document.getElementById(x);
-  function cats(b){ return [b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).join(' • '); }
+  function cats(b){ return [b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).join(' â€¢ '); }
   function rowBrand(b){
     return `<tr data-id="${b.id}">
       <td>
@@ -128,7 +128,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
   // ------- In Review (brand_drafts)
   async function loadDrafts(){
     const tbody = byId('tbl-review').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loadingâ€¦</td></tr>';
     const res = await fetch('/api/admin/brands/drafts', { headers: ADMIN_HDR });
     const data = await res.json().catch(()=>({ok:false, items:[]}));
     if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
@@ -159,7 +159,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
     const ids = Array.from(document.querySelectorAll('#tbl-review .chk:checked'))
       .map(chk => Number(chk.closest('tr')?.getAttribute('data-draft-id'))).filter(Boolean);
     if(!ids.length){ byId('reviewStatus').textContent = 'Select at least one draft'; return; }
-    byId('reviewStatus').textContent = 'Publishing…';
+    byId('reviewStatus').textContent = 'Publishingâ€¦';
     const res = await fetch('/api/admin/brands/drafts/publish', {
       method:'POST', headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
     });
@@ -169,34 +169,43 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
   });
 
   // ------- Admin brands list (published / draft)
-  async function fetchBrands(status, q=""){
-    const url = new URL('/api/admin/brands', location.origin);
-    if(q) url.searchParams.set('q', q);
-    if(status) url.searchParams.set('status', status);
-    url.searchParams.set('limit','100');
-    const res = await fetch(url, { headers: ADMIN_HDR });
-    return res.json().catch(()=>({ok:false, items:[]}));
+async function fetchBrands(wantStatus, q=""){
+  const paths = ["/api/admin/chipchip/brands", "/api/admin/brands", "/api/admin/brands/list"];
+  let data = null;
+  for (const p of paths) {
+    const url = new URL(p, location.origin);
+    if(q) url.searchParams.set("q", q);
+    if(wantStatus) url.searchParams.set("status", wantStatus);
+    url.searchParams.set("limit","100");
+    try {
+      const r = await fetch(url, { headers: ADMIN_HDR });
+      if (r.ok) { data = await r.json(); if (data) break; }
+    } catch(_) {}
   }
-  async function loadActive(){
-    const tbody = byId('tbl-active').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
-    const q = byId('qActive').value.trim();
-    const data = await fetchBrands('published', q);
-    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
-    tbody.innerHTML = data.items.map(rowBrand).join('') || '<tr><td colspan="5" class="muted">None</td></tr>';
-  }
-  async function loadDraft(){
-    const tbody = byId('tbl-draft').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
-    const q = byId('qDraft').value.trim();
-    const data = await fetchBrands('draft', q);
-    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
-    tbody.innerHTML = data.items.map(rowBrand).join('') || '<tr><td colspan="5" class="muted">None</td></tr>';
-  }
-  byId('btn-load-active').addEventListener('click', loadActive);
-  byId('btn-load-draft').addEventListener('click', loadDraft);
+  const arr = (data && (data.items || data.rows || data)) || [];
+  return { ok: true, items: Array.isArray(arr) ? arr : [] };
+}
 
-  // ------- Publish/Feature toggles
+async function loadActive(){
+  const tbody = byId("tbl-active").querySelector("tbody");
+  tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Loading…</td></tr>";
+  const q = byId("qActive").value.trim();
+  const data = await fetchBrands("published", q);
+  if(!data.ok){ tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Failed to load</td></tr>"; return; }
+  const rows = data.items.filter(b => (b.status || "published") === "published");
+  tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\"5\" class=\"muted\">None</td></tr>";
+}
+
+async function loadDraft(){
+  const tbody = byId("tbl-draft").querySelector("tbody");
+  tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Loading…</td></tr>";
+  const q = byId("qDraft").value.trim();
+  const data = await fetchBrands("draft", q);
+  if(!data.ok){ tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Failed to load</td></tr>"; return; }
+  const rows = data.items.filter(b => (b.status || "draft") === "draft");
+  tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\"5\" class=\"muted\">None</td></tr>";
+}
+// ------- Publish/Feature toggles
   async function updateBrand(id, patch){
     const res = await fetch(`/api/admin/brands/${id}`, { method:'PATCH', headers: ADMIN_HDR, body: JSON.stringify(patch) });
     return res.json();
