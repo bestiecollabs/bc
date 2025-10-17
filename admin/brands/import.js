@@ -213,4 +213,38 @@
       tbody.innerHTML = html;
       return true;
     }catch(e){ return false; }
-  }})();
+  }})();/* PATCH: restore brands table refresh + initial load */
+(function(){
+  if(window.__brandsRefreshPatched) return; window.__brandsRefreshPatched = true;
+  const ADMIN = (window.ADMIN_EMAIL||"collabsbestie@gmail.com");
+  function q(id){ return document.getElementById(id); }
+  async function apiGet(p){
+    const r = await fetch(p,{ credentials:"include", headers:{ "x-admin-email": ADMIN }});
+    if(!r.ok) throw new Error("GET "+p+" "+r.status);
+    return r.json();
+  }
+  async function loadBrands(){
+    const tbody = q("brandsTbody");
+    if(!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" class="muted">Loading…</td></tr>';
+    try{
+      let data=null, paths=["/api/admin/chipchip/brands","/api/admin/brands","/api/admin/brands/list"];
+      for(let i=0;i<paths.length;i++){ try{ data = await apiGet(paths[i]); if(data) break; }catch(_){ } }
+      const arr = Array.isArray(data) ? data : (data?.rows || data?.items || data?.data || []);
+      if(!arr.length){ tbody.innerHTML = '<tr><td colspan="6" class="muted">No brands yet</td></tr>'; return; }
+      tbody.innerHTML = arr.map(b =>
+        `<tr><td>${b.id??""}</td><td>${b.name??""}</td><td>${b.slug??""}</td><td>${b.status??"draft"}</td><td>${b.deleted?"yes":""}</td><td></td></tr>`
+      ).join("");
+    }catch(e){
+      tbody.innerHTML = '<tr><td colspan="6" class="muted">Load error</td></tr>';
+      console.error("[brands] load error", e);
+    }
+  }
+  document.addEventListener("DOMContentLoaded", function(){
+    const refresh = q("refreshBtn") || Array.from(document.querySelectorAll("button")).find(b => b.textContent.trim().toLowerCase()==="refresh");
+    if(refresh){ refresh.addEventListener("click", loadBrands); }
+    const commitBtn = q("commit") || Array.from(document.querySelectorAll("button")).find(b => b.textContent.trim().toLowerCase()==="commit");
+    if(commitBtn){ commitBtn.addEventListener("click", ()=> setTimeout(loadBrands,1500)); }
+    loadBrands();
+  });
+})();
