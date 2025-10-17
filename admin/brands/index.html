@@ -27,12 +27,13 @@
   <section class="card" id="sec-upload">
     <h2 class="section-title">CSV Upload</h2>
     <div class="toolbar">
-      <input id="csvFile" type="file" accept=".csv">
-      <button id="btn-dry" class="btn">Validate</button>
-      <button id="btn-commit" class="btn">Commit</button>
+      <!-- IDs below match import.js expectations -->
+      <input id="file" type="file" accept=".csv">
+      <button id="dryrun" class="btn">Dry Run</button>
+      <button id="commit" class="btn">Commit</button>
       <a id="btn-template" class="btn" href="/api/admin/import/brands/template">Download Template</a>
-      <button id="btn-refresh" class="btn outline">Refresh Preview</button>
-      <span id="uploadStatus" class="muted"></span>
+      <button id="refreshBtn" class="btn outline">Refresh Preview</button>
+      <span id="actout" class="muted"></span>
     </div>
     <div class="card" style="padding:0">
       <table id="tbl-upload">
@@ -93,6 +94,11 @@
     <div class="muted">Coming soon: this will list soft-deleted brands when the API supports a deleted filter.</div>
   </section>
 </main>
+
+<script>
+// Provide admin header to import.js fetches
+window.ADMIN_EMAIL = "collabsbestie@gmail.com";
+</script>
 
 <script type="module">
   const ADMIN_HDR = { "x-admin-email":"collabsbestie@gmail.com", "accept":"application/json", "content-type":"application/json" };
@@ -159,8 +165,7 @@
     });
     const j = await res.json().catch(()=>({ok:false}));
     byId('reviewStatus').textContent = j.ok ? 'Published' : 'Publish failed';
-    await loadDrafts(); // refresh
-    await loadActive();
+    await loadDrafts(); await loadActive();
   });
 
   // ------- Admin brands list (published / draft)
@@ -191,7 +196,7 @@
   byId('btn-load-active').addEventListener('click', loadActive);
   byId('btn-load-draft').addEventListener('click', loadDraft);
 
-  // ------- Publish/Feature toggles for brands rows
+  // ------- Publish/Feature toggles
   async function updateBrand(id, patch){
     const res = await fetch(`/api/admin/brands/${id}`, { method:'PATCH', headers: ADMIN_HDR, body: JSON.stringify(patch) });
     return res.json();
@@ -213,24 +218,20 @@
     }
   });
 
-  // ------- CSV Upload hooks (import.js drives the actual calls)
-  // Buttons are wired to the existing import module API.
-  async function loadUploadPreview(){
-    // import.js exposes loadBrands() after its module loads
-    if(typeof window.loadBrands === 'function'){ window.loadBrands(); }
-  }
-  byId('btn-dry').addEventListener('click', ()=> window.runImport && window.runImport(false));
-  byId('btn-commit').addEventListener('click', ()=> window.runImport && window.runImport(true));
-  byId('btn-refresh').addEventListener('click', ()=> loadUploadPreview());
+  // ------- CSV Upload hooks from this page: guard so no errors if absent
+  function safe(id, fn){ const el = byId(id); if(el) el.addEventListener('click', fn); }
+  safe('btn-dry',   ()=> window.runImport && window.runImport(false));
+  safe('btn-commit',()=> window.runImport && window.runImport(true));
+  safe('btn-refresh',()=> typeof loadBrands==='function' && loadBrands());
 
   // Initial load
-  loadDrafts();
-  loadActive();
-  loadDraft();
-  loadUploadPreview();
+  loadDrafts(); loadActive(); loadDraft();
 </script>
 
-<!-- Keep import.js last so its globals attach after DOM is ready -->
-<script type="module" src="/admin/brands/import.js"></script>
+<!-- Load admin/app.js if needed -->
+<script type="module" src="/admin/app.js"></script>
+
+<!-- Load import.js in the mode it expects -->
+<script src="/admin/brands/import.js?v=20251017" defer></script>
 </body>
 </html>
