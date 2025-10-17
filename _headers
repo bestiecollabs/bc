@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
@@ -8,8 +8,8 @@
 /api/*
   Cache-Control: no-store
   Access-Control-Allow-Origin: https://bestiecollabs.com
-  Access-Control-Allow-Methods: GET, POST, OPTIONS
-  Access-Control-Allow-Headers: Content-Type, Authorization
+  Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization, x-admin-email
 
 /brands/*
   Cache-Control: public, max-age=300, stale-while-revalidate=86400

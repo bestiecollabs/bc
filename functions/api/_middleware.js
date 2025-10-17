@@ -5,7 +5,7 @@
                       request.headers.get('Access-Control-Request-Method');
 
   const headers = new Headers({
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
     'Access-Control-Allow-Headers': 'content-type, x-admin-email',
     'Vary': 'Origin'
   });
