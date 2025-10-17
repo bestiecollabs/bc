@@ -1,4 +1,5 @@
-﻿function parseCSV(text){const rows=[];let i=0,cur="",q=false,row=[];while(i<text.length){const ch=text[i];if(q){if(ch=='"'&&text[i+1]=='"'){cur+='"';i+=2;continue}if(ch=='"'){q=false;i++;continue}cur+=ch;i++;continue}if(ch=='"'){q=true;i++;continue}if(ch==','){row.push(cur);cur="";i++;continue}if(ch=='\r'){i++;continue}if(ch=='\n'){row.push(cur);rows.push(row);row=[];cur="";i++;continue}cur+=ch;i++;continue}row.push(cur);rows.push(row);return rows}
+﻿import { ACCEPTED_HEADERS_11, validateHeaders } from './_headers.js';
+function parseCSV(text){const rows=[];let i=0,cur="",q=false,row=[];while(i<text.length){const ch=text[i];if(q){if(ch=='"'&&text[i+1]=='"'){cur+='"';i+=2;continue}if(ch=='"'){q=false;i++;continue}cur+=ch;i++;continue}if(ch=='"'){q=true;i++;continue}if(ch==','){row.push(cur);cur="";i++;continue}if(ch=='\r'){i++;continue}if(ch=='\n'){row.push(cur);rows.push(row);row=[];cur="";i++;continue}cur+=ch;i++;continue}row.push(cur);rows.push(row);return rows}
 function truthy(v){const s=String(v??"").trim().toLowerCase();return s==="1"||s==="true"||s==="yes"||s==="y"}
 function extractDomain(url){try{const u=new URL(String(url||"").trim());let d=u.hostname.toLowerCase();if(d.startsWith("www.")) d=d.slice(4);return d}catch{ return "" }}
 
@@ -18,7 +19,17 @@ export async function onRequestPost({ request, env }){
   }
 
   const rows = parseCSV(body);
-  if(rows.length<2) return new Response(JSON.stringify({ ok:false, error:"no rows" }), { status:400, headers:{ "Content-Type":"application/json" }});
+if(!Array.isArray(rows) || rows.length < 2){
+  return new Response(JSON.stringify({ ok:false, error:"no_rows" }), { status:400, headers:{ "Content-Type":"application/json" }});
+}
+const headerLine = (rows[0]||[]).join(",");
+const hv = validateHeaders(headerLine);
+if(!hv.ok){
+  return new Response(JSON.stringify({
+    ok:false, error:"invalid_csv_headers",
+    missing: hv.missing, unexpected: hv.unexpected, expected: hv.expected
+  }), { status:400, headers:{ "Content-Type":"application/json" }});
+}if(rows.length<2) return new Response(JSON.stringify({ ok:false, error:"no rows" }), { status:400, headers:{ "Content-Type":"application/json" }});
 
   const headers = rows[0].map(h=>String(h||"").trim());
   const idx = Object.fromEntries(headers.map((h,i)=>[h,i]));
@@ -79,3 +90,4 @@ export async function onRequestOptions(){
     "Access-Control-Allow-Headers":"content-type"
   }});
 }
+
