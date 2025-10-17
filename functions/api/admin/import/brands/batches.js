@@ -31,8 +31,6 @@ if(!hv.ok){
 if(!Array.isArray(rows) || rows.length < 2){
   return new Response(JSON.stringify({ ok:false, error:"no_rows" }), { status:400, headers:{ "Content-Type":"application/json" }});
 }
-const headerLine = (rows[0]||[]).join(",");
-const hv = validateHeaders(headerLine);
 if(!hv.ok){
   return new Response(JSON.stringify({
     ok:false, error:"invalid_csv_headers",
