@@ -61,3 +61,9 @@ Branch=main Commit=a118ead4744074e7ff965761ac0110b8d724b18a
 - No secret values stored in repo; values live in Cloudflare Pages and GitHub.
 - Next (Part 2): Public Brand Directory surface post-CSV commit.
 
+## 2025-10-16 22:48 PST — Handoff v3.0 — Part 1 of 2 — Latest active session
+- Initialized AI handoff docs under /seed.
+- Prepended new running-log header to AI_README.md with current production status and next steps.
+- Documented constants, APIs, D1 schema, runbooks, and Handoff Rules v3.0.
+- Noted missing GET list routes for import batches as current blocker for UI table and commit UX.
+- Next session (Part 2): restore batch read endpoints or adapt UI; tighten CSV header validator on live handler; verify commit writes new rows to brands and UI renders.

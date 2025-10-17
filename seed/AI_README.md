@@ -1,4 +1,7 @@
-﻿[AI_README 2025-10-15 20:22 PST] — Latest Active Session (Part 1 of 2)
+[AI_README 2025-10-16 22:48 PST] Handoff v3.0 — Part 1 of 2 — Latest active session
+Status: Production-first on main. Pages Functions live. Admin UI reads /api/admin/brands. Import list routes currently missing (GET /api/admin/import/brands/batches, /rows).
+Next: Restore read routes or adjust UI to POST-only flow. Commit handler writes to brands via D1.
+[AI_README 2025-10-15 20:22 PST] — Latest Active Session (Part 1 of 2)
 
 PROJECT
 - Bestie Collabs (production-first on Cloudflare Pages + Functions)
