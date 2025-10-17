@@ -1,7 +1,49 @@
-[AI_README 2025-10-16 22:48 PST] Handoff v3.0 — Part 1 of 2 — Latest active session
+﻿[AI_README 2025-10-17 11:23 PST]
+LATEST_ACTIVE_SESSION: true
+PROJECT: Bestie Collabs (production-first on main)
+DOMAINS: https://bestiecollabs.com, https://api.bestiecollabs.com
+ADMIN HEADER: x-admin-email=collabsbestie@gmail.com
+DB: Cloudflare D1 (binding DB). Active brands have deleted_at IS NULL.
+
+SCOPE THIS SESSION:
+- Restored import reads: GET /api/admin/import/brands/batches, GET /api/admin/import/brands/batches/:id/rows.
+- Directory UI loads from GET /api/admin/brands (table.js) and Refresh works.
+- Added soft-delete endpoints: POST /api/admin/brands/:id/delete and /api/admin/brands/:id/undo.
+
+IMPLEMENTED ENDPOINTS:
+- GET  /api/admin/import/brands/batches           -> list batches {id,status,source_uri,created_at} with ?limit&offset
+- GET  /api/admin/import/brands/batches/:id/rows  -> list rows {id,row_num,valid,parsed{...}} with ?limit&offset
+- GET  /api/admin/brands                          -> list active brands (deleted_at IS NULL)
+- POST /api/admin/brands/:id/delete               -> set deleted_at = now
+- POST /api/admin/brands/:id/undo                 -> set deleted_at = NULL
+
+UI WIRING STATUS:
+- /admin/brands/table.js loads directory and wires Refresh.
+- Delete/Undo wired to POST endpoints with admin header. Table refreshes on success.
+
+KNOWN GAPS / NEXT:
+- Add Unpublish endpoint (status='draft') and wire button.
+- Import: return commit counts {inserted, updated, skipped}.
+- Normalize CSV header validation and casing on server.
+- Add pagination cursor support for large batch/row lists.
+
+RUNBOOK:
+1) Admin API calls must include: x-admin-email: collabsbestie@gmail.com.
+2) Brands list shows only active rows (deleted_at IS NULL).
+3) Soft delete/undo toggles deleted_at and triggers UI refresh.
+4) If UI shows "Loading…", confirm GET /api/admin/brands returns 200 and check console.
+
+FILES TOUCHED (this session):
+- functions/api/admin/import/brands/batches/index.ts
+- functions/api/admin/import/brands/batches/[id]/rows.ts
+- functions/api/admin/brands/[id]/delete.ts
+- functions/api/admin/brands/[id]/undo.ts
+- admin/brands/table.js (loader + Refresh + Delete/Undo)
+
+[AI_README 2025-10-16 22:48 PST] Handoff v3.0 â€” Part 1 of 2 â€” Latest active session
 Status: Production-first on main. Pages Functions live. Admin UI reads /api/admin/brands. Import list routes currently missing (GET /api/admin/import/brands/batches, /rows).
 Next: Restore read routes or adjust UI to POST-only flow. Commit handler writes to brands via D1.
-[AI_README 2025-10-15 20:22 PST] — Latest Active Session (Part 1 of 2)
+[AI_README 2025-10-15 20:22 PST] â€” Latest Active Session (Part 1 of 2)
 
 PROJECT
 - Bestie Collabs (production-first on Cloudflare Pages + Functions)
@@ -14,10 +56,10 @@ RUNTIME
 - Health: GET /api/healthcheck -> { ok: true }
 
 HANDOFF RULES
-- Use Handoff Rules v3.0 (persisted): full files, no patches, prod-first, numbered steps, “What to expect”.
+- Use Handoff Rules v3.0 (persisted): full files, no patches, prod-first, numbered steps, â€œWhat to expectâ€.
 - Do NOT commit or echo secrets. Read from environment only.
 
-ENVIRONMENT (secrets present — stored privately in Cloudflare/GitHub; values NOT in repo)
+ENVIRONMENT (secrets present â€” stored privately in Cloudflare/GitHub; values NOT in repo)
 - CF_ACCESS_CLIENT_ID, CF_ACCESS_CLIENT_SECRET
 - CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, CLOUDFLARE_WORKER_DOMAIN, D1_DATABASE_ID
 - SHOPIFY_API_KEY, SHOPIFY_API_SECRET, SHOPIFY_SCOPES, SHOPIFY_ENCRYPTION_KEY
@@ -34,7 +76,7 @@ THIS SESSION
 - Scope: Doc-only update; no code or schema changes.
 
 ---
-[AI_README 2025-10-15 17:59 PST]  # Latest Active Session â€¢ v3.0 â€¢ Part 1 of 2
+[AI_README 2025-10-15 17:59 PST]  # Latest Active Session Ã¢â‚¬Â¢ v3.0 Ã¢â‚¬Â¢ Part 1 of 2
 
 PROJECT
 - Name: Bestie Collabs (BC)
@@ -169,5 +211,6 @@ Next 2 Tasks:
 2) Public /brands directory: list + detail pages sourced from DB.
 
 ---
+
 
 
