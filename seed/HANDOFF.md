@@ -1,41 +1,61 @@
-[HANDOFF 2025-10-16 22:49 PST] Handoff v3.0 — Part 2 of 2 — Latest active session
-Status: Production-first on main. Admin brands read is live. Debug SQL is live. CSV upload is POST-only and strict. Commit handler exists. Batch list/rows GET routes are currently missing, so UI list and commit UX are limited.
+﻿# Bestie Collabs — HANDOFF (v3.0)
+[HANDOFF 2025-10-17 11:25 PST]  
+LATEST_ACTIVE_SESSION: true  
+PART: 2 of 2
 
-# Bestie Collabs — Handoff (v3.0)
+## Production Context
+- Deploy target: **main** branch → Cloudflare Pages (project: bestiecollabs).
+- Domains: **https://bestiecollabs.com**, **https://api.bestiecollabs.com**.
+- Admin header required: x-admin-email: collabsbestie@gmail.com.
+- Database: Cloudflare D1 (**DB**). Active brands: deleted_at IS NULL.
 
-## Current progress
-- Admin data read: **GET /api/admin/brands** returns active rows from D1 rands where deleted_at IS NULL.
-- Diagnostics: **GET /api/debug/sql?sql=...** is available for read-only SELECT checks against D1.
-- Import upload: **POST /api/admin/import/brands/batches** enforces strict CSV header validation and writes to import_batches + import_rows(parsed_json, errors_json, valid).
-- Commit: **POST /api/admin/import/brands/batches/:id/commit** upserts valid import_rows into rands and marks the batch committed when changes occur.
-- Routing: Pages Functions includes /api/* and /api/debug/*.
+## Work Completed in this Session
+### Backend
+- Restored import reads:
+  - GET /api/admin/import/brands/batches (limit/offset, {id,status,source_uri,created_at}).
+  - GET /api/admin/import/brands/batches/:id/rows (limit/offset, {id,row_num,valid,parsed{...}}).
+- Directory management:
+  - GET /api/admin/brands used by UI to render the Directory table.
+  - **Soft delete**: POST /api/admin/brands/:id/delete → sets deleted_at = now.
+  - **Undo delete**: POST /api/admin/brands/:id/undo → sets deleted_at = NULL.
 
-## Known gaps
-- UI expectations: Missing **GET** routes for batch listing and batch rows (/api/admin/import/brands/batches, /api/admin/import/brands/batches/:id/rows) cause 404s and block table population and commit UX.
-- Schema guardrails: rands requires website_url and category_primary on insert; commit logic supplies safe defaults but needs verification across varied inputs.
+### Frontend
+- /admin/brands/table.js loads Directory table from GET /api/admin/brands, wires **Refresh**, **Delete**, and **Undo**.  
+- On success, table re-fetches and re-renders.
 
-## Next two tasks (do next)
-1) **Restore read routes for imports**  
-   Implement GET /api/admin/import/brands/batches and GET /api/admin/import/brands/batches/:id/rows to power UI list + review. Return minimal, stable fields and paginate.
-2) **End-to-end import proof**  
-   Upload a small valid CSV, commit a batch, then verify rows via both GET /api/admin/brands and the UI table. Add negative tests for header rejection and invalid rows.
+## Current Status
+- Directory page: loads and refreshes successfully.
+- Delete/Undo backend: returning 200 {"ok":true,"affected":N,"id":...}.
+- Import batches/rows list routes: live with pagination.
 
-## Operational constants
-- Admin header: x-admin-email: collabsbestie@gmail.com
-- UI path: /admin/brands/ with #file, #dryBtn|#dryrun, #commitBtn|#commit
-- Domains: https://bestiecollabs.com , https://api.bestiecollabs.com
-- D1 source of truth: rands with deleted_at IS NULL as active
+## Validate Quickly
+1. **Batches**:  
+   curl -H "x-admin-email: collabsbestie@gmail.com" https://api.bestiecollabs.com/api/admin/import/brands/batches?limit=5&offset=0
+2. **Rows for latest batch**:  
+   .../batches/{id}/rows?limit=5&offset=0
+3. **Directory**:  
+   curl -H "x-admin-email: collabsbestie@gmail.com" https://api.bestiecollabs.com/api/admin/brands?limit=10&offset=0
+4. **Delete/Undo**:  
+   POST /api/admin/brands/{id}/delete then POST /api/admin/brands/{id}/undo with admin header.
 
-## Runbooks
-### Production smoke
-1. Count: SELECT COUNT(*) AS cnt FROM brands WHERE deleted_at IS NULL;
-2. Recent: SELECT id,status,import_batch_id,name,slug,created_at FROM brands WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 5;
-3. Import state: query import_batches and import_rows via debug SQL until read routes are restored.
+## Next 2 Tasks (Do Next)
+1. **Unpublish Endpoint + UI**  
+   - Add POST /api/admin/brands/:id/unpublish → UPDATE brands SET status='draft' WHERE id=?;  
+   - Wire an **Unpublish** button beside Delete/Undo to call the endpoint and refresh the table.
+2. **Commit Counts in Import**  
+   - Update POST /api/admin/import/brands/batches/:id/commit to return { inserted, updated, skipped }.  
+   - Surface counts in the Admin UI toast and auto-refresh batches + directory.
 
-### Failure modes
-- **Build**: TypeScript in .js, duplicate consts, or route file placement. Fix and redeploy.
-- **404**: Route not implemented or misrouted. Confirm _routes.json and function path.
-- **500**: D1 query shape mismatch. Reduce columns, remove GROUP BY, then narrow.
+## Notes / Guardrails
+- All admin endpoints must check the x-admin-email header.  
+- Keep functions under /functions/api/* with _routes.json allowing /api/* and /api/debug/*.  
+- Directory list must filter deleted_at IS NULL.  
+- Pagination caps: limit <= 200.
 
-## Change log pointer
-See /seed/CHANGELOG_AI.md for timestamped entries under v3.0.
+## File Inventory Touched This Session
+- unctions/api/admin/import/brands/batches/index.ts
+- unctions/api/admin/import/brands/batches/[id]/rows.ts
+- unctions/api/admin/brands/[id]/delete.ts
+- unctions/api/admin/brands/[id]/undo.ts
+- dmin/brands/table.js
+
