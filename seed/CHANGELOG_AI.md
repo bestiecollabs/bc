@@ -67,3 +67,17 @@ Branch=main Commit=a118ead4744074e7ff965761ac0110b8d724b18a
 - Documented constants, APIs, D1 schema, runbooks, and Handoff Rules v3.0.
 - Noted missing GET list routes for import batches as current blocker for UI table and commit UX.
 - Next session (Part 2): restore batch read endpoints or adapt UI; tighten CSV header validator on live handler; verify commit writes new rows to brands and UI renders.
+[2025-10-17 11:26 PST] Bestie Collabs — Handoff v3.0 session
+- Restored import read endpoints (batches, rows) with pagination and admin header check.
+- Directory page now loads brands via GET /api/admin/brands and Refresh works.
+- Added POST /api/admin/brands/:id/delete and /api/admin/brands/:id/undo (soft delete).
+- Wired Delete/Undo in table.js to refresh after success.
+- Next: Unpublish endpoint, commit counts, header normalization.
+
+[2025-10-17 11:27 PST] Bestie Collabs — Handoff v3.0 session
+- Restored import read endpoints with pagination and admin header check.
+- Directory page loads brands via GET /api/admin/brands and Refresh works.
+- Added POST /api/admin/brands/:id/delete and /api/admin/brands/:id/undo.
+- Wired Delete/Undo in table.js to refresh after success.
+- Next: Unpublish endpoint, commit counts, header normalization.
+
