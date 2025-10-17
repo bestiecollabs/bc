@@ -214,3 +214,6 @@ Next 2 Tasks:
 
 
 
+[AI_README 2025-10-17 12:24 PST]
+- Brands Directory: /admin/brands/table.js now renders Delete/Undo/Unpublish with delegated click handling and auto-refresh after success.
+- API: Added POST /api/admin/brands/:id/unpublish → sets status='draft'.

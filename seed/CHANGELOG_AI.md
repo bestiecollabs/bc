@@ -81,3 +81,6 @@ Branch=main Commit=a118ead4744074e7ff965761ac0110b8d724b18a
 - Wired Delete/Undo in table.js to refresh after success.
 - Next: Unpublish endpoint, commit counts, header normalization.
 
+## 2025-10-17 12:24 PST
+- Fix: First-click inertia removed. Table auto-refreshes after Delete/Undo.
+- Add: Unpublish button and API. Sets brand.status='draft' and reloads table.
