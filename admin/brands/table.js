@@ -7,7 +7,7 @@
   function q(id){ return document.getElementById(id); }
 
   async function fetchBrands(){
-    const url = new URL(API + "/api/admin/brands");
+    const url = new URL(API + "/api/admin/brands?scope=all");
     url.searchParams.set("limit","500");
     url.searchParams.set("offset","0");
     const res = await fetch(url.toString(), { headers: { "x-admin-email": ADMIN }, credentials: "include" });
@@ -132,4 +132,28 @@
 
   // manual
   window.__loadBrandsDirectory = loadAll;
+})();
+
+
+;(function(){
+  if (!window.__brandsToast) {
+    window.__brandsToast = function(msg){
+      try{
+        var t=document.createElement("div");
+        t.textContent=String(msg);
+        t.style.position="fixed"; t.style.right="12px"; t.style.bottom="12px";
+        t.style.padding="8px 10px"; t.style.background="#111"; t.style.color="#fff";
+        t.style.borderRadius="10px"; t.style.zIndex="9999";
+        document.body.appendChild(t); setTimeout(()=>t.remove(),1800);
+      }catch(_){}
+    };
+  }
+  document.addEventListener("click", function(e){
+    const b=e.target && e.target.closest("button[data-action][data-id]");
+    if(!b) return;
+    const act=b.getAttribute("data-action");
+    if (act==="publish"||act==="unpublish"||act==="delete"||act==="undo"){
+      setTimeout(()=>{ if(window.__brandsToast) __brandsToast(act+" OK"); }, 0);
+    }
+  });
 })();
