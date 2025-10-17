@@ -1,4 +1,4 @@
-﻿export const config = { runtime: "edge" };
+export const config = { runtime: "edge" };
 
 /**
  * POST /api/admin/import/brands/batches
@@ -51,7 +51,7 @@ export async function onRequestPost(ctx){
   let inserted=0;
   for(let i=1;i<rows.length;i++){
     const cols = rows[i];
-    const obj:any = {
+    const obj = {
       name: cols[idx.name] || "",
       slug: cols[idx.slug] || "",
       website_url: cols[idx.website_url] || "",
