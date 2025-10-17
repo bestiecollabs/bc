@@ -129,7 +129,7 @@
     await ensureCsvHeaders(f);
 
     // Create batch by sending raw CSV as text/plain
-    var up = await fetch("/api/admin/import/brands/batches", {
+    var up = await postBatches("/api/admin/import/brands/batches", {
       method:"POST",
       credentials:"include",
       headers:{ "content-type":"text/plain", "x-admin-email": adminEmail() },
