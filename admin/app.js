@@ -14,7 +14,7 @@
     document.head.appendChild(s);
   })();
 
-  const devEmail = ""; // optional dev override
+  const devEmail = "collabsbestie@gmail.com"; // optional dev override
 
   const $  = (q)=>document.querySelector(q);
   const $$ = (q)=>document.querySelectorAll(q);
@@ -95,8 +95,8 @@
 
   /* Brands */
   async function loadBrands(){
-    const { json } = await api("/api/admin/chipchip/brands/list");
-    const items = json.items || [];
+    const { json } = await api("/api/admin/chipchip/brands");
+    const items = json.items || json.rows || [];
     renderTable($("#brandTable tbody"), items,
       ["id","name","slug","status","deleted_at"],
       (row)=>[
@@ -120,7 +120,7 @@
   /* Creators */
   async function loadCreators(){
     const { json } = await api("/api/admin/chipchip/creators/list");
-    const items = json.items || [];
+    const items = json.items || json.rows || [];
     renderTable($("#creatorTable tbody"), items,
       ["open_id","display_name","role","deleted_at"],
       (row)=>[
@@ -248,3 +248,4 @@
     }catch(e){ console.error(e); }
   })();
 })();
+
