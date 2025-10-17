@@ -248,3 +248,46 @@
     loadBrands();
   });
 })();
+/* PATCH: wire Delete/Undo actions with admin header and refresh */
+;(function(){
+  if (window.__brandsDeleteUndoPatched) return; window.__brandsDeleteUndoPatched = true;
+
+  const ADMIN = "collabsbestie@gmail.com";
+  const API   = "https://api.bestiecollabs.com";
+
+  function qs(sel){ return document.querySelector(sel); }
+  function findBtn(textOrId){
+    return qs("#"+textOrId) ||
+      Array.from(document.querySelectorAll("button")).find(b => (b.textContent||"").trim().toLowerCase()===textOrId.toLowerCase());
+  }
+  function brandId(){
+    const byId = qs("#brandId");
+    if (byId && byId.value) return Number(byId.value);
+    const any = Array.from(document.querySelectorAll("input")).find(i => (i.placeholder||"").toLowerCase().includes("brand id"));
+    return any && any.value ? Number(any.value) : NaN;
+  }
+  async function post(path){
+    const res = await fetch(API+path, { method:"POST", headers:{ "x-admin-email": ADMIN }, credentials:"include" });
+    if (!res.ok) throw new Error(path+" "+res.status);
+    return res.json();
+  }
+  async function doDelete(){
+    const id = brandId();
+    if (!Number.isFinite(id)) { alert("Enter a valid Brand ID"); return; }
+    await post(`/api/admin/brands/${id}/delete`);
+    if (window.__loadBrandsDirectory) window.__loadBrandsDirectory();
+  }
+  async function doUndo(){
+    const id = brandId();
+    if (!Number.isFinite(id)) { alert("Enter a valid Brand ID"); return; }
+    await post(`/api/admin/brands/${id}/undo`);
+    if (window.__loadBrandsDirectory) window.__loadBrandsDirectory();
+  }
+  function wire(){
+    const del  = findBtn("deleteBtn") || findBtn("delete");
+    const undo = findBtn("undoBtn")   || findBtn("undo");
+    if (del  && !del.dataset._wired){  del.dataset._wired="1";  del.addEventListener("click", e=>{ e.preventDefault(); doDelete().catch(err=>{ console.error(err); alert("Delete failed"); }); }); }
+    if (undo && !undo.dataset._wired){ undo.dataset._wired="1"; undo.addEventListener("click", e=>{ e.preventDefault(); doUndo().catch(err=>{ console.error(err); alert("Undo failed"); }); }); }
+  }
+  document.addEventListener("DOMContentLoaded", wire);
+})();
