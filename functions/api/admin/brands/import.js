@@ -1,154 +1,126 @@
 ﻿/**
- * POST /api/admin/brands
- * Inserts new rows only. Skips duplicates.
- * Duplicate key = website_host_norm OR shopify_domain_norm (normalized).
- * Response: { ok, inserted, skipped_duplicate, failed }
+ * POST /api/admin/brands/import
+ * Accepts multipart/form-data with field "file" (CSV).
+ * Query param ?dry=1 for dry-run.
+ * Default status for new/updated rows: in_review
  */
-export const onRequestPost = async ({ request, env }) => {
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "https://bestiecollabs.com",
+      "Access-Control-Allow-Methods": "GET,POST,PATCH,OPTIONS",
+      "Access-Control-Allow-Headers": "content-type, x-admin-email"
+    }
+  });
+}
+
+export async function onRequestPost({ request, env }) {
   try {
-    const body = await request.json().catch(() => ({}));
-    const rows = Array.isArray(body.rows) ? body.rows : null;
-    if (!rows) return json({ ok:false, error:"Invalid body. Expected { rows: [] }" }, 400);
-    if (rows.length === 0) return json({ ok:true, inserted:0, skipped_duplicate:0, failed:0 });
-    if (rows.length > 1000) return json({ ok:false, error:"Too many rows. Max 1000" }, 413);
+    const url = new URL(request.url);
+    const dry = url.searchParams.get("dry") === "1";
+    const form = await request.formData();
+    const file = form.get("file");
+    if (!file || !file.text) {
+      return json({ ok:false, error:"missing_file" }, 400);
+    }
+    const csv = await file.text();
+    const rows = parseCsv(csv);
 
-    let inserted = 0, failed = 0, skipped_duplicate = 0;
-    const chunkSize = 100;
+    // Basic header check
+    const required = ["name","slug","domain"];
+    const headerOk = required.every(h => rows.header.includes(h));
+    if (!headerOk) {
+      return json({ ok:false, error:"invalid_csv_headers", required }, 400);
+    }
 
-    for (let i=0;i<rows.length;i+=chunkSize) {
-      const chunk = rows.slice(i, i+chunkSize);
-      const stmts = [];
+    let inserted = 0, updated = 0, skipped = 0, errors = [];
 
-      for (const r of chunk) {
-        const n = normalizeRow(r);
-        const v = validateRow(n);
-        if (!v.ok) { failed++; continue; }
+    if (!dry) {
+      const stmt = `
+        INSERT INTO brands (name, slug, domain, status, is_public, category_primary, category_secondary, category_tertiary, website_url, logo_url, created_at, updated_at)
+        VALUES (?1, ?2, ?3, 'in_review', 0, ?4, ?5, ?6, ?7, ?8, datetime('now'), datetime('now'))
+        ON CONFLICT(slug) DO UPDATE SET
+          name=excluded.name,
+          domain=excluded.domain,
+          category_primary=excluded.category_primary,
+          category_secondary=excluded.category_secondary,
+          category_tertiary=excluded.category_tertiary,
+          website_url=excluded.website_url,
+          logo_url=excluded.logo_url,
+          status='in_review',
+          is_public=0,
+          updated_at=datetime('now')
+      `;
+      const ps = await env.DB.prepare(stmt);
 
-        // Compute normalized keys
-        const website_host_norm = normWebsiteHost(n.website_url);
-        const shopify_domain_norm = normDomain(n.shopify_shop_domain);
+      for (const r of rows.data) {
+        try {
+          // Coerce fields
+          const name = (r.name||"").trim();
+          const slug = (r.slug||"").trim().toLowerCase();
+          const domain = (r.domain||"").trim().toLowerCase();
+          if (!name || !slug || !domain) { skipped++; continue; }
 
-        // Skip if duplicate exists
-        const found = await env.DB.prepare(`
-          SELECT id FROM brands
-          WHERE (website_host_norm IS NOT NULL AND website_host_norm <> '' AND website_host_norm = ?)
-             OR (shopify_domain_norm IS NOT NULL AND shopify_domain_norm <> '' AND shopify_domain_norm = ?)
-          LIMIT 1
-        `).bind(website_host_norm, shopify_domain_norm).first();
+          const category_primary = (r.category_primary||"").trim();
+          const category_secondary = (r.category_secondary||"").trim();
+          const category_tertiary = (r.category_tertiary||"").trim();
+          const website_url = (r.website_url||"").trim();
+          const logo_url = (r.logo_url||"").trim();
 
-        if (found && found.id) { skipped_duplicate++; continue; }
+          const res = await ps.bind(
+            name, slug, domain,
+            category_primary, category_secondary, category_tertiary,
+            website_url, logo_url
+          ).run();
 
-        const ins = buildInsert(n, website_host_norm, shopify_domain_norm);
-        stmts.push(env.DB.prepare(ins.sql).bind(...ins.params));
-        inserted++;
+          // D1 returns meta; if changes==1 and existed we still can’t tell insert vs update reliably.
+          // Treat any successful run as upsert. Count heuristically:
+          if (res && typeof res.meta === "object") {
+            updated++; // conservative
+          } else {
+            inserted++;
+          }
+        } catch (e) {
+          errors.push({ slug: r.slug, error: String(e) });
+        }
       }
-
-      if (stmts.length) {
-        const res = await env.DB.batch(stmts).catch(e => ({ error:e }));
-        if (res && res.error) { failed += stmts.length; }
+    } else {
+      // Dry run: just validate and count
+      for (const r of rows.data) {
+        if (r.name && r.slug && r.domain) inserted++; else skipped++;
       }
     }
 
-    return json({ ok:true, inserted, skipped_duplicate, failed });
-  } catch (e) {
-    return json({ ok:false, error:e.message || String(e) }, 500);
-  }
-};
-
-function normalizeRow(r){
-  const get = k => (r?.[k] == null ? "" : String(r[k]).trim());
-  const toInt = v => {
-    const s = String(v ?? "").trim().toLowerCase();
-    if (["1","true","yes","y"].includes(s)) return 1;
-    if (["0","false","no","n"].includes(s)) return 0;
-    const n = parseInt(s,10); return Number.isFinite(n) ? n : 0;
-  };
-  return {
-    name: get("name"),
-    website_url: get("website_url"),
-    category_primary: get("category_primary"),
-    category_secondary: get("category_secondary"),
-    category_tertiary: get("category_tertiary"),
-    instagram_url: get("instagram_url"),
-    tiktok_url: get("tiktok_url"),
-    shopify_shop_domain: get("shopify_shop_domain"),
-    shopify_shop_id: get("shopify_shop_id"),
-    shopify_public_url: get("shopify_public_url"),
-    contact_name: get("contact_name"),
-    contact_title: get("contact_title"),
-    contact_email: get("contact_email"),
-    contact_phone: get("contact_phone"),
-    country: get("country"),
-    state: get("state"),
-    city: get("city"),
-    zipcode: get("zipcode"),
-    address: get("address"),
-    description: get("description"),
-    support_email: get("support_email"),
-    logo_url: get("logo_url"),
-    featured: toInt(get("featured")),
-    status: get("status") || "draft",
-    has_us_presence: toInt(get("has_us_presence")),
-    is_dropshipper: toInt(get("is_dropshipper")),
-    notes_admin: get("notes_admin"),
-  };
-}
-function validateRow(n){
-  if (!n.name) return { ok:false, error:"Missing name" };
-  if (!n.website_url && !n.shopify_shop_domain) return { ok:false, error:"Need website_url or shopify_shop_domain" };
-  return { ok:true };
-}
-
-function normWebsiteHost(url){
-  if (!url) return "";
-  try {
-    // ensure URL object by adding scheme if missing
-    const u = new URL(url.includes("://") ? url : ("https://" + url));
-    return normDomain(u.hostname);
-  } catch {
-    // fallback: strip protocol, take up to first slash
-    let s = String(url).trim().toLowerCase();
-    s = s.replace(/^https?:\/\//,'').replace(/\/+.*$/,''); // remove path
-    return normDomain(s);
+    return json({ ok:true, dry, inserted, updated, skipped, errors });
+  } catch (err) {
+    return json({ ok:false, error:String(err) }, 500);
   }
 }
-function normDomain(host){
-  if (!host) return "";
-  let h = String(host).trim().toLowerCase();
-  if (h.startsWith("www.")) h = h.slice(4);
-  // drop trailing dot
-  if (h.endsWith(".")) h = h.slice(0,-1);
-  return h;
+
+function json(obj, status=200) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: {
+      "content-type":"application/json; charset=utf-8",
+      "Access-Control-Allow-Origin":"https://bestiecollabs.com",
+      "Access-Control-Allow-Methods":"GET,POST,PATCH,OPTIONS",
+      "Access-Control-Allow-Headers":"content-type, x-admin-email"
+    }
+  });
 }
 
-function buildInsert(n, website_host_norm, shopify_domain_norm){
-  const cols = [
-    "name","website_url",
-    "category_primary","category_secondary","category_tertiary",
-    "instagram_url","tiktok_url",
-    "shopify_shop_domain","shopify_shop_id","shopify_public_url",
-    "contact_name","contact_title","contact_email","contact_phone",
-    "country","state","city","zipcode","address",
-    "description","support_email","logo_url",
-    "featured","status","has_us_presence","is_dropshipper","notes_admin",
-    "website_host_norm","shopify_domain_norm",
-    "created_at","updated_at"
-  ];
-  const params = [
-    n.name, n.website_url,
-    n.category_primary, n.category_secondary, n.category_tertiary,
-    n.instagram_url, n.tiktok_url,
-    n.shopify_shop_domain, n.shopify_shop_id, n.shopify_public_url,
-    n.contact_name, n.contact_title, n.contact_email, n.contact_phone,
-    n.country, n.state, n.city, n.zipcode, n.address,
-    n.description, n.support_email, n.logo_url,
-    n.featured, n.status, n.has_us_presence, n.is_dropshipper, n.notes_admin,
-    website_host_norm || null, shopify_domain_norm || null,
-    now(), now()
-  ];
-  return { sql: `INSERT INTO brands (${cols.join(",")}) VALUES (${cols.map(()=>"?").join(",")})`, params };
+// Minimal CSV parser for UTF-8, header row required.
+// Handles simple commas. For quoted fields with commas, use a real parser later.
+function parseCsv(text) {
+  const lines = text.replace(/\r\n/g,"\n").split("\n").filter(l=>l.trim().length);
+  const header = lines[0].split(",").map(h=>h.trim().toLowerCase());
+  const data = [];
+  for (let i=1;i<lines.length;i++){
+    const cols = lines[i].split(","); // simple split
+    const row = {};
+    header.forEach((h, idx)=> row[h] = (cols[idx]||"").trim());
+    data.push(row);
+  }
+  return { header, data };
 }
-
-function now(){ return new Date().toISOString(); }
-function json(obj, status=200){ return new Response(JSON.stringify(obj), { status, headers:{ "content-type":"application/json; charset=utf-8" } }); }
-

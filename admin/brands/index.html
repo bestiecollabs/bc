@@ -1,111 +1,136 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Admin - Brands</title>
-  <link rel="stylesheet" href="/air.css">
   <style>
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    :root{--bg:#f6f7fb;--card:#fff;--ink:#111;--muted:#666;--line:#e6e8ef;--brand:#4c6fff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    a{color:var(--brand);text-decoration:none}
+    .shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+    .nav{background:#fff;border-right:1px solid var(--line);padding:16px;position:sticky;top:0;height:100vh}
+    .nav h1{font-size:16px;margin:0 0 12px}
+    .nav .sec{margin:16px 0 8px;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+    .nav a{display:block;padding:8px 10px;border-radius:8px;color:#222}
+    .nav a.active{background:#eef2ff;color:#1d2b6b}
+    .wrap{padding:16px 24px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:12px 0}
     .row{display:flex;gap:8px;align-items:center}
-    .card{background:#fff;border:1px solid #eaeaea;border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:12px 0}
-    .card h2{margin:0 0 8px 0}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
-    .badge{padding:2px 6px;border:1px solid #ccc;border-radius:6px;font-size:12px}
-    .muted{color:#666}
-    .actions{display:flex;gap:6px}
     .toolbar{display:flex;gap:8px;flex-wrap:wrap}
-    .section-title{margin:16px 0 8px 0}
+    .section-title{margin:8px 0 10px 0}
+    input[type="text"],input[type="file"]{padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+    button{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+    button.btn{background:var(--brand);color:#fff;border-color:var(--brand)}
+    button.outline{background:#fff;color:#1b2b6b;border-color:var(--brand)}
+    button.xs{padding:4px 8px;font-size:12px}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+    th{background:#fafbff}
+    .badge{padding:2px 6px;border:1px solid var(--line);border-radius:6px;font-size:12px;color:#333;background:#fafbff}
+    .muted{color:var(--muted)}
+    .grow{flex:1}
   </style>
 </head>
 <body>
-<main class="wrap">
-  <h1>Brands Directory</h1>
+<div class="shell">
+  <nav class="nav">
+    <h1>Bestie Admin</h1>
+    <div class="sec">Main</div>
+    <a href="/admin/dashboard/" >Dashboard</a>
+    <a href="/admin/brands/" class="active">Brands</a>
+    <a href="/admin/imports/">Imports</a>
+    <a href="/admin/creators/">Creators</a>
+    <a href="/admin/recycle/">Recycle Bin</a>
+    <div class="sec">Settings</div>
+    <a href="/admin/settings/">General</a>
+  </nav>
 
-  <!-- 1) CSV Upload -->
-  <section class="card" id="sec-upload">
-    <h2 class="section-title">CSV Upload</h2>
-    <div class="toolbar">
-      <!-- IDs below match import.js expectations -->
-      <input id="file" type="file" accept=".csv">
-      <button id="dryrun" class="btn">Dry Run</button>
-      <button id="commit" class="btn">Commit</button>
-      <a id="btn-template" class="btn" href="/api/admin/import/brands/template">Download Template</a>
-      <button id="refreshBtn" class="btn outline">Refresh Preview</button>
-      <span id="actout" class="muted"></span>
-    </div>
-    <div class="card" style="padding:0">
-      <table id="tbl-upload">
-        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Actions</th></tr></thead>
-        <tbody><tr><td colspan="6" class="muted">No preview yet</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+  <main class="wrap">
+    <h2>Brands Directory</h2>
 
-  <!-- 2) In Review (brand_drafts) -->
-  <section class="card" id="sec-review">
-    <h2 class="section-title">In Review</h2>
-    <div class="toolbar">
-      <button id="btn-publish-selected" class="btn">Publish selected</button>
-      <span id="reviewStatus" class="muted"></span>
-    </div>
-    <div class="card" style="padding:0">
-      <table id="tbl-review">
-        <thead><tr><th><input type="checkbox" id="chk-all"></th><th>Brand</th><th>Domain</th><th>Category</th><th>Source Row</th></tr></thead>
-        <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+    <!-- 1) CSV Upload -->
+    <section class="card" id="sec-upload">
+      <h3 class="section-title">CSV Upload</h3>
+      <div class="toolbar">
+        <input id="file" type="file" accept=".csv">
+        <button id="dryrun" class="btn">Dry Run</button>
+        <button id="commit" class="btn">Commit</button>
+        <a id="btn-template" class="btn" href="/api/admin/import/brands/template">Download Template</a>
+        <button id="refreshBtn" class="outline">Refresh Preview</button>
+        <span id="actout" class="muted"></span>
+      </div>
+      <div class="card" style="padding:0">
+        <table id="tbl-upload">
+          <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Actions</th></tr></thead>
+          <tbody><tr><td colspan="6" class="muted">No preview yet</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-  <!-- 3) Active Brands -->
-  <section class="card" id="sec-active">
-    <h2 class="section-title">Active Brands</h2>
-    <div class="toolbar row">
-      <input id="qActive" placeholder="Search name or domain" class="input" style="flex:1;padding:8px">
-      <button id="btn-load-active" class="btn">Load</button>
-    </div>
-    <div class="card" style="padding:0">
-      <table id="tbl-active">
-        <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-        <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+    <!-- 2) In Review -->
+    <section class="card" id="sec-review">
+      <h3 class="section-title">In Review</h3>
+      <div class="toolbar">
+        <button id="btn-publish-selected" class="btn">Publish selected</button>
+        <span id="reviewStatus" class="muted"></span>
+      </div>
+      <div class="card" style="padding:0">
+        <table id="tbl-review">
+          <thead><tr><th><input type="checkbox" id="chk-all"></th><th>Brand</th><th>Domain</th><th>Category</th><th>Source Row</th></tr></thead>
+          <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-  <!-- 4) Unpublished Brands -->
-  <section class="card" id="sec-unpub">
-    <h2 class="section-title">Unpublished Brands</h2>
-    <div class="toolbar row">
-      <input id="qDraft" placeholder="Search name or domain" class="input" style="flex:1;padding:8px">
-      <button id="btn-load-draft" class="btn">Load</button>
-    </div>
-    <div class="card" style="padding:0">
-      <table id="tbl-draft">
-        <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-        <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+    <!-- 3) Active Brands -->
+    <section class="card" id="sec-active">
+      <h3 class="section-title">Active Brands</h3>
+      <div class="toolbar row">
+        <input id="qActive" class="grow" placeholder="Search name or domain" type="text">
+        <button id="btn-load-active" class="btn">Load</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table id="tbl-active">
+          <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
+          <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-  <!-- 5) Deleted Brands -->
-  <section class="card" id="sec-deleted">
-    <h2 class="section-title">Deleted Brands</h2>
-    <div class="muted">Coming soon: this will list soft-deleted brands when the API supports a deleted filter.</div>
-  </section>
-</main>
+    <!-- 4) Unpublished Brands -->
+    <section class="card" id="sec-unpub">
+      <h3 class="section-title">Unpublished Brands</h3>
+      <div class="toolbar row">
+        <input id="qDraft" class="grow" placeholder="Search name or domain" type="text">
+        <button id="btn-load-draft" class="btn">Load</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table id="tbl-draft">
+          <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
+          <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5) Deleted Brands -->
+    <section class="card" id="sec-deleted">
+      <h3 class="section-title">Deleted Brands</h3>
+      <div class="muted">Coming soon: soft-deleted listing when API provides a filter.</div>
+    </section>
+  </main>
+</div>
 
 <script>
-// Provide admin header to import.js fetches
+// Admin identity for API calls
 window.ADMIN_EMAIL = "collabsbestie@gmail.com";
 </script>
 
 <script type="module">
-  const ADMIN_HDR = { "x-admin-email":"collabsbestie@gmail.com", "accept":"application/json", "content-type":"application/json" };
-
-  // ------- Helpers
+  const ADMIN_HDR = { "x-admin-email": window.ADMIN_EMAIL, "accept":"application/json", "content-type":"application/json" };
   const byId = (x)=>document.getElementById(x);
-  function cats(b){ return [b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).join(' Ã¢â‚¬Â¢ '); }
+  function cats(b){ return [b.category_primary,b.category_secondary,b.category_tertiary].filter(Boolean).join(" / "); }
   function rowBrand(b){
     return `<tr data-id="${b.id}">
       <td>
@@ -119,101 +144,96 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
       <td>${b.status||''}</td>
       <td>${b.featured? 'Yes':'No'}</td>
       <td class="actions">
-        <button class="btn xs publish">${(b.status||'')==='published'?'Unpublish':'Publish'}</button>
-        <button class="btn xs outline feature">${b.featured? 'Unfeature':'Feature'}</button>
+        <button class="xs publish">${(b.status||'')==='published'?'Unpublish':'Publish'}</button>
+        <button class="xs outline feature">${b.featured? 'Unfeature':'Feature'}</button>
       </td>
     </tr>`;
   }
 
-  // ------- In Review (brand_drafts)
+  // In Review
   async function loadDrafts(){
-    const tbody = byId('tbl-review').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr>';
-    const res = await fetch('/api/admin/brands/drafts', { headers: ADMIN_HDR });
-    const data = await res.json().catch(()=>({ok:false, items:[]}));
+    const tbody = byId("tbl-review").querySelector("tbody");
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    const res = await fetch("/api/admin/brands/drafts", { headers: ADMIN_HDR });
+    const data = await res.json().catch(()=>({ok:false,items:[]}));
     if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
     if(!Array.isArray(data.items) || !data.items.length){
       tbody.innerHTML = '<tr><td colspan="5" class="muted">No drafts in review</td></tr>'; return;
     }
     const rows = data.items.map(d=>{
       let v = {};
-      try { v = JSON.parse(d.data_json||'{}'); } catch {}
-      const domain = v.domain || '';
-      const name = v.name || '(no name)';
-      const cat  = v.category_primary || '';
+      try { v = JSON.parse(d.data_json||"{}"); } catch {}
+      const domain = v.domain || "";
+      const name = v.name || "(no name)";
+      const cat  = v.category_primary || "";
       return `<tr data-draft-id="${d.id}">
         <td><input type="checkbox" class="chk"></td>
         <td>${name}</td>
         <td>${domain}</td>
         <td>${cat}</td>
-        <td>${d.source_row_id ?? ''}</td>
+        <td>${d.source_row_id ?? ""}</td>
       </tr>`;
-    }).join('');
+    }).join("");
     tbody.innerHTML = rows;
   }
-  byId('chk-all').addEventListener('change', e=>{
+  byId("chk-all").addEventListener("change", e=>{
     const on = e.target.checked;
-    document.querySelectorAll('#tbl-review .chk').forEach(c=>{ c.checked = on; });
+    document.querySelectorAll("#tbl-review .chk").forEach(c=>{ c.checked = on; });
   });
-  byId('btn-publish-selected').addEventListener('click', async ()=>{
-    const ids = Array.from(document.querySelectorAll('#tbl-review .chk:checked'))
-      .map(chk => Number(chk.closest('tr')?.getAttribute('data-draft-id'))).filter(Boolean);
-    if(!ids.length){ byId('reviewStatus').textContent = 'Select at least one draft'; return; }
-    byId('reviewStatus').textContent = 'PublishingÃ¢â‚¬Â¦';
-    const res = await fetch('/api/admin/brands/drafts/publish', {
-      method:'POST', headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
+  byId("btn-publish-selected").addEventListener("click", async ()=>{
+    const ids = Array.from(document.querySelectorAll("#tbl-review .chk:checked"))
+      .map(chk => Number(chk.closest("tr")?.getAttribute("data-draft-id"))).filter(Boolean);
+    if(!ids.length){ byId("reviewStatus").textContent = "Select at least one draft"; return; }
+    byId("reviewStatus").textContent = "Publishing…";
+    const res = await fetch("/api/admin/brands/drafts/publish", {
+      method:"POST", headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
     });
     const j = await res.json().catch(()=>({ok:false}));
-    byId('reviewStatus').textContent = j.ok ? 'Published' : 'Publish failed';
+    byId("reviewStatus").textContent = j.ok ? "Published" : "Publish failed";
     await loadDrafts(); await loadActive();
   });
 
-  // ------- Admin brands list (published / draft)
-async function fetchBrands(wantStatus, q=""){
-  // Prefer primary endpoint; fall back if needed
-  const paths = ["/api/admin/brands", "/api/admin/chipchip/brands", "/api/admin/brands/list"];
-  let payload = null, hit = null;
-  for (const p of paths) {
-    const u = new URL(p, location.origin);
-    if (q) u.searchParams.set("q", q);
-    if (wantStatus) u.searchParams.set("status", wantStatus);
-    u.searchParams.set("limit","100");
-    try {
-      const r = await fetch(u, { headers: ADMIN_HDR });
-      if (r.ok) { payload = await r.json(); hit = p; break; }
-    } catch {}
+  // Lists
+  async function fetchBrands(wantStatus, q=""){
+    const paths = ["/api/admin/brands", "/api/admin/chipchip/brands", "/api/admin/brands/list"];
+    let payload=null;
+    for (const p of paths) {
+      const u = new URL(p, location.origin);
+      if(q) u.searchParams.set("q", q);
+      if(wantStatus) u.searchParams.set("status", wantStatus);
+      u.searchParams.set("limit","100");
+      try { const r=await fetch(u,{headers:ADMIN_HDR}); if(r.ok){ payload=await r.json(); break; } } catch {}
+    }
+    const arr = (payload && (payload.items || payload.rows || payload)) || [];
+    return { ok:true, items: Array.isArray(arr)? arr : [] };
   }
-  console.info("brands.fetch hit:", hit, "status:", wantStatus, "q:", q, "payloadKeys:", payload? Object.keys(payload): null);
-  const arr = (payload && (payload.items || payload.rows || payload.data || payload)) || [];
-  return { ok: true, items: Array.isArray(arr) ? arr : [] };
-}
+  async function loadActive(){
+    const tbody = byId("tbl-active").querySelector("tbody");
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    const q = byId("qActive").value.trim();
+    const data = await fetchBrands("published", q);
+    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
+    const rows = data.items.filter(b => (b.status||"published")==="published");
+    tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
+  }
+  async function loadDraft(){
+    const tbody = byId("tbl-draft").querySelector("tbody");
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+    const q = byId("qDraft").value.trim();
+    const data = await fetchBrands("draft", q);
+    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
+    const rows = data.items.filter(b => (b.status||"draft")==="draft" || (b.status||"") === "in_review"); // safety
+    tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
+  }
+  byId("btn-load-active").addEventListener("click", loadActive);
+  byId("btn-load-draft").addEventListener("click", loadDraft);
 
-async function loadActive(){
-  const tbody = byId("tbl-active").querySelector("tbody");
-  tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Loading…</td></tr>";
-  const q = byId("qActive").value.trim();
-  const data = await fetchBrands("published", q);
-  if(!data.ok){ tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Failed to load</td></tr>"; return; }
-  // Filter client-side in case backend ignores status
-  const rows = data.items.filter(b => (b.status || "published") === "published");
-  tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\"5\" class=\"muted\">None</td></tr>";
-}
-
-async function loadDraft(){
-  const tbody = byId("tbl-draft").querySelector("tbody");
-  tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Loading…</td></tr>";
-  const q = byId("qDraft").value.trim();
-  const data = await fetchBrands("draft", q);
-  if(!data.ok){ tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Failed to load</td></tr>"; return; }
-  const rows = data.items.filter(b => (b.status || "draft") === "draft");
-  tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\"5\" class=\"muted\">None</td></tr>";
-}
-// ------- Publish/Feature toggles
+  // Row actions
   async function updateBrand(id, patch){
-    const res = await fetch(`/api/admin/brands/${id}`, { method:'PATCH', headers: ADMIN_HDR, body: JSON.stringify(patch) });
+    const res = await fetch(`/api/admin/brands/${id}`, { method:"PATCH", headers: ADMIN_HDR, body: JSON.stringify(patch) });
     return res.json();
   }
-  document.addEventListener('click', async (e)=>{
+  document.addEventListener("click", async (e)=>{
     const tr = e.target.closest('tr[data-id]');
     if(!tr) return;
     const id = tr.getAttribute('data-id');
@@ -230,21 +250,15 @@ async function loadDraft(){
     }
   });
 
-  // ------- CSV Upload hooks from this page: guard so no errors if absent
-  function safe(id, fn){ const el = byId(id); if(el) el.addEventListener('click', fn); }
-  safe('btn-dry',   ()=> window.runImport && window.runImport(false));
-  safe('btn-commit',()=> window.runImport && window.runImport(true));
-  safe('btn-refresh',()=> typeof loadBrands==='function' && loadBrands());
+  // CSV buttons wiring for preview module if present
+  const safe = (id, fn)=>{ const el=byId(id); if(el) el.addEventListener("click", fn); };
+  safe("refreshBtn", ()=> { if (typeof window.loadBrands==="function") window.loadBrands(); });
 
-  // Initial load
+  // Initial loads
   loadDrafts(); loadActive(); loadDraft();
 </script>
 
-<!-- Load admin/app.js if needed -->
-<script type="module" src="/admin/app.js"></script>
-
-<!-- Load import.js in the mode it expects -->
-<script src="/admin/brands/import.js?v=20251017" defer></script>
+<!-- Keep import.js; it handles dry-run/commit UI and preview table -->
+<script src="/admin/brands/import.js" defer></script>
 </body>
 </html>
-
