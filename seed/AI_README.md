@@ -1,4 +1,31 @@
-﻿[AI_README 2025-10-17 11:23 PST]
+﻿[AI_README 2025-10-17 14:33 PST]  (ACTIVE SESSION — Part 1 of 2)
+Project: Bestie Collabs
+Scope: Admin Brands Directory reliability + state partitions; Unpublish/Publish; soft-delete Undo; CSS reset to light.
+Context Summary:
+- Directory now renders 3 tables: Active, Unpublished (draft), Deleted.
+- Buttons: Active → Delete, Unpublish; Unpublished → Publish, Delete; Deleted → Undo.
+- Auto-refresh after each action; robust loading/empty/error states.
+- API endpoints in use:
+  - GET /api/admin/brands?scope=all&status=<draft|published>&deleted=1
+  - POST /api/admin/brands/:id/delete
+  - POST /api/admin/brands/:id/undo
+  - POST /api/admin/brands/:id/unpublish  → sets status='draft'
+  - PATCH /api/admin/brands/:id           → { status: 'published' | 'draft' }
+Files Touched (session):
+- /admin/brands/index.html  → light styling, 3 tables with stable tbody hooks
+- /admin/brands/table.js    → partitioning, delegated actions, auto-refresh, scope=all
+- /functions/api/admin/brands/index.js → supports scope/status/deleted filters
+- /functions/api/admin/brands/[id].js  → PATCH status + POST delete/undo
+Operational Notes:
+- Production-first URLs: bestiecollabs.com, api.bestiecollabs.com
+- Cloudflare Pages project: bestiecollabs; DB binding: DB → bestiedb
+- Access: service token "bc_admin_gpt" allowed by policy (for automated checks)
+Next (Part 2 of 2):
+- Add success toasts and minimal UX polish; confirm edge cases (publish->undo->publish loops).
+- Update HANDOFF.md and ai_tree.txt snapshots.
+
+-- End of ACTIVE block --
+[AI_README 2025-10-17 11:23 PST]
 LATEST_ACTIVE_SESSION: true
 PROJECT: Bestie Collabs (production-first on main)
 DOMAINS: https://bestiecollabs.com, https://api.bestiecollabs.com
@@ -217,3 +244,4 @@ Next 2 Tasks:
 [AI_README 2025-10-17 12:24 PST]
 - Brands Directory: /admin/brands/table.js now renders Delete/Undo/Unpublish with delegated click handling and auto-refresh after success.
 - API: Added POST /api/admin/brands/:id/unpublish → sets status='draft'.
+
