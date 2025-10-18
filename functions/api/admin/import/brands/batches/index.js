@@ -6,7 +6,7 @@ function json(o, s = 200, extra = {}) {
     headers: { "content-type": "application/json", ...extra }
   });
 }
-function cors(h = {}) {
+function cors() {
   return {
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET, POST, PATCH, OPTIONS",
@@ -15,7 +15,11 @@ function cors(h = {}) {
 }
 function forbid(m) { return json({ ok: false, error: m }, 401, cors()); }
 function bad(m) { return json({ ok: false, error: m }, 400, cors()); }
-function uuid() { return crypto.randomUUID(); }
+
+// Safe ID generator without crypto
+function genId() {
+  return "ib_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
+}
 
 const STRICT_HEADERS = [
   "brand_name","website_url","category_primary","category_secondary","category_tertiary",
@@ -23,8 +27,7 @@ const STRICT_HEADERS = [
 ];
 
 function parseCSV(text) {
-  // minimal CSV splitter for our strict one-line rows without quotes
-  const lines = text.trim().split(/\r?\n/).filter(Boolean);
+  const lines = (text || "").trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return { header: [], rows: [] };
   const header = lines[0].split(",").map(s => s.trim());
   const rows = lines.slice(1).map((ln, i) => {
@@ -35,8 +38,7 @@ function parseCSV(text) {
 }
 
 function normalizeRow(cols) {
-  // map by index to our 11 fields
-  const o = {
+  return {
     name: cols[0] || "",
     website_url: cols[1] || "",
     category_primary: cols[2] || "",
@@ -49,10 +51,9 @@ function normalizeRow(cols) {
     customer_age_max: Number.parseInt(cols[9] || "0", 10) || 0,
     us_based: (String(cols[10] || "0").trim() === "1") ? 1 : 0
   };
-  return o;
 }
 
-export async function onRequestOptions(ctx) {
+export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: cors() });
 }
 
@@ -69,49 +70,42 @@ export async function onRequestGet(ctx) {
 }
 
 export async function onRequestPost(ctx) {
-  const admin = (ctx.request.headers.get("x-admin-email") || "").toLowerCase();
-  if (admin !== "collabsbestie@gmail.com") return forbid("not_allowed");
+  try {
+    const admin = (ctx.request.headers.get("x-admin-email") || "").toLowerCase();
+    if (admin !== "collabsbestie@gmail.com") return forbid("not_allowed");
 
-  const url = new URL(ctx.request.url);
-  // Save by default. Allow overrides via query or header.
-  const modeQ = url.searchParams.get("mode") || url.searchParams.get("save") || url.searchParams.get("persist");
-  const modeH = ctx.request.headers.get("x-import-mode");
-  const mode = (modeQ && String(modeQ).toLowerCase() !== "0") || (modeH && String(modeH).toLowerCase() !== "dry") ? "save" : "save";
+    // Force live save mode
+    const mode = "save";
 
-  const body = await ctx.request.text();
-  if (!body) return bad("empty_body");
+    const body = await ctx.request.text();
+    if (!body) return bad("empty_body");
 
-  const { header, rows } = parseCSV(body);
-  const headerOk = JSON.stringify(header) === JSON.stringify(STRICT_HEADERS);
-  if (!headerOk) {
-    return json({ ok: true, id: "", mode: "dry-run", counts: { total: 0, valid: 0, invalid: 0 }, header: header.join(",") }, 200, cors());
-  }
+    const { header, rows } = parseCSV(body);
+    const headerOk = JSON.stringify(header) === JSON.stringify(STRICT_HEADERS);
+    if (!headerOk) {
+      return json({ ok: true, id: "", mode: "dry-run", counts: { total: 0, valid: 0, invalid: 0 }, header: header.join(",") }, 200, cors());
+    }
 
-  const id = uuid();
-  let total = 0, valid = 0, invalid = 0;
+    const id = genId();
+    let total = 0, valid = 0, invalid = 0;
 
-  // Always create a batch row so commit can find it
-  await ctx.env.DB.prepare(`INSERT INTO import_batches (id, status, created_at) VALUES (?1, 'new', datetime('now'))`).bind(id).run();
+    await ctx.env.DB
+      .prepare(`INSERT INTO import_batches (id, status, created_at) VALUES (?1, 'new', datetime('now'))`)
+      .bind(id).run();
 
-  for (const r of rows) {
-    total++;
-    const obj = normalizeRow(r.cols);
-    // basic validity: require brand name
-    const okRow = (obj.name && obj.name.trim().length > 0) ? 1 : 0;
-    if (mode === "save") {
+    for (const r of rows) {
+      total++;
+      const obj = normalizeRow(r.cols);
+      const okRow = (obj.name && obj.name.trim().length > 0) ? 1 : 0;
       await ctx.env.DB.prepare(`
         INSERT INTO import_rows (batch_id, row_num, parsed_json, valid)
         VALUES (?1, ?2, ?3, ?4)
       `).bind(id, r.row_num, JSON.stringify(obj), okRow).run();
+      if (okRow) valid++; else invalid++;
     }
-    if (okRow) valid++; else invalid++;
-  }
 
-  return json({
-    ok: true,
-    id,
-    mode,
-    counts: { total, valid, invalid },
-    header: STRICT_HEADERS.join(",")
-  }, 200, cors());
+    return json({ ok: true, id, mode, counts: { total, valid, invalid }, header: STRICT_HEADERS.join(",") }, 200, cors());
+  } catch (err) {
+    return json({ ok: false, error: "internal_error", detail: String(err && err.message || err) }, 500, cors());
+  }
 }
