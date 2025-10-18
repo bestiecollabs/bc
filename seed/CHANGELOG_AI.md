@@ -84,3 +84,24 @@ Branch=main Commit=a118ead4744074e7ff965761ac0110b8d724b18a
 ## 2025-10-17 12:24 PST
 - Fix: First-click inertia removed. Table auto-refreshes after Delete/Undo.
 - Add: Unpublish button and API. Sets brand.status='draft' and reloads table.
+## [2025-10-17 20:35 PST] Bestie Collabs — AI Handoff v3.0 — Part 1 of 2 — ACTIVE SESSION
+
+### Changes
+- Admin Brands Directory: simple theme + left navigation.
+- CSV flow: uploads default to status=in_review.
+- In Review table: reads /api/admin/brands?status=in_review; bulk publish via PATCH /api/admin/brands/{id}.
+- CORS: allow PATCH on /api/*; HTML served with UTF-8 charset to prevent mojibake.
+- Loader hardening: normalize API responses (items|rows), add failure fallbacks.
+- Buttons: “Load” renamed to “Search”; ASCII-only UI text.
+
+### Files touched
+- /admin/brands/index.html
+- /_headers
+- /functions/api/admin/brands/import.js
+- /functions/api/_middleware.js
+
+### Notes
+- Admin header required: x-admin-email=collabsbestie@gmail.com
+- Next: verify D1 rows for in_review, align endpoint filtering, add KPI cards, add Deleted listing.
+
+---
