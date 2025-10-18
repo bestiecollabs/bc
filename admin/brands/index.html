@@ -77,7 +77,7 @@
       <div class="card" style="padding:0">
         <table id="tbl-review">
           <thead><tr><th><input type="checkbox" id="chk-all"></th><th>Brand</th><th>Domain</th><th>Category</th><th>Source Row</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">Loadingâ€¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -92,7 +92,7 @@
       <div class="card" style="padding:0">
         <table id="tbl-active">
           <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">Loadingâ€¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -107,7 +107,7 @@
       <div class="card" style="padding:0">
         <table id="tbl-draft">
           <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">Loadingâ€¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -151,7 +151,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
   // In Review
   async function loadDrafts(){
     const tbody = byId("tbl-review").querySelector("tbody");
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loadingâ€¦</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr>';
     const res = await fetch("/api/admin/brands/drafts", { headers: ADMIN_HDR });
     const data = await res.json().catch(()=>({ok:false,items:[]}));
     if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
@@ -182,7 +182,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
     const ids = Array.from(document.querySelectorAll("#tbl-review .chk:checked"))
       .map(chk => Number(chk.closest("tr")?.getAttribute("data-draft-id"))).filter(Boolean);
     if(!ids.length){ byId("reviewStatus").textContent = "Select at least one draft"; return; }
-    byId("reviewStatus").textContent = "Publishingâ€¦";
+    byId("reviewStatus").textContent = "PublishingÃ¢â‚¬Â¦";
     const res = await fetch("/api/admin/brands/drafts/publish", {
       method:"POST", headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
     });
@@ -207,7 +207,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
   }
   async function loadActive(){
     const tbody = byId("tbl-active").querySelector("tbody");
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loadingâ€¦</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr>';
     const q = byId("qActive").value.trim();
     const data = await fetchBrands("published", q);
     if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
@@ -216,7 +216,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
   }
   async function loadDraft(){
     const tbody = byId("tbl-draft").querySelector("tbody");
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loadingâ€¦</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr>';
     const q = byId("qDraft").value.trim();
     const data = await fetchBrands("draft", q);
     if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
@@ -253,6 +253,43 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
   safe("refreshBtn", ()=> { if (typeof window.loadBrands==="function") window.loadBrands(); });
 
   // CSV: single-button upload to In Review
+function setStatus(t){ const el=document.getElementById("actout"); if(el) el.textContent=t; }
+async function uploadToInReview(){
+  const f = document.getElementById("file")?.files?.[0];
+  if(!f){ setStatus("Select a CSV first"); return; }
+  setStatus("Uploadingâ€¦");
+
+  // Preferred path: if legacy import.js is present, use it
+  if (typeof window.runImport === "function") {
+    try {
+      await window.runImport(true); // commit mode
+      setStatus("Uploaded to In Review");
+      await loadDrafts();
+      return;
+    } catch (e) {
+      console.warn("runImport failed, falling back:", e);
+    }
+  }
+
+  // Fallback: direct POST to import endpoint
+  try{
+    const fd = new FormData();
+    fd.append("file", f, f.name);
+    const url = new URL("/api/admin/brands/import", location.origin);
+    url.searchParams.set("dry","0");
+    const r = await fetch(url, { method:"POST", headers: { "x-admin-email": window.ADMIN_EMAIL }, body: fd });
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok || !j.ok){ setStatus("Upload failed"); return; }
+    setStatus("Uploaded to In Review");
+    await loadDrafts();
+  }catch(err){
+    console.error(err);
+    setStatus("Upload error");
+  }
+}
+document.addEventListener("click", (e)=>{ if(e.target && e.target.id==="uploadInReview"){ uploadToInReview(); }});
+
+// CSV: single-button upload to In Review
 function setStatus(t){ const el=document.getElementById("actout"); if(el) el.textContent=t; }
 async function uploadToInReview(){
   const f = document.getElementById("file")?.files?.[0];
