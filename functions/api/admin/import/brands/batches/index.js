@@ -1,10 +1,7 @@
 ﻿export const config = { runtime: "edge" };
 
 function json(o, s = 200, extra = {}) {
-  return new Response(JSON.stringify(o), {
-    status: s,
-    headers: { "content-type": "application/json", ...extra }
-  });
+  return new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json", ...extra } });
 }
 function cors() {
   return {
@@ -16,10 +13,7 @@ function cors() {
 function forbid(m) { return json({ ok: false, error: m }, 401, cors()); }
 function bad(m) { return json({ ok: false, error: m }, 400, cors()); }
 
-// Safe ID generator without crypto
-function genId() {
-  return "ib_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
-}
+function genId() { return crypto?.randomUUID?.() || ("ib_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,10)); }
 
 const STRICT_HEADERS = [
   "brand_name","website_url","category_primary","category_secondary","category_tertiary",
@@ -30,10 +24,7 @@ function parseCSV(text) {
   const lines = (text || "").trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return { header: [], rows: [] };
   const header = lines[0].split(",").map(s => s.trim());
-  const rows = lines.slice(1).map((ln, i) => {
-    const cols = ln.split(",").map(s => s.trim());
-    return { row_num: i + 1, cols };
-  });
+  const rows = lines.slice(1).map((ln, i) => ({ row_num: i + 1, cols: ln.split(",").map(s => s.trim()) }));
   return { header, rows };
 }
 
@@ -49,7 +40,7 @@ function normalizeRow(cols) {
     description: cols[7] || "",
     customer_age_min: Number.parseInt(cols[8] || "0", 10) || 0,
     customer_age_max: Number.parseInt(cols[9] || "0", 10) || 0,
-    us_based: (String(cols[10] || "0").trim() === "1") ? 1 : 0
+    us_based: (String(cols[10] || "0").trim() === "1") ? 1 : 0,
   };
 }
 
@@ -74,9 +65,6 @@ export async function onRequestPost(ctx) {
     const admin = (ctx.request.headers.get("x-admin-email") || "").toLowerCase();
     if (admin !== "collabsbestie@gmail.com") return forbid("not_allowed");
 
-    // Force live save mode
-    const mode = "save";
-
     const body = await ctx.request.text();
     if (!body) return bad("empty_body");
 
@@ -89,22 +77,32 @@ export async function onRequestPost(ctx) {
     const id = genId();
     let total = 0, valid = 0, invalid = 0;
 
-    await ctx.env.DB
-      .prepare(`INSERT INTO import_batches (id, status, created_at) VALUES (?1, 'new', datetime('now'))`)
-      .bind(id).run();
+    // cast created_at to INTEGER unix epoch to avoid type mismatch
+    await ctx.env.DB.prepare(`
+      INSERT INTO import_batches (id, status, created_at)
+      VALUES (?1, 'new', CAST(strftime('%s','now') AS INTEGER))
+    `).bind(String(id)).run();
 
     for (const r of rows) {
       total++;
       const obj = normalizeRow(r.cols);
       const okRow = (obj.name && obj.name.trim().length > 0) ? 1 : 0;
+
+      // bind types explicitly; cast numeric fields
       await ctx.env.DB.prepare(`
         INSERT INTO import_rows (batch_id, row_num, parsed_json, valid)
-        VALUES (?1, ?2, ?3, ?4)
-      `).bind(id, r.row_num, JSON.stringify(obj), okRow).run();
+        VALUES (?1, CAST(?2 AS INTEGER), CAST(?3 AS TEXT), CAST(?4 AS INTEGER))
+      `).bind(
+        String(id),
+        String(r.row_num),
+        JSON.stringify(obj),
+        String(okRow)
+      ).run();
+
       if (okRow) valid++; else invalid++;
     }
 
-    return json({ ok: true, id, mode, counts: { total, valid, invalid }, header: STRICT_HEADERS.join(",") }, 200, cors());
+    return json({ ok: true, id, mode: "save", counts: { total, valid, invalid }, header: STRICT_HEADERS.join(",") }, 200, cors());
   } catch (err) {
     return json({ ok: false, error: "internal_error", detail: String(err && err.message || err) }, 500, cors());
   }
