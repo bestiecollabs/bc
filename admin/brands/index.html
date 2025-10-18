@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -77,7 +77,7 @@
       <div class="card" style="padding:0">
         <table id="tbl-review">
           <thead><tr><th><input type="checkbox" id="chk-all"></th><th>Brand</th><th>Domain</th><th>Category</th><th>Source Row</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -92,7 +92,7 @@
       <div class="card" style="padding:0">
         <table id="tbl-active">
           <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -107,7 +107,7 @@
       <div class="card" style="padding:0">
         <table id="tbl-draft">
           <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -151,7 +151,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
   // In Review
   async function loadDrafts(){
     const tbody = byId("tbl-review").querySelector("tbody");
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr>';
     const res = await fetch("/api/admin/brands/drafts", { headers: ADMIN_HDR });
     const data = await res.json().catch(()=>({ok:false,items:[]}));
     if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
@@ -182,7 +182,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
     const ids = Array.from(document.querySelectorAll("#tbl-review .chk:checked"))
       .map(chk => Number(chk.closest("tr")?.getAttribute("data-draft-id"))).filter(Boolean);
     if(!ids.length){ byId("reviewStatus").textContent = "Select at least one draft"; return; }
-    byId("reviewStatus").textContent = "PublishingÃ¢â‚¬Â¦";
+    byId("reviewStatus").textContent = "PublishingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦";
     const res = await fetch("/api/admin/brands/drafts/publish", {
       method:"POST", headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
     });
@@ -206,20 +206,36 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
     return { ok:true, items: Array.isArray(arr)? arr : [] };
   }
   async function loadActive(){
-    const tbody = byId("tbl-active").querySelector("tbody");
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr>';
+  const tbody = byId("tbl-active").querySelector("tbody");
+  tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Loading...</td></tr>";
+  try {
     const q = byId("qActive").value.trim();
     const data = await fetchBrands("published", q);
-    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
+    if(!data || !data.items){ throw new Error("no-data"); }
+    const rows = data.items.filter(b => (b.status || "published") === "published");
+    tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\\"5\\" class=\\"muted\\">None</td></tr>";
+  } catch (e) {
+    console.error("loadActive error", e);
+    tbody.innerHTML = "<tr><td colspan=\\"5\\" class=\\"muted\\">Failed to load</td></tr>";
+  }
+}
     const rows = data.items.filter(b => (b.status||"published")==="published");
     tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
   }
   async function loadDraft(){
-    const tbody = byId("tbl-draft").querySelector("tbody");
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃ¢â‚¬Â¦</td></tr>';
+  const tbody = byId("tbl-draft").querySelector("tbody");
+  tbody.innerHTML = "<tr><td colspan=\\"5\\" class=\\"muted\\">Loading...</td></tr>";
+  try {
     const q = byId("qDraft").value.trim();
     const data = await fetchBrands("draft", q);
-    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
+    if(!data || !data.items){ throw new Error("no-data"); }
+    const rows = data.items.filter(b => (b.status||"draft")==="draft" || (b.status||"")==="in_review");
+    tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\\"5\\" class=\\"muted\\">None</td></tr>";
+  } catch (e) {
+    console.error("loadDraft error", e);
+    tbody.innerHTML = "<tr><td colspan=\\"5\\" class=\\"muted\\">Failed to load</td></tr>";
+  }
+}
     const rows = data.items.filter(b => (b.status||"draft")==="draft" || (b.status||"") === "in_review"); // safety
     tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
   }
@@ -257,7 +273,7 @@ function setStatus(t){ const el=document.getElementById("actout"); if(el) el.tex
 async function uploadToInReview(){
   const f = document.getElementById("file")?.files?.[0];
   if(!f){ setStatus("Select a CSV first"); return; }
-  setStatus("Uploadingâ€¦");
+  setStatus("UploadingÃ¢â‚¬Â¦");
 
   // Preferred path: if legacy import.js is present, use it
   if (typeof window.runImport === "function") {
@@ -294,7 +310,7 @@ function setStatus(t){ const el=document.getElementById("actout"); if(el) el.tex
 async function uploadToInReview(){
   const f = document.getElementById("file")?.files?.[0];
   if(!f){ setStatus("Select a CSV first"); return; }
-  setStatus("Uploading…");
+  setStatus("Uploadingâ€¦");
 
   // Preferred path: if legacy import.js is present, use it
   if (typeof window.runImport === "function") {
@@ -334,3 +350,4 @@ document.addEventListener("click", (e)=>{ if(e.target && e.target.id==="uploadIn
 <script src="/admin/brands/import.js" defer></script>
 </body>
 </html>
+
