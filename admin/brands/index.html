@@ -1,7 +1,8 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Admin - Brands</title>
   <style>
@@ -38,7 +39,7 @@
   <nav class="nav">
     <h1>Bestie Admin</h1>
     <div class="sec">Main</div>
-    <a href="/admin/dashboard/" >Dashboard</a>
+    <a href="/admin/dashboard/">Dashboard</a>
     <a href="/admin/brands/" class="active">Brands</a>
     <a href="/admin/imports/">Imports</a>
     <a href="/admin/creators/">Creators</a>
@@ -52,20 +53,20 @@
 
     <!-- 1) CSV Upload -->
     <section class="card" id="sec-upload">
-  <h3 class="section-title">CSV Upload</h3>
-  <div class="toolbar">
-    <input id="file" type="file" accept=".csv">
-    <button id="uploadInReview" class="btn">Upload to In Review</button>
-    <a id="btn-template" class="btn" href="/api/admin/import/brands/template">Download Template</a>
-    <span id="actout" class="muted"></span>
-  </div>
-  <div class="card" style="padding:0">
-    <table id="tbl-upload">
-      <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Actions</th></tr></thead>
-      <tbody><tr><td colspan="6" class="muted">No preview yet</td></tr></tbody>
-    </table>
-  </div>
-</section>
+      <h3 class="section-title">CSV Upload</h3>
+      <div class="toolbar">
+        <input id="file" type="file" accept=".csv">
+        <button id="uploadInReview" class="btn">Upload to In Review</button>
+        <a id="btn-template" class="btn" href="/api/admin/import/brands/template">Download Template</a>
+        <span id="actout" class="muted"></span>
+      </div>
+      <div class="card" style="padding:0">
+        <table id="tbl-upload">
+          <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Deleted</th><th>Actions</th></tr></thead>
+          <tbody><tr><td colspan="6" class="muted">No preview yet</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
     <!-- 2) In Review -->
     <section class="card" id="sec-review">
@@ -77,7 +78,7 @@
       <div class="card" style="padding:0">
         <table id="tbl-review">
           <thead><tr><th><input type="checkbox" id="chk-all"></th><th>Brand</th><th>Domain</th><th>Category</th><th>Source Row</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">Loading...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -87,12 +88,12 @@
       <h3 class="section-title">Active Brands</h3>
       <div class="toolbar row">
         <input id="qActive" class="grow" placeholder="Search name or domain" type="text">
-        <button id="btn-load-active" class="btn">Load</button>
+        <button id="btn-load-active" class="btn">Search</button>
       </div>
       <div class="card" style="padding:0">
         <table id="tbl-active">
           <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">Loading...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -102,12 +103,12 @@
       <h3 class="section-title">Unpublished Brands</h3>
       <div class="toolbar row">
         <input id="qDraft" class="grow" placeholder="Search name or domain" type="text">
-        <button id="btn-load-draft" class="btn">Load</button>
+        <button id="btn-load-draft" class="btn">Search</button>
       </div>
       <div class="card" style="padding:0">
         <table id="tbl-draft">
           <thead><tr><th>Name</th><th>Categories</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr></tbody>
+          <tbody><tr><td colspan="5" class="muted">Loading...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -148,31 +149,62 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
     </tr>`;
   }
 
-  // In Review
+  // CSV single-button upload to In Review
+  function setStatus(t){ const el=byId("actout"); if(el) el.textContent=t; }
+  async function uploadToInReview(){
+    const f = byId("file")?.files?.[0];
+    if(!f){ setStatus("Select a CSV first"); return; }
+    setStatus("Uploading...");
+    try{
+      if (typeof window.runImport === "function") {
+        await window.runImport(true); // commit
+        setStatus("Uploaded to In Review");
+        await loadDrafts();
+        return;
+      }
+      const fd = new FormData();
+      fd.append("file", f, f.name);
+      const url = new URL("/api/admin/brands/import", location.origin);
+      url.searchParams.set("dry","0");
+      const r = await fetch(url, { method:"POST", headers: { "x-admin-email": window.ADMIN_EMAIL }, body: fd });
+      const j = await r.json().catch(()=>({}));
+      if(!r.ok || !j.ok){ setStatus("Upload failed"); return; }
+      setStatus("Uploaded to In Review");
+      await loadDrafts();
+    }catch(e){ console.error(e); setStatus("Upload error"); }
+  }
+  document.addEventListener("click", (e)=>{ if(e.target && e.target.id==="uploadInReview"){ uploadToInReview(); }});
+
+  // In Review table
   async function loadDrafts(){
     const tbody = byId("tbl-review").querySelector("tbody");
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">LoadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</td></tr>';
-    const res = await fetch("/api/admin/brands/drafts", { headers: ADMIN_HDR });
-    const data = await res.json().catch(()=>({ok:false,items:[]}));
-    if(!data.ok){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>'; return; }
-    if(!Array.isArray(data.items) || !data.items.length){
-      tbody.innerHTML = '<tr><td colspan="5" class="muted">No drafts in review</td></tr>'; return;
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading...</td></tr>';
+    try {
+      const res = await fetch("/api/admin/brands/drafts", { headers: ADMIN_HDR });
+      const data = await res.json().catch(()=>({}));
+      if(!data || !data.ok || !Array.isArray(data.items)){
+        tbody.innerHTML = '<tr><td colspan="5" class="muted">None</td></tr>';
+        return;
+      }
+      const rows = data.items.map(d=>{
+        let v = {};
+        try { v = JSON.parse(d.data_json||"{}"); } catch {}
+        const domain = v.domain || "";
+        const name = v.name || "(no name)";
+        const cat  = v.category_primary || "";
+        return `<tr data-draft-id="${d.id}">
+          <td><input type="checkbox" class="chk"></td>
+          <td>${name}</td>
+          <td>${domain}</td>
+          <td>${cat}</td>
+          <td>${d.source_row_id ?? ""}</td>
+        </tr>`;
+      }).join("");
+      tbody.innerHTML = rows || '<tr><td colspan="5" class="muted">None</td></tr>';
+    } catch (e) {
+      console.error("loadDrafts error", e);
+      tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>';
     }
-    const rows = data.items.map(d=>{
-      let v = {};
-      try { v = JSON.parse(d.data_json||"{}"); } catch {}
-      const domain = v.domain || "";
-      const name = v.name || "(no name)";
-      const cat  = v.category_primary || "";
-      return `<tr data-draft-id="${d.id}">
-        <td><input type="checkbox" class="chk"></td>
-        <td>${name}</td>
-        <td>${domain}</td>
-        <td>${cat}</td>
-        <td>${d.source_row_id ?? ""}</td>
-      </tr>`;
-    }).join("");
-    tbody.innerHTML = rows;
   }
   byId("chk-all").addEventListener("change", e=>{
     const on = e.target.checked;
@@ -182,16 +214,20 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
     const ids = Array.from(document.querySelectorAll("#tbl-review .chk:checked"))
       .map(chk => Number(chk.closest("tr")?.getAttribute("data-draft-id"))).filter(Boolean);
     if(!ids.length){ byId("reviewStatus").textContent = "Select at least one draft"; return; }
-    byId("reviewStatus").textContent = "PublishingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦";
-    const res = await fetch("/api/admin/brands/drafts/publish", {
-      method:"POST", headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
-    });
-    const j = await res.json().catch(()=>({ok:false}));
-    byId("reviewStatus").textContent = j.ok ? "Published" : "Publish failed";
-    await loadDrafts(); await loadActive();
+    byId("reviewStatus").textContent = "Publishing...";
+    try{
+      const res = await fetch("/api/admin/brands/drafts/publish", {
+        method:"POST", headers: ADMIN_HDR, body: JSON.stringify({ draft_ids: ids })
+      });
+      const j = await res.json().catch(()=>({ ok:false }));
+      byId("reviewStatus").textContent = j.ok ? "Published" : "Publish failed";
+      await loadDrafts(); await loadActive();
+    }catch(e){
+      console.error(e); byId("reviewStatus").textContent = "Publish failed";
+    }
   });
 
-  // Lists
+  // Brand lists
   async function fetchBrands(wantStatus, q=""){
     const paths = ["/api/admin/brands", "/api/admin/chipchip/brands", "/api/admin/brands/list"];
     let payload=null;
@@ -206,148 +242,39 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
     return { ok:true, items: Array.isArray(arr)? arr : [] };
   }
   async function loadActive(){
-  const tbody = byId("tbl-active").querySelector("tbody");
-  tbody.innerHTML = "<tr><td colspan=\"5\" class=\"muted\">Loading...</td></tr>";
-  try {
-    const q = byId("qActive").value.trim();
-    const data = await fetchBrands("published", q);
-    if(!data || !data.items){ throw new Error("no-data"); }
-    const rows = data.items.filter(b => (b.status || "published") === "published");
-    tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\\"5\\" class=\\"muted\\">None</td></tr>";
-  } catch (e) {
-    console.error("loadActive error", e);
-    tbody.innerHTML = "<tr><td colspan=\\"5\\" class=\\"muted\\">Failed to load</td></tr>";
-  }
-}
-    const rows = data.items.filter(b => (b.status||"published")==="published");
-    tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
+    const tbody = byId("tbl-active").querySelector("tbody");
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading...</td></tr>';
+    try{
+      const q = byId("qActive").value.trim();
+      const data = await fetchBrands("published", q);
+      const rows = data.items.filter(b => (b.status || "published") === "published");
+      tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
+    }catch(e){
+      console.error("loadActive error", e);
+      tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>';
+    }
   }
   async function loadDraft(){
-  const tbody = byId("tbl-draft").querySelector("tbody");
-  tbody.innerHTML = "<tr><td colspan=\\"5\\" class=\\"muted\\">Loading...</td></tr>";
-  try {
-    const q = byId("qDraft").value.trim();
-    const data = await fetchBrands("draft", q);
-    if(!data || !data.items){ throw new Error("no-data"); }
-    const rows = data.items.filter(b => (b.status||"draft")==="draft" || (b.status||"")==="in_review");
-    tbody.innerHTML = rows.map(rowBrand).join("") || "<tr><td colspan=\\"5\\" class=\\"muted\\">None</td></tr>";
-  } catch (e) {
-    console.error("loadDraft error", e);
-    tbody.innerHTML = "<tr><td colspan=\\"5\\" class=\\"muted\\">Failed to load</td></tr>";
-  }
-}
-    const rows = data.items.filter(b => (b.status||"draft")==="draft" || (b.status||"") === "in_review"); // safety
-    tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
+    const tbody = byId("tbl-draft").querySelector("tbody");
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Loading...</td></tr>';
+    try{
+      const q = byId("qDraft").value.trim();
+      const data = await fetchBrands("draft", q);
+      const rows = data.items.filter(b => (b.status||"draft")==="draft" || (b.status||"")==="in_review");
+      tbody.innerHTML = rows.map(rowBrand).join("") || '<tr><td colspan="5" class="muted">None</td></tr>';
+    }catch(e){
+      console.error("loadDraft error", e);
+      tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load</td></tr>';
+    }
   }
   byId("btn-load-active").addEventListener("click", loadActive);
   byId("btn-load-draft").addEventListener("click", loadDraft);
 
-  // Row actions
-  async function updateBrand(id, patch){
-    const res = await fetch(`/api/admin/brands/${id}`, { method:"PATCH", headers: ADMIN_HDR, body: JSON.stringify(patch) });
-    return res.json();
-  }
-  document.addEventListener("click", async (e)=>{
-    const tr = e.target.closest('tr[data-id]');
-    if(!tr) return;
-    const id = tr.getAttribute('data-id');
-    if(e.target.classList.contains('publish')){
-      const cur = tr.children[2].textContent.trim();
-      const next = cur==='published' ? 'draft' : 'published';
-      await updateBrand(id,{ status: next });
-      await loadActive(); await loadDraft();
-    }
-    if(e.target.classList.contains('feature')){
-      const isYes = tr.children[3].textContent.trim()==='Yes';
-      await updateBrand(id,{ featured: !isYes });
-      await loadActive(); await loadDraft();
-    }
-  });
-
-  // CSV buttons wiring for preview module if present
-  const safe = (id, fn)=>{ const el=byId(id); if(el) el.addEventListener("click", fn); };
-  safe("refreshBtn", ()=> { if (typeof window.loadBrands==="function") window.loadBrands(); });
-
-  // CSV: single-button upload to In Review
-function setStatus(t){ const el=document.getElementById("actout"); if(el) el.textContent=t; }
-async function uploadToInReview(){
-  const f = document.getElementById("file")?.files?.[0];
-  if(!f){ setStatus("Select a CSV first"); return; }
-  setStatus("UploadingÃ¢â‚¬Â¦");
-
-  // Preferred path: if legacy import.js is present, use it
-  if (typeof window.runImport === "function") {
-    try {
-      await window.runImport(true); // commit mode
-      setStatus("Uploaded to In Review");
-      await loadDrafts();
-      return;
-    } catch (e) {
-      console.warn("runImport failed, falling back:", e);
-    }
-  }
-
-  // Fallback: direct POST to import endpoint
-  try{
-    const fd = new FormData();
-    fd.append("file", f, f.name);
-    const url = new URL("/api/admin/brands/import", location.origin);
-    url.searchParams.set("dry","0");
-    const r = await fetch(url, { method:"POST", headers: { "x-admin-email": window.ADMIN_EMAIL }, body: fd });
-    const j = await r.json().catch(()=>({}));
-    if(!r.ok || !j.ok){ setStatus("Upload failed"); return; }
-    setStatus("Uploaded to In Review");
-    await loadDrafts();
-  }catch(err){
-    console.error(err);
-    setStatus("Upload error");
-  }
-}
-document.addEventListener("click", (e)=>{ if(e.target && e.target.id==="uploadInReview"){ uploadToInReview(); }});
-
-// CSV: single-button upload to In Review
-function setStatus(t){ const el=document.getElementById("actout"); if(el) el.textContent=t; }
-async function uploadToInReview(){
-  const f = document.getElementById("file")?.files?.[0];
-  if(!f){ setStatus("Select a CSV first"); return; }
-  setStatus("Uploadingâ€¦");
-
-  // Preferred path: if legacy import.js is present, use it
-  if (typeof window.runImport === "function") {
-    try {
-      await window.runImport(true); // commit mode
-      setStatus("Uploaded to In Review");
-      await loadDrafts();
-      return;
-    } catch (e) {
-      console.warn("runImport failed, falling back:", e);
-    }
-  }
-
-  // Fallback: direct POST to import endpoint
-  try{
-    const fd = new FormData();
-    fd.append("file", f, f.name);
-    const url = new URL("/api/admin/brands/import", location.origin);
-    url.searchParams.set("dry","0");
-    const r = await fetch(url, { method:"POST", headers: { "x-admin-email": window.ADMIN_EMAIL }, body: fd });
-    const j = await r.json().catch(()=>({}));
-    if(!r.ok || !j.ok){ setStatus("Upload failed"); return; }
-    setStatus("Uploaded to In Review");
-    await loadDrafts();
-  }catch(err){
-    console.error(err);
-    setStatus("Upload error");
-  }
-}
-document.addEventListener("click", (e)=>{ if(e.target && e.target.id==="uploadInReview"){ uploadToInReview(); }});
-
-// Initial loads
+  // Initial loads
   loadDrafts(); loadActive(); loadDraft();
 </script>
 
-<!-- Keep import.js; it handles dry-run/commit UI and preview table -->
+<!-- Keep optional legacy importer if present -->
 <script src="/admin/brands/import.js" defer></script>
 </body>
 </html>
-
