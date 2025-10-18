@@ -27,7 +27,7 @@ export async function onRequestGet({ env, request }) {
   const where = [];
   const binds = [];
 
-  // Soft-delete filter: default non-deleted; allow deleted=1 to list trash
+  // Soft-delete filter
   if (deleted === "1" || deleted.toLowerCase() === "true") {
     where.push("deleted_at IS NOT NULL");
   } else {
@@ -43,12 +43,31 @@ export async function onRequestGet({ env, request }) {
 
   const whereSql = "WHERE " + where.join(" AND ");
 
+  // Return columns aligned to CSV headers, plus minimal admin fields for actions
   const listSql = `
-    SELECT id, name, slug, status, is_public, logo_url, website_url, updated_at, deleted_at
-    FROM brands ${whereSql}
+    SELECT
+      id,
+      slug,
+      status,
+      updated_at,
+      deleted_at,
+      name AS brand_name,
+      website_url,
+      category_primary,
+      category_secondary,
+      category_tertiary,
+      instagram_url,
+      tiktok_url,
+      description,
+      customer_age_min,
+      customer_age_max,
+      us_based
+    FROM brands
+    ${whereSql}
     ORDER BY updated_at DESC, id DESC
     LIMIT ? OFFSET ?
   `;
+
   const totalSql = `SELECT COUNT(*) AS c FROM brands ${whereSql}`;
 
   const items = await env.DB.prepare(listSql).bind(...binds, limit, offset).all()
@@ -60,6 +79,18 @@ export async function onRequestGet({ env, request }) {
     .catch(() => 0);
 
   return j({ ok: true, total, limit, offset, items });
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET, POST, PATCH, OPTIONS",
+      "access-control-allow-headers": "content-type, x-admin-email",
+      "content-type": "text/plain; charset=utf-8"
+    }
+  });
 }
 
 function clamp(v, min, max, dflt){
@@ -75,17 +106,6 @@ function j(body, status=200){
       "access-control-allow-origin": "*",
       "access-control-allow-methods": "GET, POST, PATCH, OPTIONS",
       "access-control-allow-headers": "content-type, x-admin-email"
-    }
-  });
-}
-export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "access-control-allow-origin": "*",
-      "access-control-allow-methods": "GET, POST, PATCH, OPTIONS",
-      "access-control-allow-headers": "content-type, x-admin-email",
-      "content-type": "text/plain; charset=utf-8"
     }
   });
 }
