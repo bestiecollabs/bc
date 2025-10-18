@@ -78,3 +78,14 @@ function j(body, status=200){
     }
   });
 }
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET, POST, PATCH, OPTIONS",
+      "access-control-allow-headers": "content-type, x-admin-email",
+      "content-type": "text/plain; charset=utf-8"
+    }
+  });
+}
