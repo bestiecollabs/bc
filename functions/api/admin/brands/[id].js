@@ -1,13 +1,4 @@
-﻿/**
- * PATCH /api/admin/brands/{id}
- * Body:
- *   { "restore": true }           -> deleted_at = NULL
- *   { "status": "published" }     -> updates status
- *   { "is_public": 1 }            -> updates is_public (1|0)
- * Admin header required: x-admin-email in ADMIN_ADMINS
- * Response: { ok, item }
- */
-export async function onRequestPatch({ env, request, params }) {
+﻿export async function onRequestPatch({ env, request, params }) {
   const admin = String(request.headers.get("x-admin-email") || "").trim().toLowerCase();
   const allow = String(env.ADMIN_ADMINS || "collabsbestie@gmail.com").toLowerCase().split(",").map(s => s.trim());
   if (!admin || !allow.includes(admin)) return J({ ok:false, error:"not_allowed" }, 401);
@@ -24,8 +15,13 @@ export async function onRequestPatch({ env, request, params }) {
   const sets = [];
   const binds = [];
 
+  // Soft delete
+  if (body.delete === true) sets.push("deleted_at = CURRENT_TIMESTAMP");
+
+  // Restore
   if (body.restore === true) sets.push("deleted_at = NULL");
 
+  // Status
   if (typeof body.status === "string") {
     const s = body.status.trim().toLowerCase();
     const allowed = new Set(["in_review","published","draft","archived"]);
@@ -34,6 +30,7 @@ export async function onRequestPatch({ env, request, params }) {
     binds.push(s);
   }
 
+  // is_public
   if (body.is_public !== undefined) {
     const v = (body.is_public === 1 || body.is_public === true) ? 1
           : (body.is_public === 0 || body.is_public === false) ? 0
