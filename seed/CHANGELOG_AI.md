@@ -105,3 +105,9 @@ Branch=main Commit=a118ead4744074e7ff965761ac0110b8d724b18a
 - Next: verify D1 rows for in_review, align endpoint filtering, add KPI cards, add Deleted listing.
 
 ---
+[2025-10-17 22:18 PST] v3.0 — Latest active — Part 1 of 2
+- Admin Brands API: enforce status and deleted filters; standardized shape { ok, total, limit, offset, items }.
+- OPTIONS added for /api/admin/brands (CORS 204).
+- PATCH /api/admin/brands/{id}: restore, delete, status, is_public supported.
+- CSV import: reaffirm strict 11-header format; identify commit-path need to set status='in_review'.
+- Planned UI (Part 2): tables aligned to upload columns; bulk delete in all but Deleted tab; Actions right-aligned.
