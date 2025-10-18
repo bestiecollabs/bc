@@ -1,3 +1,4 @@
+﻿import { validateHeaders } from "./_headers.js";
 export const config = { runtime: "edge" };
 
 /**
@@ -96,3 +97,4 @@ export async function onRequestPost(ctx){
 
   return new Response(JSON.stringify({ ok:true, id:batchId, rows:inserted }),{headers:{"content-type":"application/json"}});
 }
+
