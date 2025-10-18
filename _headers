@@ -1,16 +1,2 @@
-/*
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-
-/api/*
-  Cache-Control: no-store
-  Access-Control-Allow-Origin: https://bestiecollabs.com
-  Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS
-  Access-Control-Allow-Headers: Content-Type, Authorization, x-admin-email
-
-/*.html
+﻿/*
   Content-Type: text/html; charset=utf-8
-
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
