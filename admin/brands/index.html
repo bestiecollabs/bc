@@ -168,7 +168,7 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
       url.searchParams.set("dry","0");
       const r = await fetch(url, { method:"POST", headers: { "x-admin-email": window.ADMIN_EMAIL }, body: fd });
       const j = await r.json().catch(()=>({}));
-      if(!r.ok || !j.ok){ setStatus("Upload failed"); return; }
+      if(!r.ok || !j.ok){ setStatus("Upload failed"); if (j && j.error) setStatus("Upload failed: " + j.error); return; }
       setStatus("Uploaded to In Review");
       await loadDrafts();
     }catch(e){ console.error(e); setStatus("Upload error"); }
@@ -275,6 +275,5 @@ window.ADMIN_EMAIL = "collabsbestie@gmail.com";
 </script>
 
 <!-- Keep optional legacy importer if present -->
-<script src="/admin/brands/import.js" defer></script>
 </body>
 </html>

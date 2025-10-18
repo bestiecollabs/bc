@@ -1,38 +1,26 @@
-﻿/**
- * POST /api/admin/brands/import
- * Accepts multipart/form-data with field "file" (CSV).
- * Query param ?dry=1 for dry-run.
- * Default status for new/updated rows: in_review
+/**
+ * POST /api/admin/brands/import?dry=0
+ * multipart/form-data, field "file"
+ * New/updated rows -> status=in_review, is_public=0
  */
 export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "https://bestiecollabs.com",
-      "Access-Control-Allow-Methods": "GET,POST,PATCH,OPTIONS",
-      "Access-Control-Allow-Headers": "content-type, x-admin-email"
-    }
-  });
+  return new Response(null, { status: 204, headers: cors() });
 }
 
 export async function onRequestPost({ request, env }) {
   try {
     const url = new URL(request.url);
-    const dry = url.searchParams.get("dry") === "1";
+    const dry = url.searchParams.get("dry") === "1" ? true : false;
     const form = await request.formData();
     const file = form.get("file");
-    if (!file || !file.text) {
-      return json({ ok:false, error:"missing_file" }, 400);
-    }
-    const csv = await file.text();
-    const rows = parseCsv(csv);
+    if (!file || !file.text) return j({ ok:false, error:"missing_file" }, 400);
 
-    // Basic header check
-    const required = ["name","slug","domain"];
-    const headerOk = required.every(h => rows.header.includes(h));
-    if (!headerOk) {
-      return json({ ok:false, error:"invalid_csv_headers", required }, 400);
-    }
+    const csv = await file.text();
+    const rows = parseCsv(csv); // {header[], data[]}
+    if (!rows.header.length) return j({ ok:false, error:"empty_csv" }, 400);
+
+    // header mapping: accept many variants
+    const map = headerMap(rows.header);
 
     let inserted = 0, updated = 0, skipped = 0, errors = [];
 
@@ -56,71 +44,89 @@ export async function onRequestPost({ request, env }) {
 
       for (const r of rows.data) {
         try {
-          // Coerce fields
-          const name = (r.name||"").trim();
-          const slug = (r.slug||"").trim().toLowerCase();
-          const domain = (r.domain||"").trim().toLowerCase();
+          const nameRaw = pick(r, map.name);
+          const domainRaw = pick(r, map.domain);
+          const slugRaw = pick(r, map.slug);
+          const name = (nameRaw||"").trim();
+          let domain = (domainRaw||"").trim();
+          if (!domain) {
+            const urlGuess = pick(r, map.website_url);
+            domain = guessDomain(urlGuess||"");
+          } else {
+            domain = guessDomain(domain);
+          }
+          if (!domain && name) domain = slugify(name) + ".com";
+
+          let slug = (slugRaw||"").trim().toLowerCase() || (name ? slugify(name) : "");
+          if (!slug && domain) slug = slugify(domain.replace(/^www\./i,"").replace(/\..*$/,""));
+
           if (!name || !slug || !domain) { skipped++; continue; }
 
-          const category_primary = (r.category_primary||"").trim();
-          const category_secondary = (r.category_secondary||"").trim();
-          const category_tertiary = (r.category_tertiary||"").trim();
-          const website_url = (r.website_url||"").trim();
-          const logo_url = (r.logo_url||"").trim();
+          const website_url = (pick(r, map.website_url)||"").trim();
+          const logo_url = (pick(r, map.logo_url)||"").trim();
+          const cat1 = (pick(r, map.category_primary)||"").trim();
+          const cat2 = (pick(r, map.category_secondary)||"").trim();
+          const cat3 = (pick(r, map.category_tertiary)||"").trim();
 
-          const res = await ps.bind(
-            name, slug, domain,
-            category_primary, category_secondary, category_tertiary,
-            website_url, logo_url
-          ).run();
-
-          // D1 returns meta; if changes==1 and existed we still can’t tell insert vs update reliably.
-          // Treat any successful run as upsert. Count heuristically:
-          if (res && typeof res.meta === "object") {
-            updated++; // conservative
-          } else {
-            inserted++;
-          }
+          const res = await ps.bind(name, slug, domain, cat1, cat2, cat3, website_url, logo_url).run();
+          if (res && res.meta) updated++; else inserted++;
         } catch (e) {
-          errors.push({ slug: r.slug, error: String(e) });
+          errors.push({ row:r, error:String(e) });
         }
       }
     } else {
-      // Dry run: just validate and count
       for (const r of rows.data) {
-        if (r.name && r.slug && r.domain) inserted++; else skipped++;
+        const name = (pick(r, ["name","brand","brand_name"])||"").trim();
+        const domain = guessDomain(pick(r, ["domain","website","url","website_url"])||"");
+        const slug = (pick(r, ["slug"])||"").trim() || (name ? slugify(name) : "");
+        if (name && (domain||slug)) inserted++; else skipped++;
       }
     }
 
-    return json({ ok:true, dry, inserted, updated, skipped, errors });
+    return j({ ok:true, dry, inserted, updated, skipped, errors });
   } catch (err) {
-    return json({ ok:false, error:String(err) }, 500);
+    return j({ ok:false, error:String(err) }, 500);
   }
 }
 
-function json(obj, status=200) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: {
-      "content-type":"application/json; charset=utf-8",
-      "Access-Control-Allow-Origin":"https://bestiecollabs.com",
-      "Access-Control-Allow-Methods":"GET,POST,PATCH,OPTIONS",
-      "Access-Control-Allow-Headers":"content-type, x-admin-email"
-    }
-  });
-}
-
-// Minimal CSV parser for UTF-8, header row required.
-// Handles simple commas. For quoted fields with commas, use a real parser later.
-function parseCsv(text) {
+// ---------- helpers ----------
+function j(obj, status=200){ return new Response(JSON.stringify(obj), { status, headers: { ...cors(), "content-type":"application/json; charset=utf-8" } }); }
+function cors(){ return {
+  "Access-Control-Allow-Origin":"https://bestiecollabs.com",
+  "Access-Control-Allow-Methods":"GET,POST,PATCH,OPTIONS",
+  "Access-Control-Allow-Headers":"content-type, x-admin-email"
+};}
+function parseCsv(text){
   const lines = text.replace(/\r\n/g,"\n").split("\n").filter(l=>l.trim().length);
-  const header = lines[0].split(",").map(h=>h.trim().toLowerCase());
+  const header = lines[0].split(",").map(h=>h.trim());
   const data = [];
   for (let i=1;i<lines.length;i++){
-    const cols = lines[i].split(","); // simple split
+    const cols = lines[i].split(",");
     const row = {};
-    header.forEach((h, idx)=> row[h] = (cols[idx]||"").trim());
+    header.forEach((h,idx)=> row[h]= (cols[idx]||"").trim());
     data.push(row);
   }
   return { header, data };
+}
+function headerMap(header){
+  const h = header.map(x=>x.toLowerCase());
+  const idx = (names)=> names.map(n=> h.indexOf(n)).filter(i=>i>=0).map(i=> header[i]);
+  return {
+    name: idx(["name","brand","brand_name"]),
+    domain: idx(["domain","shop_domain","store_domain","hostname","website","url","website_url"]),
+    slug: idx(["slug","handle"]),
+    website_url: idx(["website","url","website_url"]),
+    logo_url: idx(["logo","logo_url","image","image_url"]),
+    category_primary: idx(["category_primary","category","primary_category"]),
+    category_secondary: idx(["category_secondary","secondary_category"]),
+    category_tertiary: idx(["category_tertiary","tertiary_category"])
+  };
+}
+function pick(row, keys){ if(!keys||!keys.length) return ""; for(const k of keys){ if(row[k]) return row[k]; } return ""; }
+function slugify(s){ return String(s).toLowerCase().replace(/https?:\/\/(www\.)?/,"").replace(/[^\w]+/g,"-").replace(/^-+|-+$/g,""); }
+function guessDomain(s){
+  if(!s) return "";
+  let t = String(s).trim();
+  if (/^https?:\/\//i.test(t)===false) t = "https://" + t;
+  try { const u = new URL(t); return (u.hostname||"").toLowerCase(); } catch { return t.toLowerCase(); }
 }
