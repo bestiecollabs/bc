@@ -1,4 +1,60 @@
-﻿[AI_README 2025-10-17 14:33 PST]  (ACTIVE SESSION — Part 1 of 2)
+[AI_README 2025-10-17 20:31 PST]  —  Handoff Rules v3.0  —  Latest Active Session  —  Part 1 of 2
+
+PROJECT
+- Name: Bestie Collabs (repo: bc)
+- Domain: bestiecollabs.com
+- Stack: Cloudflare Pages + Workers + D1 (database: bestiedb)
+- Admin header required: x-admin-email
+- Allowed methods on /api/*: GET, POST, PATCH, OPTIONS
+
+SCOPE OF THIS SESSION
+- Admin Brands Directory flow updates:
+  - CSV uploads go to status=in_review.
+  - “In Review” table reads brands where status=in_review and supports bulk publish via PATCH /api/admin/brands/{id}.
+  - Air theme removed; simple theme with left nav added.
+  - CORS updated to include PATCH; UTF-8 headers for .html set to avoid mojibake.
+  - List loaders hardened; response normalization for items|rows.
+- This session is marked ACTIVE.
+
+KNOWN OPEN ITEMS (handoff to next session)
+1) Importer vs table read consistency: ensure importer and list endpoints use the same DB binding (env.DB) and status semantics.
+2) D1 checks: confirm brands table exists remotely and locally; align migrations where needed.
+3) KPI cards for Brands Directory (total_creators, total_sales_30d, avg_gmv_30d, avg_engagement_rate).
+4) Deleted Brands listing once API exposes deleted filter.
+5) CSV header variants are accepted; keep mapping in importer stable.
+
+HOW TO OPERATE
+- Admin auth header:
+  - x-admin-email: collabsbestie@gmail.com
+- Publish a brand:
+  - PATCH /api/admin/brands/{id}  body: { "status": "published", "is_public": 1 }
+- In Review table loader:
+  - GET /api/admin/brands?status=in_review&limit=100
+- Content-Type for .html:
+  - text/html; charset=utf-8
+
+QUICK TESTS
+- Upload CSV (single button “Upload to In Review”) → rows appear under In Review.
+- Select one or more rows → Publish selected → rows move to Active Brands.
+- Active/Draft search inputs → “Search” triggers reload.
+
+RISK LOG
+- If tables show “Loading...” indefinitely, check console for fetch or JSON shape errors.
+- If uploads succeed but In Review is empty, verify status=in_review rows exist in brands and that API filters are honored.
+- Mojibake indicates missing charset or non-ASCII literals in source.
+
+FILE TOUCHPOINTS (most relevant this session)
+- /admin/brands/index.html
+- /_headers
+- /functions/api/admin/brands/import.js
+- /functions/api/_middleware.js
+
+NEXT SESSION START POINTER
+- Begin by verifying D1 brands rows with status=in_review on REMOTE.
+- If present, confirm API response shape to the UI: items[] vs rows[] and status filter.
+- Proceed to KPI cards and Deleted Brands filter.
+
+[AI_README 2025-10-17 14:33 PST]  (ACTIVE SESSION — Part 1 of 2)
 Project: Bestie Collabs
 Scope: Admin Brands Directory reliability + state partitions; Unpublish/Publish; soft-delete Undo; CSS reset to light.
 Context Summary:
