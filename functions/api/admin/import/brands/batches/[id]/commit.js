@@ -57,13 +57,13 @@ export async function onRequestPost(ctx) {
           name, slug, domain, website_url,
           category_primary, category_secondary, category_tertiary,
           instagram_url, tiktok_url, description,
-          customer_age_min, customer_age_max, us_based,
-          status, created_at, updated_at
+          customer_age_min, customer_age_max, us_based, is_public,
+        status, created_at, updated_at
         ) VALUES (
           ?1, ?2, ?3, ?4,
           ?5, ?6, ?7,
           ?8, ?9, ?10,
-          ?11, ?12, ?13,
+          ?11, ?12, ?13, 0,
           'in_review', datetime('now'), datetime('now')
         )
       `).bind(
