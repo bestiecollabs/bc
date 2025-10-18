@@ -44,7 +44,7 @@ export async function onRequestPost(ctx) {
       const customer_age_max   = Number.isFinite(Number(obj.customer_age_max)) ? Number(obj.customer_age_max) : 0;
       const us_based           = String(obj.us_based ?? "0").trim() === "1" ? 1 : 0;
 
-      // Try insert first. If slug already exists (or no UNIQUE), IGNORE prevents error.
+      // Insert first; ignore if row already exists
       const ins = await ctx.env.DB.prepare(`
         INSERT OR IGNORE INTO brands (
           name, slug, website_url,
@@ -66,12 +66,9 @@ export async function onRequestPost(ctx) {
         customer_age_min, customer_age_max, us_based
       ).run();
 
-      if ((ins.meta?.changes || 0) > 0) {
-        inserted++;
-        continue;
-      }
+      if ((ins.meta?.changes || 0) > 0) { inserted++; continue; }
 
-      // If not inserted, update by slug and clear deleted_at to restore soft-deleted brands.
+      // Update existing by slug and restore soft-deletes
       const up = await ctx.env.DB.prepare(`
         UPDATE brands
            SET name = COALESCE(?1, name),
@@ -105,9 +102,7 @@ export async function onRequestPost(ctx) {
       ).run();
 
       if ((up.meta?.changes || 0) > 0) updated++; else skipped++;
-    } catch (_e) {
-      skipped++;
-    }
+    } catch { skipped++; }
   }
 
   if (inserted + updated > 0) {
