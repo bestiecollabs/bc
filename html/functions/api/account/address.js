@@ -33,7 +33,7 @@ export async function onRequestPost({ request, env }) {
   if (/<Error>/i.test(txt)) return json({ ok:false, error:"usps_fail", desc: pick(txt,"Description") }, 400);
 
   const nStreet = pick(txt,"Address2");
-  const nApt    = pick(txt,"Address1");
+
   const nCity   = pick(txt,"City");
   const nState  = pick(txt,"State");
   const zip5n   = pick(txt,"Zip5");
@@ -50,4 +50,5 @@ export async function onRequestPost({ request, env }) {
 
   return json({ ok:true });
 }
+
 
