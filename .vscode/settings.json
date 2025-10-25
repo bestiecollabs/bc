@@ -1,0 +1,10 @@
+{
+  "files.autoGuessEncoding": false,
+  "files.eol": "\n",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.env.windows": {
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
+  },
+  "files.encoding": "utf8"
+}
