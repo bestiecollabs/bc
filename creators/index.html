@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Creators · Bestie Collabs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/favicon.png">
+  <meta name="theme-color" content="#5E7BFF">
+  <link rel="stylesheet" href="/air.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap row">
+    <a class="brandmark" href="/"><img src="/b1.png" alt="Bestie Collabs"><span class="title">Bestie Collabs</span></a>
+    <nav>
+      <a href="/about/">About</a>
+      <a href="/brands/">Brands</a>
+      <a href="/creators/">Creators</a>
+      <a href="/pricing/">Pricing</a>
+      <a href="/support/">Support</a>
+    </nav>
+    <nav class="auth">
+      <a data-link="dashboard" href="/account/" hidden>Dashboard</a>
+      <a data-link="login" href="/login/">Log in</a>
+      <a data-link="create" href="/signup/">Create account</a>
+      <a data-link="logout" href="/logout" hidden>Log out</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1 class="funtext">Creator Directory</h1>
+    <p class="sub">Browse creators. Invite to collab. Pay only on sales.</p>
+  </section>
+
+  <!-- Filters -->
+  <section class="card" style="margin-top:12px">
+    <form class="formwrap" onsubmit="return false;">
+      <div class="row">
+        <div><label>Platform
+          <select id="f-platform">
+            <option value="">All</option>
+            <option>TikTok</option>
+            <option>Instagram</option>
+            <option>YouTube</option>
+          </select>
+        </label></div>
+        <div><label>Category
+          <select id="f-category">
+            <option value="">All</option>
+            <option>Beauty</option>
+            <option>Fashion</option>
+            <option>Fitness</option>
+            <option>Tech</option>
+            <option>Home</option>
+          </select>
+        </label></div>
+        <div><label>Min followers
+          <input id="f-min" type="number" placeholder="0" min="0">
+        </label></div>
+        <div style="align-self:end">
+          <button class="btn" id="f-apply" type="button">Apply</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- Directory grid -->
+  <section class="section" style="padding-top:22px">
+    <div class="grid grid-2" id="creator-grid">
+      <!-- Card template examples (static for now) -->
+      <article class="card">
+        <div class="row" style="align-items:center;gap:12px">
+          <img src="/avatar-a.png" alt="Creator A" style="width:52px;height:52px;border-radius:50%">
+          <div>
+            <h2 class="funtext" style="margin:0">Creator A</h2>
+            <p class="hint" style="margin:2px 0 0">TikTok · Beauty · 120k followers</p>
+          </div>
+        </div>
+        <p style="margin-top:10px">UGC + GRWM content. Strong conversion on skincare and hair tools.</p>
+        <div class="row-between" style="margin-top:10px">
+          <span class="hint">Avg conv: 2.3%</span>
+          <a class="btn" href="/signup/?role=brand">Invite to collab</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="row" style="align-items:center;gap:12px">
+          <img src="/avatar-b.png" alt="Creator B" style="width:52px;height:52px;border-radius:50%">
+          <div>
+            <h2 class="funtext" style="margin:0">Creator B</h2>
+            <p class="hint" style="margin:2px 0 0">Instagram · Fashion · 85k followers</p>
+          </div>
+        </div>
+        <p style="margin-top:10px">OOTD reels + story links. Strong AOV lift on accessories.</p>
+        <div class="row-between" style="margin-top:10px">
+          <span class="hint">Avg conv: 1.8%</span>
+          <a class="btn" href="/signup/?role=brand">Invite to collab</a>
+        </div>
+      </article>
+    </div>
+
+    <!-- Signup CTA for creators -->
+    <div class="card narrow" style="margin-top:22px">
+      <h2 class="funtext" style="text-align:center">Are you a Creator?</h2>
+      <p class="hint" style="text-align:center;margin-top:6px">No fees. Free samples. Earn on sales.</p>
+      <p style="text-align:center;margin-top:10px"><a class="btn" href="/signup/?role=creator">Create your account</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <nav class="links" aria-label="Footer">
+    <a href="/about/">About</a>
+    <a href="/brands/">Brands</a>
+    <a href="/cookie/">Cookie</a>
+    <a href="/creators/">Creators</a>
+    <a href="/dmca/">DMCA</a>
+    <a href="/pricing/">Pricing</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/support/">Support</a>
+    <a href="/terms/">Terms</a>
+  </nav>
+</footer>
+
+<script src="/auth.js" defer></script>
+<script>
+  // Simple client-side filter demo (static)
+  (function(){
+    const grid = document.getElementById('creator-grid');
+    document.getElementById('f-apply').addEventListener('click', () => {
+      // Placeholder: wire to API later. For now, no-op to keep UI consistent.
+      grid.style.opacity = '0.92';
+      setTimeout(()=>grid.style.opacity='1', 120);
+    });
+  })();
+</script>
+</body>
+</html>
+
+

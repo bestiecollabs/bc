@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Log in · Bestie Collabs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/favicon.png">
+  <meta name="theme-color" content="#4C6FFF">
+
+  <!-- Redirect logged-in users to dashboard -->
+  <script>
+    (async () => {
+      try {
+        const r = await fetch('/auth/session',{credentials:'include'});
+        if (r.ok) {
+          const j = await r.json().catch(()=>null);
+          if (j && (j.auth === true || j.user)) location.replace('/account/');
+        }
+      } catch(e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="/air.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap row">
+    <a class="brandmark" href="/"><img src="/b1.png" alt="Bestie Collabs"><span class="title">Bestie Collabs</span></a>
+    <nav>
+      <a href="/about/">About</a><a href="/brands/">Brands</a><a href="/creators/">Creators</a><a href="/pricing/">Pricing</a><a href="/support/">Support</a>
+    </nav>
+    <nav class="auth">
+      <a data-link="dashboard" href="/account/" hidden>Dashboard</a>
+      <a data-link="login" href="/login/">Log in</a>
+      <a data-link="create" href="/signup/">Create account</a>
+      <a data-link="logout" href="/logout" hidden>Log out</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap wrap-centered login-page">
+  <!-- match homepage spacing -->
+  <section class="hero section">
+    <h1 class="funtext center">Welcome back</h1>
+  </section>
+
+  <section class="section">
+    <!-- 30% narrower only here -->
+    <div class="narrow" style="max-width:504px">
+      <article class="card auth-card">
+        <h2 class="funtext center">Log in to your account</h2>
+
+        <div id="form_error" class="muted" role="alert" style="display:none"></div>
+
+        <!-- reduce stacked spacing locally -->
+        <div class="formwrap" style="gap:12px">
+          <label style="margin:0">Email or User ID
+            <input id="identifier" type="text" autocomplete="username" required>
+            <input id="email" type="hidden">
+          </label>
+
+          <!-- Password group with Remember Me directly under the field -->
+          <div class="pw-group" style="margin:0">
+            <label style="margin:0">Password
+              <div class="input-wrap">
+                <input id="password" type="password" class="pw" autocomplete="current-password" minlength="8" required>
+                <!-- eye toggle -->
+                <button id="togglePw" type="button" class="pw-eye" aria-pressed="false" aria-label="Show password" aria-controls="password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+            </label>
+
+            <!-- Remember Me: single line, left aligned, tight spacing -->
+            <div class="remember-row" style="display:flex;justify-content:flex-start;margin-top:6px">
+              <label for="remember" class="remember-label" style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap">
+                <input id="remember" type="checkbox">
+                <span>Remember Me</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="actions" style="justify-content:center">
+            <button id="loginBtn" type="button" class="btn" disabled>Log In</button>
+          </div>
+
+          <!-- centered links -->
+          <p class="postlinks muted" style="text-align:center">
+            <a href="/reset/">Forgot Password?</a>
+            <a href="/signup/">Sign Up</a>
+          </p>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <nav class="links" aria-label="Footer">
+    <a href="/about/">About</a>
+    <a href="/brands/">Brands</a>
+    <a href="/cookie/">Cookie</a>
+    <a href="/creators/">Creators</a>
+    <a href="/dmca/">DMCA</a>
+    <a href="/pricing/">Pricing</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/support/">Support</a>
+    <a href="/terms/">Terms</a>
+  </nav>
+</footer>
+
+<script>
+(function(){
+  const idEl = document.getElementById('identifier');
+  const emailAlias = document.getElementById('email');
+  const pwEl = document.getElementById('password');
+  const rememberEl = document.getElementById('remember');
+  const btn = document.getElementById('loginBtn');
+  const alertBox = document.getElementById('form_error');
+  const togglePw = document.getElementById('togglePw');
+
+  const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  const isUsername = v => /^[A-Za-z0-9_]{3,15}$/.test(v);
+
+  function showError(t){ alertBox.textContent=t; alertBox.style.display='block'; }
+  function hideError(){ alertBox.textContent=''; alertBox.style.display='none'; }
+
+  function validate(){
+    hideError();
+    const id = idEl.value.trim();
+    const okId = isEmail(id) || isUsername(id);
+    const ok = okId && pwEl.value.length>=8;
+    btn.disabled = !ok;
+    emailAlias.value = isEmail(id) ? id : "";
+  }
+
+  function loadRemember(){
+    const remembered = localStorage.getItem('remember') === '1';
+    rememberEl.checked = remembered;
+    if (remembered) {
+      const savedId = localStorage.getItem('identifier') || '';
+      idEl.value = savedId;
+    } else {
+      idEl.value = '';
+      pwEl.value = '';
+    }
+    validate();
+  }
+
+  idEl.addEventListener('input', validate);
+  pwEl.addEventListener('input', validate);
+  rememberEl.addEventListener('change', () => {
+    if (!rememberEl.checked) {
+      localStorage.removeItem('remember');
+      localStorage.removeItem('identifier');
+      idEl.value = '';
+      pwEl.value = '';
+      validate();
+    }
+  });
+
+  loadRemember();
+
+  async function postJSON(url,data){
+    try{
+      const res = await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        credentials:'include',
+        body:JSON.stringify(data)
+      });
+      const text = await res.text(); let json=null; try{ json=JSON.parse(text);}catch{}
+      return {ok:res.ok,status:res.status,json,text};
+    }catch(e){ return {ok:false,status:0,json:null,text:String(e)}}
+  }
+
+  async function doLogin(){
+    if(btn.disabled) return;
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Signing in…';
+    const id = idEl.value.trim();
+    const payload = isEmail(id)
+      ? { email: id, username: "", password: pwEl.value, remember: rememberEl.checked }
+      : { email: "", username: id, password: pwEl.value, remember: rememberEl.checked };
+
+    const r = await postJSON('/auth/login', payload);
+    if(!r.ok || (r.json && r.json.ok===false)){
+      if(r.status===404 || (r.json && r.json.error==='not_found')) showError('No account found for those credentials.');
+      else if(r.status===401 || (r.json && r.json.error==='wrong_password')) showError('Wrong password.');
+      else if(r.status===400 || (r.json && r.json.error==='missing_fields')) showError('Enter your email or user ID and password.');
+      else showError(`Login failed. Status ${r.status}.`);
+      btn.textContent = old; btn.disabled = false; return;
+    }
+
+    if (rememberEl.checked) {
+      localStorage.setItem('remember','1');
+      localStorage.setItem('identifier', id);
+    } else {
+      localStorage.removeItem('remember');
+      localStorage.removeItem('identifier');
+    }
+
+    const to = (r.json && r.json.redirect) || new URLSearchParams(location.search).get('next') || '/account/';
+    location.assign(to);
+  }
+
+  btn.addEventListener('click', doLogin);
+  pwEl.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+  // Eye icon toggle
+  const eye = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const eyeOff = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.8 21.8 0 0 1-3.16 4.19"/><line x1="1" y1="1" x2="23" y2="23"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const svgOn = eyeOff, svgOff = eye;
+
+  togglePw.addEventListener('click', () => {
+    const show = pwEl.type === 'password';
+    pwEl.type = show ? 'text' : 'password';
+    togglePw.setAttribute('aria-pressed', String(show));
+    togglePw.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    togglePw.innerHTML = show ? svgOn : svgOff;
+    pwEl.focus();
+  });
+})();
+</script>
+
+<!-- load auth.js last like homepage -->
+<script src="/auth.js" defer></script>
+</body>
+</html>
+
+

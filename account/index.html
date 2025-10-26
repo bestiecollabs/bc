@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · Bestie Collabs</title>
+  <link rel="icon" href="/favicon.png">
+  <meta name="theme-color" content="#5E7BFF">
+  <link rel="stylesheet" href="/air.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap row">
+    <a class="brandmark" href="/"><img src="/b1.png" alt="Bestie Collabs"><span class="title">Bestie Collabs</span></a>
+    <nav>
+      <a href="/about/">About</a>
+      <a href="/brands/">Brands</a>
+      <a href="/creators/">Creators</a>
+      <a href="/pricing/">Pricing</a>
+      <a href="/support/">Support</a>
+    </nav>
+    <nav class="auth">
+      <a data-link="dashboard" href="/account/" hidden>Dashboard</a>
+      <a data-link="login" href="/login/">Log in</a>
+      <a data-link="create" href="/signup/">Create account</a>
+      <a data-link="logout" href="/logout" hidden>Log out</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1 class="funtext" id="hello">Dashboard</h1>
+    <p class="sub">Overview and quick access.</p>
+  </section>
+
+  <article class="card">
+    <h2 class="funtext">Quick links</h2>
+    <div id="links" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px"></div>
+  </article>
+
+  <article class="card" id="profile"></article>
+</main>
+
+<footer class="wrap">
+  <nav class="links" aria-label="Footer">
+    <a href="/about/">About</a>
+    <a href="/brands/">Brands</a>
+    <a href="/cookie/">Cookie</a>
+    <a href="/creators/">Creators</a>
+    <a href="/dmca/">DMCA</a>
+    <a href="/pricing/">Pricing</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/support/">Support</a>
+    <a href="/terms/">Terms</a>
+  </nav>
+</footer>
+
+<script>
+(async function(){
+  const me = await fetch('/api/users/me', { credentials:'include' }).then(r=>r.json()).catch(()=>null);
+  if (!me || !me.ok || !me.user) { location.href='/login/'; return; }
+
+  const u = me.user;
+  document.getElementById('hello').textContent = `Welcome, ${u.full_name || u.username || u.email}`;
+
+  const links = document.getElementById('links');
+  if (u.role === 'brand') {
+    links.innerHTML = `
+      <a class="btn" href="/brands/">Brand dashboard</a>
+      <a class="btn" href="/brands/">Browse creators</a>`;
+  } else {
+    links.innerHTML = `
+      <a class="btn" href="/creators/profile/">Creator dashboard</a>
+      <a class="btn" href="/creators/">Browse brands</a>`;
+  }
+
+  const a = me.address || {};
+  document.getElementById('profile').innerHTML = `
+    <h3>Account</h3>
+    <p><strong>Email:</strong> ${u.email}<br>
+       <strong>Role:</strong> ${u.role}<br>
+       <strong>Name:</strong> ${u.full_name || ''}</p>
+    ${u.role==='creator' ? `
+      <h3>Shipping address</h3>
+      <p>${[a.street, a.city, a.state, a.zip].filter(Boolean).join(', ') || 'No address on file.'}</p>` : ''}
+  `;
+})();
+</script>
+
+<script src="/auth.js" defer></script>
+</body>
+</html>
+
+

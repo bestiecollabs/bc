@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin · Bestie Collabs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/favicon.png">
+  <meta name="theme-color" content="#5E7BFF">
+  <link rel="stylesheet" href="/air.css">
+  <style>
+    :root { --fun:#4C6FFF; --fun-600:#3B5BDF; --line:#e2e8f0; --card:#ffffff; --ink:#0f172a; --muted:#64748b; }
+    body{margin:0}
+    .wrap-centered{max-width:1200px;margin:0 auto;padding:0 16px}
+    header.site-header .wrap{display:flex;justify-content:space-between;align-items:center;padding:10px 0}
+    .brandmark{display:flex;align-items:center;gap:8px;text-decoration:none}
+    .brandmark img{height:28px}
+    .brandmark .title{font-weight:800;color:#111}
+    .hero{padding-top:28px;padding-bottom:12px}
+    .funtext{color:#4C3F91}
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:18px}
+    @media (max-width:1100px){.layout{grid-template-columns:1fr}}
+    .side{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+    .side h3{margin:4px 0 10px;font-size:16px}
+    .nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;color:var(--ink);text-decoration:none;font-weight:600}
+    .nav a.active,.nav a:hover{background:rgba(76,111,255,.08);color:#1f2937}
+    .tag{display:inline-block;font-size:11px;border:1px solid var(--line);padding:2px 8px;border-radius:999px;color:#334155;background:#f8fafc}
+    .main{display:grid;grid-template-columns:1fr;gap:16px}
+    .cols{display:grid;grid-template-columns:1fr;gap:16px;align-items:start;width:56.25%;min-width:340px;margin:0 auto;}
+    @media (max-width:980px){.cols{width:92%;min-width:auto}}
+    .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px;box-shadow:0 12px 24px rgba(0,0,0,.06)}
+    .card h2{margin:0 0 12px;font-size:20px}
+    .card h3{margin:0 0 10px;font-size:18px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:900px){.grid2{grid-template-columns:1fr}}
+    .input,.select{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;font-size:16px;outline:0;box-shadow:0 2px 14px rgba(86,81,255,.06) inset;}
+    .input:focus,.select:focus{border-color:var(--fun);box-shadow:0 0 0 3px rgba(76,111,255,.15),0 2px 14px rgba(86,81,255,.06) inset;}
+    .btn{border:0;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer;text-decoration:none}
+    .btn-fun{background:var(--fun);color:#fff}
+    .btn-fun:hover{background:var(--fun-600)}
+    .btn-ghost{background:#f1f5f9;color:#0f172a}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .muted{color:var(--muted);font-size:13px}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    th{font-size:12px;color:#475569;text-align:left;padding:0 8px}
+    td{background:#fff;border:1px solid var(--line);padding:10px 8px;border-radius:10px}
+    .status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 8px;border-radius:999px}
+    .built{background:#e8fff1;color:#065f46}
+    .prog{background:#fff7ed;color:#9a3412}
+    .plan{background:#eef2ff;color:#3730a3}
+    .hidden{display:none}
+    .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(12px);transition:all .18s}
+    .toast.show{opacity:1;transform:translateY(0)}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap row">
+    <a class="brandmark" href="/"><img src="/b1.png" alt=""><span class="title">Bestie Collabs</span></a>
+    <nav>
+      <span id="adminEmail" class="tag">admin</span>
+      <a href="/logout" class="btn btn-ghost">Log out</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap wrap-centered">
+  <section class="hero">
+    <h1 class="funtext">Admin Control Center</h1>
+    <p class="muted">Full site management. Access restricted to admins.</p>
+  </section>
+
+  <section class="section">
+    <div class="layout">
+      <aside class="side">
+        <h3>Navigation</h3>
+        <nav class="nav" id="adminNav">
+          <a href="#overview" class="active">Overview</a>
+          <a href="#users">Users</a>
+          <a href="#signups">Signups</a>
+          <a href="#sessions">Auth Sessions</a>
+          <a href="#content">Content</a>
+          <a href="#billing">Billing</a>
+          <a href="#emails">Emails</a>
+          <a href="#integrations">Integrations</a>
+          <a href="#flags">Feature Flags</a>
+          <a href="#logs">Logs</a>
+          <a href="#settings">Settings</a>
+        </nav>
+      </aside>
+
+      <section class="main">
+        <article id="overview" class="card">
+          <h2 class="funtext">Overview</h2>
+          <div class="grid2">
+            <div>
+              <h3>Progress Tracker</h3>
+              <p class="muted">Drag items across columns. Saved locally until API wiring.</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+                <div><strong>Built</strong><div id="col-built"></div></div>
+                <div><strong>In Progress</strong><div id="col-progress"></div></div>
+                <div><strong>Planned</strong><div id="col-planned"></div></div>
+              </div>
+              <div class="actions" style="margin-top:10px">
+                <button id="resetBoard" class="btn btn-ghost">Reset Board</button>
+                <button id="exportBoard" class="btn btn-fun">Export JSON</button>
+              </div>
+            </div>
+            <div>
+              <h3>Quick Actions</h3>
+              <div class="actions">
+                <button class="btn btn-fun" data-link="#users">Manage Users</button>
+                <button class="btn btn-fun" data-link="#flags">Toggle Features</button>
+                <button class="btn btn-fun" data-link="#logs">View Logs</button>
+              </div>
+              <p class="muted" style="margin-top:8px">Use the left nav for modules.</p>
+            </div>
+          </div>
+        </article>
+
+        <article id="users" class="card hidden">
+          <h2 class="funtext">Users</h2>
+          <div class="actions">
+            <input id="qUsers" class="input" placeholder="Search by email or username">
+            <select id="roleFilter" class="select">
+              <option value="">All roles</option>
+              <option value="admin">Admin</option>
+              <option value="brand">Brand</option>
+              <option value="creator">Creator</option>
+            </select>
+            <button id="refreshUsers" class="btn btn-ghost">Refresh</button>
+          </div>
+          <div style="margin-top:12px">
+            <table>
+              <thead><tr><th>Email</th><th>User ID</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+              <tbody id="usersTbody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article id="signups" class="card hidden">
+          <h2 class="funtext">Signups</h2>
+          <p class="muted">Recent and pending registrations.</p>
+          <div class="actions"><button id="refreshSignups" class="btn btn-ghost">Refresh</button></div>
+          <div style="margin-top:12px">
+            <table>
+              <thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+              <tbody id="signupsTbody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article id="sessions" class="card hidden">
+          <h2 class="funtext">Auth Sessions</h2>
+          <p class="muted">List and revoke sessions. (Framework)</p>
+          <div class="actions"><button id="refreshSessions" class="btn btn-ghost">Refresh</button></div>
+          <div style="margin-top:12px">
+            <table>
+              <thead><tr><th>User</th><th>IP</th><th>Device</th><th>Last Seen</th><th>Actions</th></tr></thead>
+              <tbody id="sessionsTbody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article id="content" class="card hidden">
+          <h2 class="funtext">Content</h2>
+          <p class="muted">CMS placeholders. (Framework)</p>
+          <div class="actions">
+            <button class="btn btn-ghost">New Page</button>
+            <button class="btn btn-ghost">Media Library</button>
+          </div>
+        </article>
+
+        <article id="billing" class="card hidden">
+          <h2 class="funtext">Billing</h2>
+          <p class="muted">Plans, invoices, refunds. (Framework)</p>
+          <div class="actions">
+            <button class="btn btn-ghost">Sync Provider</button>
+            <button class="btn btn-ghost">Export</button>
+          </div>
+        </article>
+
+        <article id="emails" class="card hidden">
+          <h2 class="funtext">Emails</h2>
+          <p class="muted">Outbound templates and events. (Framework)</p>
+          <div class="actions">
+            <button class="btn btn-ghost">Templates</button>
+            <button class="btn btn-ghost">Events</button>
+          </div>
+        </article>
+
+        <article id="integrations" class="card hidden">
+          <h2 class="funtext">Integrations</h2>
+          <p class="muted">TikTok, Shopify, etc. (Framework)</p>
+          <div class="actions"><button class="btn btn-ghost">Connect</button></div>
+        </article>
+
+        <article id="flags" class="card hidden">
+          <h2 class="funtext">Feature Flags</h2>
+          <div id="flagsList" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+          <div class="actions" style="margin-top:10px">
+            <button id="saveFlags" class="btn btn-fun">Save Flags</button>
+          </div>
+        </article>
+
+        <article id="logs" class="card hidden">
+          <h2 class="funtext">Logs</h2>
+          <div class="actions"><button id="refreshLogs" class="btn btn-ghost">Refresh</button></div>
+          <pre id="logsBox" style="background:#0b1020;color:#e5e7eb;border-radius:12px;padding:12px;overflow:auto;max-height:300px;margin-top:12px">Initializing…</pre>
+        </article>
+
+        <article id="settings" class="card hidden">
+          <h2 class="funtext">Settings</h2>
+          <div class="grid2">
+            <div>
+              <label>Site Name</label>
+              <input id="siteName" class="input" value="Bestie Collabs">
+            </div>
+            <div>
+              <label>Support Email</label>
+              <input id="supportEmail" class="input" value="support@bestiecollabs.com">
+            </div>
+          </div>
+          <div class="actions" style="margin-top:10px">
+            <button id="saveSettings" class="btn btn-fun">Save Settings</button>
+          </div>
+          <p class="muted" style="margin-top:8px">Stored locally until backend endpoints exist.</p>
+        </article>
+      </section>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="./admin.js"></script>
+</body>
+</html>
+
+
