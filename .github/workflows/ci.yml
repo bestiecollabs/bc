@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Detect package manager
+        id: pm
+        run: |
+          if [ -f package-lock.json ]; then echo "pm=npm" >> $GITHUB_OUTPUT; fi
+          if [ -f pnpm-lock.yaml ]; then echo "pm=pnpm" >> $GITHUB_OUTPUT; fi
+          if [ -f yarn.lock ]; then echo "pm=yarn" >> $GITHUB_OUTPUT; fi
+      - name: Install deps
+        if: steps.pm.outputs.pm == 'npm'
+        run: npm ci
+      - name: Install deps (pnpm)
+        if: steps.pm.outputs.pm == 'pnpm'
+        run: |
+          corepack enable
+          pnpm i --frozen-lockfile
+      - name: Install deps (yarn)
+        if: steps.pm.outputs.pm == 'yarn'
+        run: yarn install --frozen-lockfile
+      - name: Run lint if available
+        run: |
+          if npm run 2>/dev/null | grep -q "lint"; then npm run lint; else echo "no lint script"; fi
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps if any
+        run: |
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then npm ci; elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; fi
+          else
+            echo "no package.json"
+          fi
+      - name: Build if available
+        run: |
+          if npm run 2>/dev/null | grep -q "build"; then npm run build; else echo "no build script"; fi
