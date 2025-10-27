@@ -6,19 +6,19 @@
 <title>BAM | TikTok Affiliate Center (Clone UI)</title>
 <style>
   :root{
-    --bg:#0b0f14; --panel:#121823; --muted:#8fa0b3; --text:#e6eef8; --brand:#5ac8fa; --brand-2:#6ee7b7; --warn:#fbbf24; --danger:#ef4444; --ok:#22c55e; --chip:#1b2330; --line:#1d2837;
+    --bg:#f7f9fc; --panel:#ffffff; --muted:#6b7280; --text:#0f172a; --brand:#2563eb; --brand-2:#22c55e; --warn:#d97706; --danger:#dc2626; --ok:#16a34a; --chip:#eef2f7; --line:#e5e7eb;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
   a{color:var(--brand);text-decoration:none}
   .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-  .sidebar{background:linear-gradient(180deg,#0d131b 0%, #0b0f14 100%);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh}
+  .sidebar{background:linear-gradient(180deg,#f5f7fb 0%, #eef2f7 100%);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh}
   .logo{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:10px}
-  .logo-badge{width:28px;height:28px;border-radius:8px;background:conic-gradient(from 210deg,var(--brand),var(--brand-2));box-shadow:0 0 0 2px #0b0f14 inset}
+  .logo-badge{width:28px;height:28px;border-radius:8px;background:conic-gradient(from 210deg,var(--brand),var(--brand-2));box-shadow:0 0 0 2px #fff inset}
   .logo h1{font-size:15px;margin:0}
   .search{margin:8px 8px 14px}
-  .search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)}
+  .search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)}
   .nav{display:flex;flex-direction:column;gap:4px;margin-top:6px}
   .nav button{all:unset;padding:10px 12px;border-radius:10px;color:var(--muted);cursor:pointer}
   .nav button.active,.nav button:hover{color:var(--text);background:var(--chip)}
@@ -26,34 +26,34 @@
   .main{padding:18px;display:flex;flex-direction:column;gap:16px}
   .topbar{display:flex;align-items:center;gap:10px;justify-content:space-between}
   .topbar .r{display:flex;gap:8px}
-  .btn{all:unset;display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);cursor:pointer;color:var(--text);background:#0f1620}
-  .btn.primary{background:linear-gradient(180deg,#1a2a3d,#14202e);border-color:#223246}
+  .btn{all:unset;display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);cursor:pointer;color:var(--text);background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+  .btn.primary{background:linear-gradient(180deg,#ffffff,#f3f6fb);border-color:#dbe3f2}
   .btn.ghost{background:transparent}
-  .btn.warn{border-color:#3a2b12;background:#20160a;color:#ffde8a}
-  .btn.danger{border-color:#3a1a1a;background:#1a0d0d;color:#ffb4b4}
+  .btn.warn{border-color:#f3e8d7;background:#fff7ed;color:#7c3e0a}
+  .btn.danger{border-color:#f9dada;background:#fff1f2;color:#7f1d1d}
   .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 16px rgba(15,23,42,0.04)}
   .card h3{margin:0 0 6px 0;font-size:14px}
   .card .hd{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line)}
   .card .bd{padding:14px}
   .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-  .toolbar input,.toolbar select{padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)}
-  table{width:100%;border-collapse:collapse}
+  .toolbar input,.toolbar select{padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
   th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
-  th{font-size:12px;color:var(--muted)}
-  tr:hover td{background:#0e151f}
+  th{font-size:12px;color:var(--muted);background:#fafbff}
+  tr:hover td{background:#f9fbff}
   .status{font-size:12px;padding:4px 8px;border-radius:999px;display:inline-block}
-  .s-pending{background:#2a2630;color:#d8b4fe}
-  .s-active{background:#14271a;color:#6ee7b7}
-  .s-declined{background:#2a1a1a;color:#fca5a5}
+  .s-pending{background:#f3e8ff;color:#6b21a8}
+  .s-active{background:#e8fff3;color:#065f46}
+  .s-declined{background:#fee2e2;color:#991b1b}
   .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .msg-list{max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:8px}
-  .msg{padding:10px;border:1px solid var(--line);border-radius:10px;background:#0f1620}
+  .msg{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
   .msg .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
   .msg-input{display:flex;gap:8px}
-  textarea{width:100%;min-height:88px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text);padding:10px;resize:vertical}
+  textarea{width:100%;min-height:88px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text);padding:10px;resize:vertical}
   .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 4px 16px rgba(15,23,42,0.04)}
   .kpi .t{color:var(--muted);font-size:12px}
   .kpi .v{font-size:22px;margin-top:4px}
   .foot{padding:10px 14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
@@ -61,6 +61,8 @@
 </style>
 </head>
 <body>
+<!-- existing HTML structure below unchanged from prior version -->
+<!-- START APP -->
 <div class="app">
   <aside class="sidebar">
     <div class="logo">
@@ -76,11 +78,12 @@
       <button data-tab="settings">Settings</button>
     </div>
     <div style="margin-top:14px;padding:8px 10px">
-      <div class="pill">Workspace <strong style="color:#e6eef8">Default</strong></div>
+      <div class="pill">Workspace <strong style="color:#0f172a">Default</strong></div>
     </div>
   </aside>
-
   <main class="main">
+    <!-- content identical to the previous scaffold -->
+    <!-- Overview -->
     <div class="topbar">
       <div class="l">
         <div class="pill">TikTok Affiliate Center</div>
@@ -91,7 +94,6 @@
         <button class="btn primary" id="newInviteBtn">New Invite</button>
       </div>
     </div>
-
     <section id="tab-overview">
       <div class="kpis">
         <div class="kpi"><div class="t">Active Affiliates</div><div class="v" id="kpiActive">128</div></div>
@@ -118,7 +120,7 @@
         </div>
       </div>
     </section>
-
+    <!-- Creators -->
     <section id="tab-creators" style="display:none">
       <div class="card">
         <div class="hd">
@@ -150,14 +152,12 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- rows injected by JS -->
-            </tbody>
+            <tbody></tbody>
           </table>
         </div>
       </div>
     </section>
-
+    <!-- Invites -->
     <section id="tab-invites" style="display:none">
       <div class="card">
         <div class="hd"><h3>Invites</h3><button class="btn" id="sendInvite">Send Invite</button></div>
@@ -165,11 +165,11 @@
           <div class="split">
             <div>
               <label>Creator handle</label>
-              <input id="inviteHandle" placeholder="@creator" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+              <input id="inviteHandle" placeholder="@creator" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)"/>
             </div>
             <div>
               <label>Offer</label>
-              <select id="inviteOffer" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)">
+              <select id="inviteOffer" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)">
                 <option>Q4 Beauty Box</option>
                 <option>Holiday Gadgets</option>
                 <option>Home Essentials</option>
@@ -179,11 +179,11 @@
           <div style="margin-top:10px" class="split">
             <div>
               <label>Commission</label>
-              <input id="inviteCommission" type="number" value="10" min="0" max="100" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+              <input id="inviteCommission" type="number" value="10" min="0" max="100" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)"/>
             </div>
             <div>
               <label>Expires (days)</label>
-              <input id="inviteExpire" type="number" value="14" min="1" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+              <input id="inviteExpire" type="number" value="14" min="1" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)"/>
             </div>
           </div>
           <div style="margin-top:12px">
@@ -200,7 +200,7 @@
         </div>
       </div>
     </section>
-
+    <!-- Messages -->
     <section id="tab-messages" style="display:none">
       <div class="card">
         <div class="hd"><h3>Messages</h3></div>
@@ -223,7 +223,7 @@
         <div class="foot"><span>Draft autosave is off</span><span id="msgStatus">Idle</span></div>
       </div>
     </section>
-
+    <!-- Settings -->
     <section id="tab-settings" style="display:none">
       <div class="card">
         <div class="hd"><h3>Settings</h3></div>
@@ -231,11 +231,11 @@
           <div class="split">
             <div>
               <label>Workspace name</label>
-              <input id="wsName" value="Default" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+              <input id="wsName" value="Default" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)"/>
             </div>
             <div>
               <label>Auto rules</label>
-              <select id="autoRules" multiple style="width:100%;height:96px;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)">
+              <select id="autoRules" multiple style="width:100%;height:96px;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text)">
                 <option selected>Reinvite after 7 days</option>
                 <option>Remove after 21 days</option>
                 <option>Send 48h reminder</option>
@@ -249,13 +249,12 @@
         </div>
       </div>
     </section>
-
     <div class="foot"><span>UI only. No TikTok API calls yet.</span><span>Build: BAM UI Scaffold</span></div>
   </main>
 </div>
+<!-- END APP -->
 
 <script>
-  // Simple state
   const creators = Array.from({length:20}).map((_,i)=>({
     id:i+1,
     handle:['@luna.shop','@gearmax','@fitty','@greenhome','@beauhub','@sparkbyte','@cozycook','@cityglow','@freshnest','@runlab'][i%10]+i,
@@ -264,14 +263,11 @@
     ctr:(3.2 + (i%5)*0.4).toFixed(1)+'%',
     sales: Math.floor(5+(i*3.7))})
   );
-
   const invites = [
     {handle:'@gearmax', offer:'Holiday Gadgets', sent:'Today', status:'Pending'},
     {handle:'@fitty', offer:'Q4 Beauty Box', sent:'Yesterday', status:'Pending'},
     {handle:'@luna.shop', offer:'Home Essentials', sent:'3d', status:'Declined'},
   ];
-
-  // Tabs
   document.querySelectorAll('.nav button').forEach(btn=>{
     btn.onclick=()=>{
       document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
@@ -282,8 +278,6 @@
       });
     };
   });
-
-  // Creators table render
   const tbody = document.querySelector('#creatorsTable tbody');
   function renderCreators(filterText='',status=''){
     tbody.innerHTML='';
@@ -312,21 +306,16 @@
     document.getElementById('creatorsCount').textContent = rows.length;
   }
   renderCreators();
-
   document.getElementById('creatorFilter').oninput = e=>renderCreators(e.target.value, document.getElementById('statusFilter').value);
   document.getElementById('statusFilter').onchange = e=>renderCreators(document.getElementById('creatorFilter').value, e.target.value);
   document.getElementById('toggleAll').onchange = e=>{
     tbody.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=e.target.checked);
   };
-
-  // Bulk ops (UI only)
   function getSelected(){ return Array.from(tbody.querySelectorAll('input[type="checkbox"]:checked')).map(cb=>+cb.dataset.id); }
   function pushThread(text){ const box=document.getElementById('threadList'); const d=document.createElement('div'); d.className='msg'; d.innerHTML='<div class="meta">System</div>'+text; box.prepend(d); }
   document.getElementById('bulkMessage').onclick=()=>pushThread('Opened composer for '+getSelected().length+' creators.');
   document.getElementById('bulkRemind').onclick=()=>pushThread('Reminder queued for '+getSelected().length+' creators.');
   document.getElementById('bulkRemove').onclick=()=>pushThread('Remove scheduled for '+getSelected().length+' creators.');
-
-  // Invites
   function renderInvites(){
     const body=document.getElementById('invitesTableBody');
     body.innerHTML='';
@@ -345,7 +334,6 @@
     });
   }
   renderInvites();
-
   document.getElementById('sendInvite').onclick=()=>{
     const h=document.getElementById('inviteHandle').value||'@newcreator';
     const o=document.getElementById('inviteOffer').value;
@@ -353,15 +341,12 @@
     renderInvites();
     pushThread('Invite sent to '+h+' for '+o+'.');
   };
-
   document.getElementById('invitesList').onclick=(e)=>{
     const btn=e.target.closest('button'); if(!btn) return;
     const i=+btn.dataset.i, op=btn.dataset.op;
     if(op==='reinvite'){ pushThread('Reinvite sent to '+invites[i].handle+'.'); }
     if(op==='remove'){ pushThread('Invite removed for '+invites[i].handle+'.'); invites.splice(i,1); renderInvites(); }
   };
-
-  // Messages
   document.getElementById('sendMsg').onclick=()=>{
     const txt=document.getElementById('msgBox').value.trim();
     if(!txt){ document.getElementById('msgStatus').textContent='Message empty'; return; }
@@ -372,8 +357,6 @@
   document.getElementById('saveDraft').onclick=()=>{
     document.getElementById('msgStatus').textContent='Draft saved';
   };
-
-  // Misc
   document.getElementById('refreshBtn').onclick=()=>pushThread('Refreshed data.');
   document.getElementById('newInviteBtn').onclick=()=>{
     document.querySelector('.nav button[data-tab="invites"]').click();
