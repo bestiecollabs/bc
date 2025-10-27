@@ -172,11 +172,18 @@ footer a:hover{background:rgba(0,0,0,.03)}
 
 /* ===== Login helpers (scoped, minimal) ===== */
 .center{text-align:center}
+.input-wrap{position:relative}
 .pw{padding-right:44px}
 .postlinks{margin-top:18px}
 .postlinks a{margin:0 10px}
 
 /* Eye icon toggle */
+.pw-eye{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  border:0;background:transparent;padding:4px;line-height:0;cursor:pointer;
+  color:#6a5ae0;
+}
+.pw-eye svg{width:20px;height:20px;display:block}
 .pw-eye:active{transform:translateY(-50%)}
 
 /* Center the links under auth cards */
@@ -193,48 +200,3 @@ footer a:hover{background:rgba(0,0,0,.03)}
   color:var(--muted);font-size:14px
 }
 .login-page .remember-row input[type="checkbox"]{accent-color:var(--fun)}
-
-/* PW-EYE START */
-.input-wrap{position:relative;}
-
-.pw-eye{
-  position:absolute; top:50%; right:10px; transform:translateY(-50%);
-  display:flex; align-items:center; justify-content:center;
-  width:28px; height:28px; padding:0; margin:0;
-  border:0; background:transparent;
-  line-height:1; vertical-align:middle; cursor:pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.pw-eye svg{width:20px; height:20px; display:block;}
-.pw-eye:active{transform:translateY(-50%);} /* prevent press nudge */
-
-/* Guard against global button hover/active styles */
-.input-wrap .pw-eye,
-.input-wrap .pw-eye:hover,
-.input-wrap .pw-eye:focus,
-.input-wrap .pw-eye:active{
-  position:absolute; top:50%; right:10px; transform:translateY(-50%);
-  display:flex; align-items:center; justify-content:center;
-  width:28px; height:28px; padding:0; margin:0; border:0; background:transparent;
-  line-height:1; vertical-align:middle; cursor:pointer; box-sizing:border-box;
-  transition:none; outline:0; color:inherit; pointer-events:auto; z-index:1;
-}
-.input-wrap .pw-eye svg{width:20px; height:20px; display:block;}
-.input-wrap .pw-eye:hover{ transform: translateY(-50%) !important; }
-/* PW-EYE END */
-
-/* Eye icon color and fixed position */
-.input-wrap{position:relative;}
-.input-wrap .pw-eye,
-.input-wrap .pw-eye:hover,
-.input-wrap .pw-eye:focus,
-.input-wrap .pw-eye:active{
-  position:absolute; top:50%; right:10px; transform:translateY(-50%);
-  display:flex; align-items:center; justify-content:center;
-  width:28px; height:28px; padding:0; margin:0; border:0; background:transparent;
-  line-height:1; vertical-align:middle; cursor:pointer; box-sizing:border-box;
-  transition:none; outline:0; pointer-events:auto; z-index:1;
-  color:#663399; /* dark royal purple */
-}
-.input-wrap .pw-eye svg{width:20px; height:20px; display:block;}
-.pw-eye:active{transform:translateY(-50%);} /* no vertical nudge */
