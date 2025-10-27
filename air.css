@@ -200,3 +200,12 @@ footer a:hover{background:rgba(0,0,0,.03)}
   color:var(--muted);font-size:14px
 }
 .login-page .remember-row input[type="checkbox"]{accent-color:var(--fun)}
+/* Fun theme shimmer overrides */
+.funtext,
+.site-header .title,
+header .title{
+  background: linear-gradient(90deg, #FFD700, #1E3A8A, #FF69B4, #FFD700);
+  --shimmer-name: shimmer-rtl;
+  --shimmer-speed: 4s;
+  --shimmer-pos: 200% 0%;
+}
