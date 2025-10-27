@@ -51,8 +51,8 @@ This is a continuation from prior chats. Do not remove or override working featu
 **Maintain Consistent Structure**
 Match existing file layout, naming, and coding conventions.
 
-**No Backup or Variant Files**
-Do not create .bak or variant files. Update only the intended files with clean code..
+**No Variant Files**
+Do not create variant files.
 
 **Fix, Don’t Patch**
 No temporary solutions. Identify root causes. Update code and files cleanly.
