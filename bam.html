@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BAM | TikTok Affiliate Center (Clone UI)</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121823; --muted:#8fa0b3; --text:#e6eef8; --brand:#5ac8fa; --brand-2:#6ee7b7; --warn:#fbbf24; --danger:#ef4444; --ok:#22c55e; --chip:#1b2330; --line:#1d2837;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+  a{color:var(--brand);text-decoration:none}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  .sidebar{background:linear-gradient(180deg,#0d131b 0%, #0b0f14 100%);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh}
+  .logo{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:10px}
+  .logo-badge{width:28px;height:28px;border-radius:8px;background:conic-gradient(from 210deg,var(--brand),var(--brand-2));box-shadow:0 0 0 2px #0b0f14 inset}
+  .logo h1{font-size:15px;margin:0}
+  .search{margin:8px 8px 14px}
+  .search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)}
+  .nav{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+  .nav button{all:unset;padding:10px 12px;border-radius:10px;color:var(--muted);cursor:pointer}
+  .nav button.active,.nav button:hover{color:var(--text);background:var(--chip)}
+  .pill{display:inline-flex;gap:6px;align-items:center;background:var(--chip);padding:4px 8px;border-radius:999px;color:var(--muted);font-size:12px}
+  .main{padding:18px;display:flex;flex-direction:column;gap:16px}
+  .topbar{display:flex;align-items:center;gap:10px;justify-content:space-between}
+  .topbar .r{display:flex;gap:8px}
+  .btn{all:unset;display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);cursor:pointer;color:var(--text);background:#0f1620}
+  .btn.primary{background:linear-gradient(180deg,#1a2a3d,#14202e);border-color:#223246}
+  .btn.ghost{background:transparent}
+  .btn.warn{border-color:#3a2b12;background:#20160a;color:#ffde8a}
+  .btn.danger{border-color:#3a1a1a;background:#1a0d0d;color:#ffb4b4}
+  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+  .card h3{margin:0 0 6px 0;font-size:14px}
+  .card .hd{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line)}
+  .card .bd{padding:14px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .toolbar input,.toolbar select{padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:12px;color:var(--muted)}
+  tr:hover td{background:#0e151f}
+  .status{font-size:12px;padding:4px 8px;border-radius:999px;display:inline-block}
+  .s-pending{background:#2a2630;color:#d8b4fe}
+  .s-active{background:#14271a;color:#6ee7b7}
+  .s-declined{background:#2a1a1a;color:#fca5a5}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .msg-list{max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+  .msg{padding:10px;border:1px solid var(--line);border-radius:10px;background:#0f1620}
+  .msg .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+  .msg-input{display:flex;gap:8px}
+  textarea{width:100%;min-height:88px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text);padding:10px;resize:vertical}
+  .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .kpi .t{color:var(--muted);font-size:12px}
+  .kpi .v{font-size:22px;margin-top:4px}
+  .foot{padding:10px 14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+  @media (max-width: 1080px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.app{grid-template-columns:1fr}.sidebar{position:static;height:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-badge"></div>
+      <h1>BAM</h1>
+    </div>
+    <div class="search"><input id="globalSearch" placeholder="Search creators, offers" /></div>
+    <div class="nav">
+      <button class="active" data-tab="overview">Overview</button>
+      <button data-tab="creators">Creators</button>
+      <button data-tab="invites">Invites</button>
+      <button data-tab="messages">Messages</button>
+      <button data-tab="settings">Settings</button>
+    </div>
+    <div style="margin-top:14px;padding:8px 10px">
+      <div class="pill">Workspace <strong style="color:#e6eef8">Default</strong></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="l">
+        <div class="pill">TikTok Affiliate Center</div>
+        <h2 style="margin:6px 0 0 0;font-size:18px">Affiliate Manager</h2>
+      </div>
+      <div class="r">
+        <button class="btn ghost" id="refreshBtn">Refresh</button>
+        <button class="btn primary" id="newInviteBtn">New Invite</button>
+      </div>
+    </div>
+
+    <section id="tab-overview">
+      <div class="kpis">
+        <div class="kpi"><div class="t">Active Affiliates</div><div class="v" id="kpiActive">128</div></div>
+        <div class="kpi"><div class="t">Pending Invites</div><div class="v" id="kpiPending">42</div></div>
+        <div class="kpi"><div class="t">Declined</div><div class="v" id="kpiDeclined">9</div></div>
+        <div class="kpi"><div class="t">Messages Today</div><div class="v" id="kpiMsgs">57</div></div>
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <div class="card">
+          <div class="hd"><h3>Recent Activity</h3><span class="pill">last 24h</span></div>
+          <div class="bd" id="activity">
+            <div class="msg"><div class="meta">Invite sent to @luna.shop • 2h</div>Approved offer “Q4 Beauty Box”.</div>
+            <div class="msg"><div class="meta">Reminder sent to @gearmax • 5h</div>No response yet.</div>
+            <div class="msg"><div class="meta">Re-invite sent to @fitty • 7h</div>Auto rule matched: no reply after 7 days.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="hd"><h3>Automation Rules</h3></div>
+          <div class="bd">
+            <div class="msg"><div class="meta">Rule A</div>Reinvite after 7 days if no response.</div>
+            <div class="msg"><div class="meta">Rule B</div>Remove creator if no response after 21 days.</div>
+            <div class="msg"><div class="meta">Rule C</div>Send reminder 48 hours after invite.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-creators" style="display:none">
+      <div class="card">
+        <div class="hd">
+          <h3>Creators</h3>
+          <div class="pill">Total <span id="creatorsCount">212</span></div>
+        </div>
+        <div class="bd">
+          <div class="toolbar">
+            <input id="creatorFilter" placeholder="Filter by handle or tag" />
+            <select id="statusFilter">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="declined">Declined</option>
+            </select>
+            <button class="btn" id="bulkMessage">Message Selected</button>
+            <button class="btn warn" id="bulkRemind">Remind</button>
+            <button class="btn danger" id="bulkRemove">Remove</button>
+          </div>
+          <table id="creatorsTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="toggleAll"/></th>
+                <th>Creator</th>
+                <th>Status</th>
+                <th>Last Action</th>
+                <th>CTR</th>
+                <th>Sales</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-invites" style="display:none">
+      <div class="card">
+        <div class="hd"><h3>Invites</h3><button class="btn" id="sendInvite">Send Invite</button></div>
+        <div class="bd">
+          <div class="split">
+            <div>
+              <label>Creator handle</label>
+              <input id="inviteHandle" placeholder="@creator" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+            </div>
+            <div>
+              <label>Offer</label>
+              <select id="inviteOffer" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)">
+                <option>Q4 Beauty Box</option>
+                <option>Holiday Gadgets</option>
+                <option>Home Essentials</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:10px" class="split">
+            <div>
+              <label>Commission</label>
+              <input id="inviteCommission" type="number" value="10" min="0" max="100" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+            </div>
+            <div>
+              <label>Expires (days)</label>
+              <input id="inviteExpire" type="number" value="14" min="1" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <label>Message</label>
+            <textarea id="inviteMsg" placeholder="Short note to the creator"></textarea>
+          </div>
+          <div id="invitesList" style="margin-top:12px">
+            <h3 style="margin:0 0 8px 0;font-size:14px">Recent Invites</h3>
+            <table>
+              <thead><tr><th>Creator</th><th>Offer</th><th>Sent</th><th>Status</th><th>Ops</th></tr></thead>
+              <tbody id="invitesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-messages" style="display:none">
+      <div class="card">
+        <div class="hd"><h3>Messages</h3></div>
+        <div class="bd">
+          <div class="split">
+            <div>
+              <div class="msg-list" id="threadList"></div>
+            </div>
+            <div>
+              <div class="msg-input">
+                <textarea id="msgBox" placeholder="Write a message to selected creators"></textarea>
+              </div>
+              <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn" id="saveDraft">Save Draft</button>
+                <button class="btn primary" id="sendMsg">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>Draft autosave is off</span><span id="msgStatus">Idle</span></div>
+      </div>
+    </section>
+
+    <section id="tab-settings" style="display:none">
+      <div class="card">
+        <div class="hd"><h3>Settings</h3></div>
+        <div class="bd">
+          <div class="split">
+            <div>
+              <label>Workspace name</label>
+              <input id="wsName" value="Default" style="width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)"/>
+            </div>
+            <div>
+              <label>Auto rules</label>
+              <select id="autoRules" multiple style="width:100%;height:96px;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e141d;color:var(--text)">
+                <option selected>Reinvite after 7 days</option>
+                <option>Remove after 21 days</option>
+                <option>Send 48h reminder</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn primary" id="saveSettings">Save</button>
+            <button class="btn ghost" id="resetSettings">Reset</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot"><span>UI only. No TikTok API calls yet.</span><span>Build: BAM UI Scaffold</span></div>
+  </main>
+</div>
+
+<script>
+  // Simple state
+  const creators = Array.from({length:20}).map((_,i)=>({
+    id:i+1,
+    handle:['@luna.shop','@gearmax','@fitty','@greenhome','@beauhub','@sparkbyte','@cozycook','@cityglow','@freshnest','@runlab'][i%10]+i,
+    status:(['active','pending','declined'])[i%3],
+    last:['Invited 2d','Reminded 1d','Approved 7h'][i%3],
+    ctr:(3.2 + (i%5)*0.4).toFixed(1)+'%',
+    sales: Math.floor(5+(i*3.7))})
+  );
+
+  const invites = [
+    {handle:'@gearmax', offer:'Holiday Gadgets', sent:'Today', status:'Pending'},
+    {handle:'@fitty', offer:'Q4 Beauty Box', sent:'Yesterday', status:'Pending'},
+    {handle:'@luna.shop', offer:'Home Essentials', sent:'3d', status:'Declined'},
+  ];
+
+  // Tabs
+  document.querySelectorAll('.nav button').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      ['overview','creators','invites','messages','settings'].forEach(key=>{
+        document.getElementById('tab-'+key).style.display = key===tab?'':'none';
+      });
+    };
+  });
+
+  // Creators table render
+  const tbody = document.querySelector('#creatorsTable tbody');
+  function renderCreators(filterText='',status=''){
+    tbody.innerHTML='';
+    const rows = creators.filter(c=>{
+      const t = filterText.toLowerCase();
+      const okText = !t || c.handle.toLowerCase().includes(t);
+      const okStatus = !status || c.status===status;
+      return okText && okStatus;
+    });
+    rows.forEach(c=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="checkbox" data-id="${c.id}"/></td>
+        <td>${c.handle}</td>
+        <td><span class="status ${c.status==='active'?'s-active':c.status==='pending'?'s-pending':'s-declined'}">${c.status}</span></td>
+        <td>${c.last}</td>
+        <td>${c.ctr}</td>
+        <td>${c.sales}</td>
+        <td>
+          <button class="btn" data-act="msg" data-id="${c.id}">Message</button>
+          <button class="btn warn" data-act="remind" data-id="${c.id}">Remind</button>
+          <button class="btn danger" data-act="remove" data-id="${c.id}">Remove</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('creatorsCount').textContent = rows.length;
+  }
+  renderCreators();
+
+  document.getElementById('creatorFilter').oninput = e=>renderCreators(e.target.value, document.getElementById('statusFilter').value);
+  document.getElementById('statusFilter').onchange = e=>renderCreators(document.getElementById('creatorFilter').value, e.target.value);
+  document.getElementById('toggleAll').onchange = e=>{
+    tbody.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=e.target.checked);
+  };
+
+  // Bulk ops (UI only)
+  function getSelected(){ return Array.from(tbody.querySelectorAll('input[type="checkbox"]:checked')).map(cb=>+cb.dataset.id); }
+  function pushThread(text){ const box=document.getElementById('threadList'); const d=document.createElement('div'); d.className='msg'; d.innerHTML='<div class="meta">System</div>'+text; box.prepend(d); }
+  document.getElementById('bulkMessage').onclick=()=>pushThread('Opened composer for '+getSelected().length+' creators.');
+  document.getElementById('bulkRemind').onclick=()=>pushThread('Reminder queued for '+getSelected().length+' creators.');
+  document.getElementById('bulkRemove').onclick=()=>pushThread('Remove scheduled for '+getSelected().length+' creators.');
+
+  // Invites
+  function renderInvites(){
+    const body=document.getElementById('invitesTableBody');
+    body.innerHTML='';
+    invites.forEach((inv,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${inv.handle}</td>
+        <td>${inv.offer}</td>
+        <td>${inv.sent}</td>
+        <td><span class="status ${inv.status==='Pending'?'s-pending':inv.status==='Declined'?'s-declined':'s-active'}">${inv.status}</span></td>
+        <td>
+          <button class="btn" data-i="${i}" data-op="reinvite">Reinvite</button>
+          <button class="btn danger" data-i="${i}" data-op="remove">Remove</button>
+        </td>`;
+      body.appendChild(tr);
+    });
+  }
+  renderInvites();
+
+  document.getElementById('sendInvite').onclick=()=>{
+    const h=document.getElementById('inviteHandle').value||'@newcreator';
+    const o=document.getElementById('inviteOffer').value;
+    invites.unshift({handle:h,offer:o,sent:'Now',status:'Pending'});
+    renderInvites();
+    pushThread('Invite sent to '+h+' for '+o+'.');
+  };
+
+  document.getElementById('invitesList').onclick=(e)=>{
+    const btn=e.target.closest('button'); if(!btn) return;
+    const i=+btn.dataset.i, op=btn.dataset.op;
+    if(op==='reinvite'){ pushThread('Reinvite sent to '+invites[i].handle+'.'); }
+    if(op==='remove'){ pushThread('Invite removed for '+invites[i].handle+'.'); invites.splice(i,1); renderInvites(); }
+  };
+
+  // Messages
+  document.getElementById('sendMsg').onclick=()=>{
+    const txt=document.getElementById('msgBox').value.trim();
+    if(!txt){ document.getElementById('msgStatus').textContent='Message empty'; return; }
+    pushThread('Message sent: '+txt);
+    document.getElementById('msgBox').value='';
+    document.getElementById('msgStatus').textContent='Sent';
+  };
+  document.getElementById('saveDraft').onclick=()=>{
+    document.getElementById('msgStatus').textContent='Draft saved';
+  };
+
+  // Misc
+  document.getElementById('refreshBtn').onclick=()=>pushThread('Refreshed data.');
+  document.getElementById('newInviteBtn').onclick=()=>{
+    document.querySelector('.nav button[data-tab="invites"]').click();
+    document.getElementById('inviteHandle').focus();
+  };
+  document.getElementById('globalSearch').oninput = (e)=>{
+    const q=e.target.value.trim();
+    document.querySelector('.nav button[data-tab="creators"]').click();
+    document.getElementById('creatorFilter').value=q;
+    renderCreators(q, document.getElementById('statusFilter').value);
+  };
+</script>
+</body>
+</html>
