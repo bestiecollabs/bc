@@ -209,3 +209,18 @@ header .title{
   --shimmer-speed: 4s;
   --shimmer-pos: 200% 0%;
 }
+/* Fun text and buttons: gold -> navy -> pink, RTL, 4s */
+.funtext{
+  background: linear-gradient(90deg, #FFD700, #1E3A8A, #FF69B4, #FFD700);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  background-size:200% 100%;
+  animation: shimmer-rtl 4s linear infinite;
+}
+.btn,.button,.cta,button,[type="submit"]{
+  color:#fff;
+  background: linear-gradient(90deg, #FFD700, #1E3A8A, #FF69B4, #FFD700);
+  background-size:200% 100%;
+  animation: btnshine-rtl 4s linear infinite;
+}
+@keyframes shimmer-rtl{0%{background-position:200% 0}100%{background-position:0 0}}
+@keyframes btnshine-rtl{0%{background-position:200% 0}100%{background-position:0 0}}
