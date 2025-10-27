@@ -200,15 +200,3 @@ footer a:hover{background:rgba(0,0,0,.03)}
   color:var(--muted);font-size:14px
 }
 .login-page .remember-row input[type="checkbox"]{accent-color:var(--fun)}
-
-/* PW-EYE FIX: lock position and ignore global button transforms */
-.input-wrap .pw-eye,
-.input-wrap .pw-eye:hover,
-.input-wrap .pw-eye:focus,
-.input-wrap .pw-eye:active{
-  transform: translateY(-50%) !important;
-  transition: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-  pointer-events: auto; /* ensure clicks register */
-}
