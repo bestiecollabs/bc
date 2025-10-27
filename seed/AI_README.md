@@ -27,13 +27,6 @@ Scope: Admin + Creator/Brand directory. Cloudflare Pages (frontend) + Cloudflare
 * Integration Stability Rule: do not break existing behavior.
 * Do not rename, restructure, or create variant files without permission.
 
-## Current State (resuming point "Project Root")
-
-* Admin endpoints live: `/api/admin/chipchip/*`
-* Delete + Undo working for brands and creators
-* Minimal Admin UI: `/admin/index.html` and `/admin/admin.js`
-* D1 schema stable (`admin_recycle_bin` includes: `id`, `admin_email`, `action`, `entity_table`, `entity_id`, `before_json`, `after_json`, `batch_id`, `created_at`, `ts`)
-
 ## Operational Rules
 
 * PowerShell 7.5.3 required; use `$ErrorActionPreference='Stop'`; wrap critical steps in `try { } catch { }`.
@@ -43,30 +36,16 @@ Scope: Admin + Creator/Brand directory. Cloudflare Pages (frontend) + Cloudflare
 * Testing: include a smoke test or minimal repro for each feature; validate timestamps, time zones, and locale.
 * For D1 queries, show schema assumptions and expected row counts.
 
-## Continuity Files
-
-**CHANGELOG_AI**
-
-* Record each material change by date/time (PST), author/model, files touched, diffs or summaries, rationale, tests run, impact, rollback notes, and PR links.
-
-**HANDOFF**
-
-* Capture current state, open decisions, blockers, next actions, env bindings (no secrets), build/test steps, known issues, owners, deadlines, and pointers to AI_README and CHANGELOG_AI entries.
-* Refresh at every shift change, task pause, or transfer.
-
 ## Handoff File Rules (for New Chats)
 
 **PowerShell Compatibility**
-Always provide full PowerShell-ready code blocks so I can update or run them directly in PowerShell.
+Always provide full PowerShell-ready code blocks so I can run them directly in PowerShell. Always double check codes for accuracy.
 
 **Full Code Delivery**
 Always put the step #, include the full code, the exact file directory path, a clear explanation of what the code does, and what to expect after running it.
 
-**File Verification**
-Before updating any code, verify you have the latest version. If not, ask me to provide the most recent file before making changes.
-
 **Concise Instructions**
-Provide short, direct, and clear instructions for every step.
+Provide short, direct, and detailed instructions for every step.
 
 **Understand the Codebase First**
 Before writing or editing code, review all files in the repo to understand the project structure and logic. If a needed file is missing, ask me for it immediately before continuing.
@@ -78,10 +57,10 @@ This is a continuation from prior chats. Do not remove or override working featu
 Match existing file layout, naming, and coding conventions.
 
 **No Backup or Variant Files**
-Do not create .bak or variant files. Update only the intended files.
+Do not create .bak or variant files. Always provide clean code.
 
 **Fix, Don’t Patch**
-No temporary hacks. Identify root causes and update code cleanly.
+No temporary solutions. Identify root causes and update code cleanly.
 
 ## SOP
 > Enforcement: All chats must follow the SOP exactly. If a conflict exists between prior instructions and the SOP, follow the SOP and note the conflict in the next message.
@@ -92,34 +71,16 @@ Keep the project stable while shipping small, verifiable steps.
 
 ## Standard Flow
 
-1) **Pull latest artifacts**
-   - Use the newest zip from the user.
-   - Confirm file timestamps match.
-
-2) **Start local**
-   - `wrangler pages dev . --port=8788`
-   - Use `x-admin-email` for admin routes during local development.
-
-3) **Validate baseline**
-   - `GET /health`
-   - `GET /api/admin/ping` (with header)
-   - `GET /api/admin/chipchip/brands?limit=5` (with header)
-
-4) **Change management**
+1) **Change management**
    - Read target files fully.
    - Edit with full-file replacements only.
    - Keep code style and structure consistent.
 
-5) **Test**
-   - Exercise endpoints touched by the change.
-   - If D1 schema errors occur, adjust schema via explicit migrations and update code accordingly.
-
-6) **Deliverables**
+2) **Deliverables**
    - Full code for changed files.
    - Exact paths.
    - Short what-it-does and what-to-expect notes.
    - One PowerShell script that writes all updated files (Seed included).
 
-## Notes
-- Routes under Pages dev are `/api/...` not `/functions/api/...`.
-- Avoid backups or file variants.
+3) Local File Root Directory
+   - C:\bc\cloudflare\html>
