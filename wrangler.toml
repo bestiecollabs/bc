@@ -1,8 +1,1 @@
-# D1 binding used by code as env.DB
-[[d1_databases]]
-binding = "DB"
-database_name = "bestiedb"
-database_id = "7ccf7968-cb51-4001-a81b-ca235b8d2403"
-
-compatibility_date = "2025-10-06"
-
+pages_build_output_dir = "."
