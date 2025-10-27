@@ -224,3 +224,18 @@ header .title{
 }
 @keyframes shimmer-rtl{0%{background-position:200% 0}100%{background-position:0 0}}
 @keyframes btnshine-rtl{0%{background-position:200% 0}100%{background-position:0 0}}
+/* Header text: green↔white gradient, RTL shimmer, slower */
+:root{ --shimmer-speed:8s } /* change to 16s if you want 75% slower */
+
+.site-header,.site-header *[style*="background"],header{ background:none !important }
+
+.site-header .title,
+header .title{
+  background: linear-gradient(90deg,#85BB65,#FFFFFF,#85BB65);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  background-size:200% 100%;
+  animation: shimmer-rtl var(--shimmer-speed) linear infinite;
+}
+
+/* Ensure RTL keyframes exist */
+@keyframes shimmer-rtl{0%{background-position:200% 0}100%{background-position:0 0}}
