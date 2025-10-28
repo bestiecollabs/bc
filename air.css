@@ -265,3 +265,7 @@ footer a:hover{background:rgba(0,0,0,.03)}
   color:var(--accent,#6c5ce7) !important;
   opacity:1 !important; filter:none !important;
 }
+@keyframes shimmer-rtl{
+  0%   { background-position: 200% 0%; }
+  100% { background-position: 0% 0%; }
+}
