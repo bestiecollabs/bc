@@ -249,3 +249,12 @@ footer a:hover{background:rgba(0,0,0,.03)}
   top:50%;
   transform:translateY(-50%) !important;
 }
+
+/* Show Password icon swap */
+.pw-eye .icon-eye-off{display:none}
+.pw-eye[aria-pressed="true"] .icon-eye{display:none}
+.pw-eye[aria-pressed="true"] .icon-eye-off{display:inline}
+.pw-eye,
+.pw-eye:hover,
+.pw-eye:focus,
+.pw-eye:active{ top:50%; transform:translateY(-50%) !important }
