@@ -68,7 +68,7 @@ h1,h2{text-transform:capitalize}
 .funtext{
   background:linear-gradient(90deg,var(--fun),var(--fun2),var(--fun));
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  background-size:200% 100%;animation: shimmer 6.6s linear infinite;
+  background-size:200% 100%;animation: shimmer-rtl 6.6s linear infinite;
 }
 @keyframes shimmer{0%{background-position:0 0}100%{background-position:200% 0}}
 
@@ -267,5 +267,6 @@ footer a:hover{background:rgba(0,0,0,.03)}
 }
 @keyframes shimmer-rtl{
   0%   { background-position: 200% 0%; }
-  100% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
 }
+
