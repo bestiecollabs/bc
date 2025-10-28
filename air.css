@@ -235,3 +235,17 @@ footer a:hover{background:rgba(0,0,0,.03)}
 .pw-eye:focus{outline:0}
 .pw-eye:active{transform:translateY(-50%); filter:brightness(.9); opacity:.9}
 
+
+/* lock pw-eye position on interaction */
+.pw-eye{transition:none}
+.pw-eye,
+.pw-eye:hover,
+.pw-eye:focus,
+.pw-eye:active,
+.input-wrap .pw-eye,
+.input-wrap .pw-eye:hover,
+.input-wrap .pw-eye:focus,
+.input-wrap .pw-eye:active{
+  top:50%;
+  transform:translateY(-50%) !important;
+}
