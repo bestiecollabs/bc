@@ -21,6 +21,7 @@
   </script>
 
   <link rel="stylesheet" href="/air.css">
+<script src="/scripts/login.js" defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -64,7 +65,7 @@
             <label style="margin:0" for="password">Password</label><div class="input-wrap">
                 <input id="password" type="password" class="pw" autocomplete="current-password" minlength="8" required>
                 <!-- eye toggle -->
-                <button id="togglePw" type="button" class="pw-eye" aria-pressed="false" aria-label="Show password" aria-controls="password">
+                <button id="togglePw" type="button" class="pw-eye" aria-pressed="false" aria-label="Show password" aria-controls="password" type="button">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
                     <circle cx="12" cy="12" r="3"/>
@@ -227,6 +228,8 @@
 <script src="/auth.js" defer></script>
 </body>
 </html>
+
+
 
 
 
