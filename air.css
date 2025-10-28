@@ -1,3 +1,6 @@
+/* design vars */
+:root{--accent:#6c5ce7}
+
 /* Air theme — compact fun style with organized header */
 
 /* ========== Variables ========== */
@@ -207,20 +210,28 @@ footer a:hover{background:rgba(0,0,0,.03)}
 
 .pw-eye svg{width:20px; height:20px; display:block}
 
+/* ===== Password visibility toggle ===== */
+.input-wrap{position:relative}
+.pw{padding-right:44px}
+
+.pw-eye svg{width:20px; height:20px; display:block}
+
 
 /* ===== Password visibility toggle ===== */
 .input-wrap{position:relative}
 .pw{padding-right:44px}
 
+/* Ensure icon inherits a visible color */
 .pw-eye{
   position:absolute; top:50%; right:10px; transform:translateY(-50%);
   display:flex; align-items:center; justify-content:center;
   width:28px; height:28px; padding:0; margin:0;
   border:0; background:transparent; line-height:1; cursor:pointer;
   -webkit-tap-highlight-color:transparent;
-  z-index:2;
+  z-index:2;                 /* click sits above input */
+  color:var(--accent,#6c5ce7); /* sets currentColor for SVG stroke/fill */
 }
-.pw-eye svg{width:20px; height:20px; display:block}
+.pw-eye svg{width:20px; height:20px; display:block; stroke:currentColor; fill:none}
 .pw-eye:focus{outline:0}
 .pw-eye:active{transform:translateY(-50%); filter:brightness(.9); opacity:.9}
 
