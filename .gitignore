@@ -5,3 +5,4 @@ Thumbs.db
 .vscode/
 # Logs and caches
 *.log
+node_modules/
