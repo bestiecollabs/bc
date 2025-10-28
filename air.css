@@ -7,7 +7,7 @@
 
   /* Shimmer vars: left -> right, speed up by 10% from 12s => 10.8s */
   --shimmer-name: shimmer-ltr;
-  --shimmer-speed: 9.72s;
+  --shimmer-speed: 8.75s;
   --shimmer-pos: 0% 0%;
 }
 
@@ -49,4 +49,5 @@ h1,h2{text-transform:capitalize}
   0%   { background-position: 0% 0%; }
   100% { background-position: 0%   0%; }
 }
+
 
