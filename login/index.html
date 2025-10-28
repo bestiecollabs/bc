@@ -61,8 +61,7 @@
 
           <!-- Password group with Remember Me directly under the field -->
           <div class="pw-group" style="margin:0">
-            <label style="margin:0">Password
-              <div class="input-wrap">
+            <label style="margin:0" for="password">Password</label><div class="input-wrap">
                 <input id="password" type="password" class="pw" autocomplete="current-password" minlength="8" required>
                 <!-- eye toggle -->
                 <button id="togglePw" type="button" class="pw-eye" aria-pressed="false" aria-label="Show password" aria-controls="password">
@@ -72,7 +71,6 @@
                   </svg>
                 </button>
               </div>
-            </label>
 
             <!-- Remember Me: single line, left aligned, tight spacing -->
             <div class="remember-row" style="display:flex;justify-content:flex-start;margin-top:6px">
@@ -229,5 +227,6 @@
 <script src="/auth.js" defer></script>
 </body>
 </html>
+
 
 
