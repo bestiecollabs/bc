@@ -49,7 +49,7 @@ header .wrap{
 }
 .brandmark{display:inline-flex;align-items:center;gap:10px}
 .brandmark img{height:40px;width:auto;border-radius:8px}
-header .title{font-weight:800;font-size:1.2rem;line-height:1}
+header .title{font-weight:800;font-size:1.32rem;line-height:1;color:#85BB65}
 
 header nav{display:flex;flex-wrap:wrap;gap:var(--x3);justify-content:center}
 header .auth{justify-self:end}
@@ -265,4 +265,5 @@ footer a:hover{background:rgba(0,0,0,.03)}
   color:var(--accent,#6c5ce7) !important;
   opacity:1 !important; filter:none !important;
 }
+
 
