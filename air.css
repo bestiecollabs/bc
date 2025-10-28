@@ -181,22 +181,10 @@ footer a:hover{background:rgba(0,0,0,.03)}
 .input-wrap{position:relative}
 .pw{padding-right:44px}
 
-.pw-eye{
-  position:absolute; right:10px; top:50%; transform:translateY(-50%);
-  display:flex; align-items:center; justify-content:center;
-  width:28px; height:28px; padding:0; margin:0;
-  border:0; background:transparent; line-height:1; cursor:pointer;
-  box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:0; transition:none;
-}
 .pw-eye svg{width:20px; height:20px; display:block}
 
 /* Visual press only. No movement. */
-.pw-eye:active{ transform:translateY(-50%); filter:brightness(.95); opacity:.95 }
-.pw-eye{
-  position:absolute;right:10px;top:50%;transform:translateY(-50%);
-  border:0;background:transparent;padding:4px;line-height:0;cursor:pointer;
-  color:#6a5ae0;
-}
+
 .pw-eye svg{width:20px;height:20px;display:block}
 /* Center the links under auth cards */
 .auth-card .actions{justify-content:center}
@@ -212,4 +200,21 @@ footer a:hover{background:rgba(0,0,0,.03)}
   color:var(--muted);font-size:14px
 }
 .login-page .remember-row input[type="checkbox"]{accent-color:var(--fun)}
+
+
+/* ===== Password visibility toggle ===== */
+.input-wrap{position:relative}
+.pw{padding-right:44px}
+
+.pw-eye{
+  position:absolute; top:50%; right:10px; transform:translateY(-50%);
+  display:flex; align-items:center; justify-content:center;
+  width:28px; height:28px; padding:0; margin:0;
+  border:0; background:transparent; line-height:1; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  z-index:2;
+}
+.pw-eye svg{width:20px; height:20px; display:block}
+.pw-eye:focus{outline:0}
+.pw-eye:active{transform:translateY(-50%); filter:brightness(.9); opacity:.9}
 
