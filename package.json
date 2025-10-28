@@ -1,0 +1,25 @@
+{
+  "name": "html",
+  "version": "1.0.0",
+  "description": "",
+  "main": "auth.js",
+  "scripts": {
+    "deploy": "wrangler pages deployment create . --project-name=bc --commit-dirty=true",
+    "dev": "wrangler pages dev ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bestiecollabs/bc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bestiecollabs/bc/issues"
+  },
+  "homepage": "https://github.com/bestiecollabs/bc#readme",
+  "devDependencies": {
+    "wrangler": "^4.45.0"
+  }
+}

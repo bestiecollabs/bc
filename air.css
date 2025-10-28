@@ -239,3 +239,29 @@ header .title{
 
 /* Ensure RTL keyframes exist */
 @keyframes shimmer-rtl{0%{background-position:200% 0}100%{background-position:0 0}}
+
+/* pw-eye fix marker: do not remove */
+/* Ensure the wrapper is positioned */
+.input-wrap{ position:relative; }
+
+/* Lock the eye button position in all states */
+.input-wrap .pw-eye,
+.input-wrap .pw-eye:hover,
+.input-wrap .pw-eye:focus,
+.input-wrap .pw-eye:active{
+  position:absolute; top:50%; right:10px; transform:translateY(-50%);
+  display:flex; align-items:center; justify-content:center;
+  width:28px; height:28px; padding:0; margin:0; border:0; background:transparent;
+  line-height:1; vertical-align:middle; cursor:pointer; box-sizing:border-box;
+  transition:none; outline:0;
+}
+
+/* Keep transform fixed even if global hover styles exist */
+.input-wrap .pw-eye:hover{ transform:translateY(-50%) !important; }
+
+/* Prevent :active from nudging the button */
+.pw-eye:active{ transform:translateY(-50%); }
+
+/* SVG size stays stable */
+.input-wrap .pw-eye svg{ width:20px; height:20px; display:block; }
+
