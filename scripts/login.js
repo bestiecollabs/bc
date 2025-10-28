@@ -19,11 +19,7 @@ document.addEventListener("DOMContentLoaded", function(){
     });
     btn.dataset.bound = "1";
   }
-  function byIds(btnId, inpId){
-    var b = document.getElementById(btnId);
-    var i = document.getElementById(inpId);
-    bindPair(b, i);
-  }
+  function byIds(btnId, inpId){ bindPair(document.getElementById(btnId), document.getElementById(inpId)); }
   function generic(){
     document.querySelectorAll(".input-wrap .pw-eye").forEach(function(b){
       var wrap = b.closest(".input-wrap");
@@ -31,12 +27,9 @@ document.addEventListener("DOMContentLoaded", function(){
       bindPair(b, i);
     });
   }
-  // Initial binds
   byIds("togglePw","password");
   byIds("home-togglePw","home-password");
   generic();
-
-  // Bind late-loaded DOM
-  var mo = new MutationObserver(function(){ byIds("togglePw","password"); byIds("home-togglePw","home-password"); generic(); });
-  mo.observe(document.documentElement, {subtree:true, childList:true});
+  new MutationObserver(function(){ byIds("togglePw","password"); byIds("home-togglePw","home-password"); generic(); })
+    .observe(document.documentElement, {subtree:true, childList:true});
 });
