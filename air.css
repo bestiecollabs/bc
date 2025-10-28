@@ -7,12 +7,12 @@
 
   /* Shimmer vars: left -> right, speed up by 10% from 12s => 10.8s */
   --shimmer-name: shimmer-ltr;
-  --shimmer-speed: 10.8s;
+  --shimmer-speed: 9.72s;
   --shimmer-pos: 0% 0%;
 }
 
 /* Optional flip: add .shimmer-rtl on <body> to run right -> left */
-.shimmer-rtl{ --shimmer-name: shimmer-rtl; --shimmer-pos: 200% 0%; }
+.shimmer-rtl{ --shimmer-name: shimmer-ltr; --shimmer-pos: 0% 0%; }
 
 /* ========== Base ========== */
 *{box-sizing:border-box}
@@ -43,9 +43,10 @@ h1,h2{text-transform:capitalize}
 /* ========== Keyframes ========== */
 @keyframes shimmer-ltr{
   0%   { background-position: 0%   0%; }
-  100% { background-position: 200% 0%; }
+  100% { background-position: 0% 0%; }
 }
 @keyframes shimmer-rtl{
-  0%   { background-position: 200% 0%; }
+  0%   { background-position: 0% 0%; }
   100% { background-position: 0%   0%; }
 }
+
