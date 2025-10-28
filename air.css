@@ -201,6 +201,12 @@ footer a:hover{background:rgba(0,0,0,.03)}
 }
 .login-page .remember-row input[type="checkbox"]{accent-color:var(--fun)}
 
+/* ===== Password visibility toggle ===== */
+.input-wrap{position:relative}
+.pw{padding-right:44px}
+
+.pw-eye svg{width:20px; height:20px; display:block}
+
 
 /* ===== Password visibility toggle ===== */
 .input-wrap{position:relative}
