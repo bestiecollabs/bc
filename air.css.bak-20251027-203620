@@ -178,26 +178,14 @@ footer a:hover{background:rgba(0,0,0,.03)}
 .postlinks a{margin:0 10px}
 
 /* Eye icon toggle */
-.input-wrap{position:relative}
-.pw{padding-right:44px}
-
-.pw-eye{
-  position:absolute; right:10px; top:50%; transform:translateY(-50%);
-  display:flex; align-items:center; justify-content:center;
-  width:28px; height:28px; padding:0; margin:0;
-  border:0; background:transparent; line-height:1; cursor:pointer;
-  box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:0; transition:none;
-}
-.pw-eye svg{width:20px; height:20px; display:block}
-
-/* Visual press only. No movement. */
-.pw-eye:active{ transform:translateY(-50%); filter:brightness(.95); opacity:.95 }
 .pw-eye{
   position:absolute;right:10px;top:50%;transform:translateY(-50%);
   border:0;background:transparent;padding:4px;line-height:0;cursor:pointer;
   color:#6a5ae0;
 }
 .pw-eye svg{width:20px;height:20px;display:block}
+.pw-eye:active{transform:translateY(-50%)}
+
 /* Center the links under auth cards */
 .auth-card .actions{justify-content:center}
 .auth-card .postlinks{display:flex;justify-content:center;gap:16px;margin-top:16px}
