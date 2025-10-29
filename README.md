@@ -1,21 +1,24 @@
 # Bestie Collabs
 
-Public so an AI assistant can read files and help automate work on **bestiecollabs.com** and **api.bestiecollabs.com**.
+Static site with Cloudflare Pages Functions and a D1 database. Public so an AI assistant can read files and help automate work.
 
-## What this is
-- Static site + Cloudflare Pages Functions
-- D1 database: `bestiedb`
-- Deploy branch: `main`
+## Links
 
-## Quick facts for assistants
-- Local root: `C:\bc\cloudflare\html`
-- Repo: `https://github.com/bestiecollabs/bc`
-- Shell: PowerShell by default
-- After any file change: show git add/commit and push to `main`
+- Prod: https://bestiecollabs.com  
+- API: https://api.bestiecollabs.com  
+- Repo: https://github.com/bestiecollabs/bc
 
-## Restore workflow (summary)
-Make `main` match the chosen `restore/*` branch, push, then hard-reset local to `origin/main`.  
-See `AI_README.md` for exact commands.
+## Stack
 
-## Notes
-- Keep `_headers`, `_redirects`, `b1.png`, `robots.txt`, `sitemap.xml` intact.
+- Cloudflare Pages + Functions (Wrangler config) :contentReference[oaicite:0]{index=0}  
+- Cloudflare Workers Cron Triggers for scheduled jobs :contentReference[oaicite:1]{index=1}  
+- Cloudflare D1 for data :contentReference[oaicite:2]{index=2}
+
+## Quickstart
+
+Prereqs: Node 18+, Git. Install Wrangler locally or run with npx. :contentReference[oaicite:3]{index=3}
+
+```powershell
+# install deps and run locally (Pages + Functions)
+npm i
+npx wrangler pages dev .
