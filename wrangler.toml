@@ -1,0 +1,8 @@
+name = "bestiecollabs"
+compatibility_date = "2024-09-26"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"                # env.DB in your Functions
+database_name = "bestiedb"    # from `wrangler d1 list`
+database_id = "7ccf7968-cb51-4001-a81b-ca235b8d2403"
