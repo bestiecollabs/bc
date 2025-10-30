@@ -1,8 +1,6 @@
 /**
  * POST /api/signup
  * JSON: { email, username, password, confirmPassword, role, acceptTerms }
- * Uses env.DB (D1) and Workers Web Crypto PBKDF2-SHA256.
- * Returns JSON only.
  */
 export async function onRequestPost(ctx) {
   try {
@@ -55,10 +53,10 @@ export async function onRequestPost(ctx) {
     const hashHex = await pbkdf2Sha256Hex(password, salt, 150000);
     const saltHex = toHex(salt);
 
-    // insert
+    // insert (timestamps are unixepoch() by default; store accepted_terms_at)
     const res = await env.DB.prepare(
-      `INSERT INTO users (email, username, role, password_hash, password_salt, created_at)
-       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`
+      `INSERT INTO users (email, username, role, pw_hash, pw_salt, accepted_terms_at)
+       VALUES (?, ?, ?, ?, ?, unixepoch())`
     ).bind(email, username, role, hashHex, saltHex).run();
 
     if (!res.success) {
@@ -87,12 +85,9 @@ async function pbkdf2Sha256Hex(password, saltBytes, iterations) {
   );
   const bits = await crypto.subtle.deriveBits(
     { name:'PBKDF2', hash:'SHA-256', salt: saltBytes, iterations },
-    keyMaterial,
-    256
+    keyMaterial, 256
   );
   return toHex(new Uint8Array(bits));
 }
 
-function toHex(bytes) {
-  return [...bytes].map(b => b.toString(16).padStart(2,'0')).join('');
-}
+function toHex(bytes) { return [...bytes].map(b => b.toString(16).padStart(2,'0')).join(''); }
