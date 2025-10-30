@@ -38,14 +38,14 @@ export async function onRequestPost(ctx) {
     // uniqueness with LIMIT 1
     const emailExists = await env.DB
       .prepare('SELECT id FROM users WHERE lower(email)=lower(?) LIMIT 1')
-      .bind(email).first();
-    if (emailExists)
+      .bind(email) .all();
+    if (emailExists && emailExists.results && emailExists.results.length>0)
       return json(409, { ok:false, field:"email", message:"Email is already registered." });
 
     const usernameExists = await env.DB
       .prepare('SELECT id FROM users WHERE lower(username)=lower(?) LIMIT 1')
-      .bind(username).first();
-    if (usernameExists)
+      .bind(username) .all();
+    if (usernameExists && usernameExists.results && usernameExists.results.length>0)
       return json(409, { ok:false, field:"username", message:"Username is taken." });
 
     // PBKDF2-SHA256 with 16-byte salt
@@ -91,3 +91,4 @@ async function pbkdf2Sha256Hex(password, saltBytes, iterations) {
 }
 
 function toHex(bytes) { return [...bytes].map(b => b.toString(16).padStart(2,'0')).join(''); }
+
