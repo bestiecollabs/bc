@@ -50,7 +50,7 @@ export async function onRequestPost(ctx) {
 
     // PBKDF2-SHA256 with 16-byte salt
     const salt = crypto.getRandomValues(new Uint8Array(16));
-    const hashHex = await pbkdf2Sha256Hex(password, salt, 150000);
+    const hashHex = await pbkdf2Sha256Hex(password, salt, 100000);
     const saltHex = toHex(salt);
 
     // insert (timestamps are unixepoch() by default; store accepted_terms_at)
@@ -91,4 +91,5 @@ async function pbkdf2Sha256Hex(password, saltBytes, iterations) {
 }
 
 function toHex(bytes) { return [...bytes].map(b => b.toString(16).padStart(2,'0')).join(''); }
+
 
