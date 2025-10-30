@@ -57,7 +57,7 @@ export async function onRequestPost(ctx){
     const res = await env.DB.prepare(
       `INSERT INTO users (email, username, role, pw_hash, pw_salt, accepted_terms_at)
        VALUES (?, ?, ?, ?, ?, unixepoch())`
-    ).bind(email, username, role, hashHex, saltHex\).run();
+    ).bind(email, username, role, hashHex, saltHex).run();
 
     if (!res.success) {
       console.error('Insert failed', res);
@@ -91,6 +91,7 @@ async function pbkdf2Sha256Hex(password, saltBytes, iterations) {
 }
 
 function toHex(bytes) { return [...bytes].map(b => b.toString(16).padStart(2,'0')).join(''); }
+
 
 
 
