@@ -2,7 +2,7 @@
  * POST /api/signup
  * JSON: { email, username, password, confirmPassword, role, acceptTerms }
  */
-export async function onRequestPost(ctx){ console.error('signup: enter');
+export async function onRequestPost(ctx){ 
   try {
     const { request, env } = ctx;
     if (!env?.DB) return json(500, { ok:false, message:"Database not available" });
@@ -50,14 +50,14 @@ export async function onRequestPost(ctx){ console.error('signup: enter');
 
     // PBKDF2-SHA256 with 16-byte salt
     const salt = crypto.getRandomValues(new Uint8Array(16));
-    console.error('signup: start-hash'); const hashHex = await pbkdf2Sha256Hex(password, salt, 60000); console.error('signup: end-hash');
+    const hashHex = await pbkdf2Sha256Hex(password, salt, 100000);
     const saltHex = toHex(salt);
 
     // insert (timestamps are unixepoch() by default; store accepted_terms_at)
     const res = await env.DB.prepare(
       `INSERT INTO users (email, username, role, pw_hash, pw_salt, accepted_terms_at)
        VALUES (?, ?, ?, ?, ?, unixepoch())`
-    ).bind(email, username, role, hashHex, saltHex\).run(); console.error('signup: insert-done');
+    ).bind(email, username, role, hashHex, saltHex\).run();
 
     if (!res.success) {
       console.error('Insert failed', res);
@@ -91,6 +91,7 @@ async function pbkdf2Sha256Hex(password, saltBytes, iterations) {
 }
 
 function toHex(bytes) { return [...bytes].map(b => b.toString(16).padStart(2,'0')).join(''); }
+
 
 
 
