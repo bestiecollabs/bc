@@ -1,106 +1,81 @@
-/**
- * POST /api/signup
- * JSON: { email, username, password, confirmPassword, role, acceptTerms }
- */
-<<<<<<< HEAD
-export async function onRequestPost(ctx){ 
-=======
-export async function onRequestPost(ctx){ console.error('signup: enter');
->>>>>>> 48d4650 (debug(api): add signup stage logs)
+// POST /api/signup
+export const onRequestPost = async ({ request, env }) => {
+  let body;
   try {
-    const { request, env } = ctx;
-    if (!env?.DB) return json(500, { ok:false, message:"Database not available" });
-
-    let body;
-    try { body = await request.json(); }
-    catch { return json(400, { ok:false, message:"Invalid JSON body" }); }
-
-    const emailRaw = String(body?.email ?? "").trim();
-    const usernameRaw = String(body?.username ?? "").trim();
-    const password = String(body?.password ?? "");
-    const confirmPassword = String(body?.confirmPassword ?? "");
-    const role = String(body?.role ?? "").trim().toLowerCase();
-    const acceptTerms = body?.acceptTerms === true;
-
-    const email = emailRaw.toLowerCase();
-    const username = usernameRaw;
-
-    // validations
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      return json(400, { ok:false, field:"email", message:"Enter a valid email." });
-    if (!username)
-      return json(400, { ok:false, field:"username", message:"Username is required." });
-    if (!password)
-      return json(400, { ok:false, field:"password", message:"Password is required." });
-    if (password !== confirmPassword)
-      return json(400, { ok:false, field:"confirmPassword", message:"Passwords do not match." });
-    if (!["brand","creator"].includes(role))
-      return json(400, { ok:false, field:"role", message:"Choose brand or creator." });
-    if (!acceptTerms)
-      return json(400, { ok:false, field:"acceptTerms", message:"You must accept the terms." });
-
-    // uniqueness with LIMIT 1
-    const emailExists = await env.DB
-      .prepare('SELECT id FROM users WHERE lower(email)=lower(?) LIMIT 1')
-      .bind(email) .all();
-    if (emailExists && emailExists.results && emailExists.results.length>0)
-      return json(409, { ok:false, field:"email", message:"Email is already registered." });
-
-    const usernameExists = await env.DB
-      .prepare('SELECT id FROM users WHERE lower(username)=lower(?) LIMIT 1')
-      .bind(username) .all();
-    if (usernameExists && usernameExists.results && usernameExists.results.length>0)
-      return json(409, { ok:false, field:"username", message:"Username is taken." });
-
-    // PBKDF2-SHA256 with 16-byte salt
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    console.error('signup: start-hash'); const hashHex = await pbkdf2Sha256Hex(password, salt, 60000); console.error('signup: end-hash');
-    const saltHex = toHex(salt);
-
-    // insert (timestamps are unixepoch() by default; store accepted_terms_at)
-    const res = await env.DB.prepare(
-      `INSERT INTO users (email, username, role, pw_hash, pw_salt, accepted_terms_at)
-       VALUES (?, ?, ?, ?, ?, unixepoch())`
-    ).bind(email, username, role, hashHex, saltHex\).run(); console.error('signup: insert-done');
-
-    if (!res.success) {
-      console.error('Insert failed', res);
-      return json(500, { ok:false, message:"Could not create account." });
-    }
-
-    return json(200, { ok:true, next:"login", message:"Account created. Please sign in." });
-  } catch (err) {
-    console.error(err);
-    return json(500, { ok:false, message:"Unexpected error." });
+    body = await request.json();
+  } catch {
+    return j(400, { ok:false, message:"Invalid JSON." });
   }
+
+  const email = String(body.email||"").trim().toLowerCase();
+  const name  = String(body.name||"").trim();
+  const usernameRaw = (body.username ?? email.split("@")[0] ?? "").toString();
+  let username = usernameRaw.trim().toLowerCase().replace(/[^a-z0-9_.]/g, "_").slice(0,24);
+  if (!username) username = "u_"+randHex(6);
+
+  const pass = String(body.password||"");
+  const confirm = String(body.confirmPassword||"");
+  if (pass.length < 8) return j(400, { ok:false, field:"password", message:"Min 8 chars." });
+  if (pass !== confirm) return j(400, { ok:false, field:"confirmPassword", message:"Passwords do not match." });
+
+  const accept = !!body.acceptTerms;
+  if (!accept) return j(400, { ok:false, field:"acceptTerms", message:"You must accept the terms." });
+
+  // Default role to creator if missing or invalid
+  const r = String(body.role||"creator");
+  const role = (r === "brand" || r === "creator") ? r : "creator";
+
+  // Map camelCase -> snake_case with default
+  const terms_version = String(body.termsVersion || "v1");
+  const accepted_terms_at = Math.floor(Date.now()/1000);
+
+  // Hash password with PBKDF2
+  const { hash, salt } = await hashPw(pass);
+
+  const sql = `
+    INSERT INTO users (email, username, full_name, role, phone, terms_version, accepted_terms_at, pw_salt, pw_hash)
+    VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?);
+  `;
+
+  try {
+    await env.DB.prepare(sql).bind(email, username, name, role, terms_version, accepted_terms_at, salt, hash).run();
+    return j(200, { ok:true, next:"login", message:"Account created. Please sign in." });
+  } catch (e) {
+    const m = String(e && e.message || "");
+    if (/UNIQUE constraint failed: users\.email/i.test(m)) {
+      return j(409, { ok:false, field:"email", message:"Email already registered." });
+    }
+    if (/UNIQUE constraint failed: users\.username/i.test(m)) {
+      // retry once with suffix
+      const u2 = (username + "_" + randHex(2)).slice(0,28);
+      try {
+        await env.DB.prepare(sql).bind(email, u2, name, role, terms_version, accepted_terms_at, salt, hash).run();
+        return j(200, { ok:true, next:"login", message:"Account created. Please sign in." });
+      } catch (e2) {
+        if (/UNIQUE constraint failed: users\.username/i.test(String(e2?.message||""))) {
+          return j(409, { ok:false, field:"username", message:"Username is taken." });
+        }
+      }
+    }
+    return j(500, { ok:false, message:"Signup failed." });
+  }
+};
+
+function j(status, obj){ return new Response(JSON.stringify(obj), { status, headers:{ "content-type":"application/json" } }); }
+
+function randHex(nBytes){
+  const b = new Uint8Array(nBytes);
+  crypto.getRandomValues(b);
+  return [...b].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
-function json(status, data) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'content-type':'application/json; charset=utf-8' }
-  });
-}
-
-async function pbkdf2Sha256Hex(password, saltBytes, iterations) {
+async function hashPw(password){
+  const saltBytes = new Uint8Array(16);
+  crypto.getRandomValues(saltBytes);
   const enc = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw', enc.encode(password), { name:'PBKDF2' }, false, ['deriveBits']
-  );
-  const bits = await crypto.subtle.deriveBits(
-    { name:'PBKDF2', hash:'SHA-256', salt: saltBytes, iterations },
-    keyMaterial, 256
-  );
-  return toHex(new Uint8Array(bits));
+  const key = await crypto.subtle.importKey("raw", enc.encode(password), { name:"PBKDF2" }, false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name:"PBKDF2", salt:saltBytes, iterations:100000, hash:"SHA-256" }, key, 256);
+  const hashHex = [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  const saltHex = [...saltBytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+  return { hash: hashHex, salt: saltHex };
 }
-
-function toHex(bytes) { return [...bytes].map(b => b.toString(16).padStart(2,'0')).join(''); }
-
-
-
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 48d4650 (debug(api): add signup stage logs)
