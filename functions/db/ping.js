@@ -1,5 +1,8 @@
 export async function onRequestGet({ env }) {
-  const r = await env.DB.prepare("SELECT count(*) AS c FROM creators").first();
-  return new Response(JSON.stringify({ ok:true, count: r?.c ?? 0 }, null, 2),
-    { headers:{ "content-type":"application/json" }});
+  try {
+    const row = await env.DB.prepare("SELECT count(*) AS users_count FROM users;").first();
+    return Response.json({ ok: true, users_count: row?.users_count ?? 0 });
+  } catch (e) {
+    return Response.json({ ok: false, error: String(e) }, { status: 500 });
+  }
 }
