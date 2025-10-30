@@ -5,3 +5,11 @@ Thumbs.db
 .vscode/
 # Logs and caches
 *.log
+.wrangler/
+.mf/
+node_modules/
+node_modules/.cache/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sql
