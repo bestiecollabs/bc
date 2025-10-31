@@ -7,12 +7,12 @@ export async function onRequestGet({ env, request }) {
   }
 
   const sqlWithStatus = `
-    SELECT id, email, username, role, status, created_at
+    SELECT id, email, username, role, status, created_at, is_admin
     FROM users
     ORDER BY created_at DESC
   `;
   const sqlFallback = `
-    SELECT id, email, username, role, created_at, 'active' AS status
+    SELECT id, email, username, role, created_at, 'active' AS status, is_admin
     FROM users
     ORDER BY created_at DESC
   `;
@@ -29,3 +29,4 @@ export async function onRequestGet({ env, request }) {
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { "content-type": "application/json; charset=utf-8" } });
   }
 }
+
