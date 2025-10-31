@@ -37,3 +37,38 @@
 
 
 
+<script>
+// Minimal client glue for the unified /api/admin/users route
+const $ = s => document.querySelector(s);
+const tbody = document.querySelector("#tbl tbody") || document.createElement("tbody");
+const statusEl = document.querySelector("#status") || document.createElement("p");
+
+async function loadUsers() {
+  statusEl.textContent = "Loading";
+  const r = await fetch("/api/admin/users", { credentials: "include" });
+  if (!r.ok) { statusEl.textContent = "Unauthorized or error"; return; }
+  const { users = [] } = await r.json();
+  if (tbody) tbody.innerHTML = "";
+  users.forEach(u => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = [
+      u.id ?? "", u.email ?? "", u.username ?? "", u.status ?? "",
+      u.role ?? "", u.is_admin ?? "", u.created_at ?? ""
+    ].map(v => `<td>${String(v)}</td>`).join("")
+      + `<td><button class="del" data-id="${u.id}">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  statusEl.textContent = `Rows: ${users.length}`;
+}
+
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button.del");
+  if (!btn) return;
+  const id = btn.getAttribute("data-id");
+  btn.disabled = true;
+  const r = await fetch(`/api/admin/users?id=${encodeURIComponent(id)}`, { method: "DELETE", credentials: "include" });
+  if (r.ok) loadUsers(); else btn.disabled = false;
+});
+
+window.addEventListener("DOMContentLoaded", loadUsers);
+</script>
