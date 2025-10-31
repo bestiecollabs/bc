@@ -13,3 +13,4 @@ node_modules/.cache/
 *.sqlite-shm
 *.sqlite-wal
 *.sql
+node_modules/
