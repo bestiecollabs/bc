@@ -1,105 +1,98 @@
-async function fetchUsers(){
-  setStatus("Loading...");
-  const r = await fetch("/api/admin/users",{credentials:"include"});
-  const j = await r.json(); if(Array.isArray(j?.users)){const __list=j.users;const __norm=s=>(s||"active");j.active=__list.filter(u=>__norm(u.status)==="active");j.suspended=__list.filter(u=>__norm(u.status)==="suspended");j.deleted=__list.filter(u=>__norm(u.status)==="deleted");console.log("[admin] counts",{active:j.active.length,suspended:j.suspended.length,deleted:j.deleted.length});}
-  render(j.items||[]);
-  clearStatus();
-}
-function render(items){
-  const act = document.getElementById("activeRows");
-  const sus = document.getElementById("suspendedRows");
-  const del = document.getElementById("deletedRows");
-  act.innerHTML = sus.innerHTML = del.innerHTML = "";
+/* admin/app.js - clean renderer */
+document.addEventListener('DOMContentLoaded', () => {
+  const els = {
+    active:    document.getElementById('activeRows'),
+    suspended: document.getElementById('suspendedRows'),
+    deleted:   document.getElementById('deletedRows'),
+    status:    document.getElementById('status'),
+    emailNew:  document.getElementById('email'),
+    form:      document.getElementById('createForm'),
+  };
 
-  const rowsFor = (where) => where==="active" ? act : where==="suspended" ? sus : del;
+  const fmtTime = (ts) => {
+    if (ts == null) return '';
+    try {
+      // API returns epoch seconds; convert if needed
+      const ms = ts > 1e12 ? ts : ts * 1000;
+      return new Date(ms).toLocaleString();
+    } catch { return String(ts); }
+  };
 
-  for(const u of items){
-    const where = u.deleted ? "deleted" : u.suspended ? "suspended" : "active";
-    const tbody = rowsFor(where);
-    const tr = document.createElement("tr");
-    const dt = u.created_at ? new Date(Number(u.created_at)*1000) : null;
-    tr.innerHTML = `
-      <td>${u.email}</td>
-      <td>${u.username||""}</td>
-      <td>${u.account_type||""}</td>
-      <td>${dt ? dt.toLocaleString() : ""}</td>
-      <td class="actions"></td>`;
-    // keep ID as first col if you prefer; adjust header accordingly
-    tbody.appendChild(tr);
+  const splitByStatus = (users) => {
+    const norm = (s) => (s || 'active').toLowerCase();
+    return {
+      active:    users.filter(u => norm(u.status) === 'active'),
+      suspended: users.filter(u => norm(u.status) === 'suspended'),
+      deleted:   users.filter(u => norm(u.status) === 'deleted'),
+    };
+  };
 
-    const actions = tr.querySelector(".actions");
+  const render = (tbody, list) => {
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    for (const u of list) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${u.id ?? ''}</td>
+        <td>${u.email ?? ''}</td>
+        <td>${u.username ?? ''}</td>
+        <td>${u.role ?? ''}</td>
+        <td>${fmtTime(u.created_at)}</td>
+        <td class="actions"><button class="btn btn-ghost" data-id="${u.id ?? ''}">View</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+  };
 
-    const unameBtn = document.createElement("button");
-    unameBtn.textContent = "Set username";
-    unameBtn.addEventListener("click", async ()=>{
-      const v = prompt("Username (3-30, a-z 0-9 . _ -):", u.username||"");
-      if (v==null) return;
-      setStatus("Saving username...");
-      const res = await fetch("/api/admin/users", {
-        method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
-        body: JSON.stringify({ action:"set_username", id:u.id, username:v })
+  async function load() {
+    els.status && (els.status.textContent = 'Loading...');
+    const r = await fetch('/api/admin/users', { credentials: 'include' });
+    if (!r.ok) {
+      els.status && (els.status.textContent = `HTTP ${r.status}`);
+      return;
+    }
+    let data;
+    try { data = await r.json(); }
+    catch { els.status && (els.status.textContent = 'Invalid JSON'); return; }
+
+    // Accept either {users:[...]} or {active:[],suspended:[],deleted:[]}
+    let buckets;
+    if (Array.isArray(data?.users)) {
+      buckets = splitByStatus(data.users);
+    } else {
+      buckets = {
+        active: data.active ?? [],
+        suspended: data.suspended ?? [],
+        deleted: data.deleted ?? [],
+      };
+    }
+
+    render(els.active, buckets.active);
+    render(els.suspended, buckets.suspended);
+    render(els.deleted, buckets.deleted);
+    els.status && (els.status.textContent = '');
+  }
+
+  if (els.form && els.emailNew) {
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = els.emailNew.value.trim();
+      if (!email) return;
+      els.status && (els.status.textContent = 'Creating...');
+      const r = await fetch('/api/admin/users', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       });
-      const j = await res.json();
-      setStatus(j.ok ? "Saved" : ("Error: " + (j.error || "unknown")));
-      fetchUsers();
+      if (!r.ok) {
+        els.status && (els.status.textContent = `Create failed: HTTP ${r.status}`);
+        return;
+      }
+      els.emailNew.value = '';
+      await load();
     });
-    actions.appendChild(unameBtn);
-
-    const sBtn = document.createElement("button");
-    sBtn.textContent = u.suspended ? "Unsuspend" : "Suspend";
-    sBtn.addEventListener("click", async ()=>{
-      setStatus(u.suspended?"Unsuspending...":"Suspending...");
-      const res = await fetch("/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({action:u.suspended?"unsuspend":"suspend", id:u.id})});
-      const j = await res.json(); setStatus(j.ok?"Done":"Error: "+(j.error||"unknown")); fetchUsers();
-    });
-    actions.appendChild(sBtn);
-
-    const dBtn = document.createElement("button");
-    dBtn.textContent = u.deleted ? "Undelete" : "Delete";
-    dBtn.addEventListener("click", async ()=>{
-      if(!u.deleted && !confirm("Soft delete user "+u.id+"?")) return;
-      setStatus(u.deleted?"Undeleting...":"Deleting...");
-      const res = await fetch("/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({action:u.deleted?"undelete":"delete", id:u.id})});
-      const j = await res.json(); setStatus(j.ok?"Done":"Error: "+(j.error||"unknown")); fetchUsers();
-    });
-    actions.appendChild(dBtn);
   }
-}
-document.getElementById("createForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const email = document.getElementById("email").value.trim();
-  if(!email) return;
-  setStatus("Creating...");
-  const r = await fetch("/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email})});
-  const j = await r.json(); if(Array.isArray(j?.users)){const __list=j.users;const __norm=s=>(s||"active");j.active=__list.filter(u=>__norm(u.status)==="active");j.suspended=__list.filter(u=>__norm(u.status)==="suspended");j.deleted=__list.filter(u=>__norm(u.status)==="deleted");console.log("[admin] counts",{active:j.active.length,suspended:j.suspended.length,deleted:j.deleted.length});} setStatus(j.ok?"Created":"Error: "+(j.error||"unknown"));
-  e.target.reset(); fetchUsers();
+
+  load();
 });
-function setStatus(t){ document.getElementById("status").textContent=t; }
-function clearStatus(){ setStatus(""); }
-fetchUsers();
-
-/* FIX: render by named keys to avoid column order bugs */
-async function loadUsers() {
-  const r = await fetch("/api/admin/users", { headers: window.__cfAccessToken ? { "CF-Access-Jwt-Assertion": window.__cfAccessToken } : {} });
-  const data = await r.json(); if(Array.isArray(data?.users)){const __list=data.users;const __norm=s=>(s||"active");data.active=__list.filter(u=>__norm(u.status)==="active");data.suspended=__list.filter(u=>__norm(u.status)==="suspended");data.deleted=__list.filter(u=>__norm(u.status)==="deleted");console.log("[admin] counts",{active:data.active.length,suspended:data.suspended.length,deleted:data.deleted.length});}
-  const users = Array.isArray(data) ? data : data.users || [];
-  const tbody = document.querySelector("#users-tbody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-  for (const u of users) {
-    const { id, username, email, role, status, created_at } = u;
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${id ?? ""}</td>
-      <td>${username ?? ""}</td>
-      <td>${email ?? ""}</td>
-      <td>${role ?? ""}</td>
-      <td>${status ?? ""}</td>
-      <td>${created_at ? new Date(created_at).toLocaleString() : ""}</td>
-      <td><button class="btn-delete" data-id="${id}">Delete</button></td>
-    `;
-    tbody.appendChild(tr);
-  }
-}
-
-
