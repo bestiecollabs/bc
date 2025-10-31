@@ -28,8 +28,45 @@
     `);
   }
 
-  async function loadUsers() {
+  @"
+async function loadUsers() {
+  const statusEl = document.querySelector("#users-status") || (function(){
+    const p = document.createElement("p"); p.id = "users-status"; p.style.fontSize = "12px";
+    document.body.prepend(p); return p;
+  })();
+  statusEl.textContent = "Loading users...";
+  try {
     const headers = window.__cfAccessToken ? { "CF-Access-Jwt-Assertion": window.__cfAccessToken } : {};
+    const res = await fetch("/api/admin/users", { headers });
+    if (!res.ok) {
+      const txt = await res.text().catch(()=>"");
+      statusEl.textContent = `Error ${res.status}: ${txt || "fetch failed"}`;
+      return;
+    }
+    const data = await res.json().catch(()=>({ users: [] }));
+    const users = Array.isArray(data) ? data : (data.users || []);
+    statusEl.textContent = `Loaded ${users.length} users`;
+    const map = {
+      active: document.querySelector("#users-active"),
+      suspended: document.querySelector("#users-suspended"),
+      deleted: document.querySelector("#users-deleted"),
+      default: document.querySelector("#users-active"),
+    };
+    Object.values(map).forEach(t => { if (t) t.innerHTML = ""; });
+    for (const u of users) {
+      const status = (u.status || "active").toLowerCase();
+      const target =
+        status === "active" ? map.active :
+        status === "suspended" ? map.suspended :
+        status === "deleted" ? map.deleted :
+        map.default;
+      if (target) target.appendChild(row(u));
+    }
+  } catch (e) {
+    statusEl.textContent = `Runtime error: ${e?.message || e}`;
+  }
+}
+"@ : {};
     const res = await fetch("/api/admin/users", { headers });
     const data = await res.json();
     const users = Array.isArray(data) ? data : (data.users || []);
@@ -60,3 +97,4 @@
 
   document.addEventListener("DOMContentLoaded", loadUsers);
 })();
+
