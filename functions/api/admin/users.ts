@@ -13,42 +13,50 @@ export async function onRequest({ env, request }) {
     const url = new URL(request.url);
 
     if (request.method === "GET") {
-      // schema-aware selection with stable output keys
       const info = await env.DB.prepare("PRAGMA table_info(users)").all();
       const names = new Set((info?.results || []).map(r => String(r.name).toLowerCase()));
       const has = (c) => names.has(String(c).toLowerCase());
 
-      const sel = [];
+      const sel: string[] = [];
       sel.push(has("id") ? "id" : "rowid AS id");
       sel.push(has("email") ? "email" : "NULL AS email");
       sel.push(has("username") ? "username" : "'' AS username");
 
-      if (has("account_type")) sel.push("account_type");
-      else if (has("role"))    sel.push("role AS account_type");
-      else if (has("is_admin"))sel.push("CASE WHEN is_admin=1 THEN 'admin' ELSE 'user' END AS account_type");
-      else                     sel.push("'user' AS account_type");
+      // account_type with admin precedence
+      {
+        const fallbackParts: string[] = [];
+        if (has("account_type")) fallbackParts.push("NULLIF(account_type,'')");
+        if (has("role"))         fallbackParts.push("NULLIF(role,'')");
+        const fallback = fallbackParts.length ? `COALESCE(${fallbackParts.join(", ")}, 'user')` : `'user'`;
+        const expr = has("is_admin")
+          ? `CASE WHEN is_admin=1 THEN 'admin' ELSE ${fallback} END AS account_type`
+          : `${fallback} AS account_type`;
+        sel.push(expr);
+      }
 
+      // keep raw role for reference if present
       sel.push(has("role") ? "role" : "NULL AS role");
       sel.push(has("status") ? "status" : "'active' AS status");
 
-      if (has("suspended"))        sel.push("suspended");
-      else if (has("suspended_at"))sel.push("CASE WHEN suspended_at IS NOT NULL THEN 1 ELSE 0 END AS suspended");
-      else                         sel.push("0 AS suspended");
+      // derive suspended/deleted booleans
+      sel.push(has("suspended") ? "suspended"
+        : has("suspended_at") ? "CASE WHEN suspended_at IS NOT NULL THEN 1 ELSE 0 END AS suspended"
+        : "0 AS suspended");
 
-      if (has("deleted"))          sel.push("deleted");
-      else if (has("deleted_at"))  sel.push("CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END AS deleted");
-      else                         sel.push("0 AS deleted");
+      sel.push(has("deleted") ? "deleted"
+        : has("deleted_at") ? "CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END AS deleted"
+        : "0 AS deleted");
 
-      if (has("created_at"))       sel.push("created_at");
-      else if (has("createdon"))   sel.push("createdon AS created_at");
-      else                         sel.push("NULL AS created_at");
+      // created_at
+      sel.push(has("created_at") ? "created_at"
+        : has("createdon") ? "createdon AS created_at"
+        : "NULL AS created_at");
 
       const orderCol = has("created_at") ? "created_at" : (has("id") ? "id" : "rowid");
       const rs = await env.DB.prepare(`SELECT ${sel.join(", ")} FROM users ORDER BY ${orderCol} DESC`).all();
 
-      const items = (rs.results || []).map(u => {
+      const items = (rs.results || []).map((u: any) => {
         const out = { ...u };
-        // created_at may be epoch seconds; convert to ISO for UI
         if (typeof out.created_at === "number") {
           const ms = out.created_at < 1e12 ? out.created_at * 1000 : out.created_at;
           out.created_at = new Date(ms).toISOString();
@@ -68,7 +76,7 @@ export async function onRequest({ env, request }) {
     }
 
     return new Response("Method Not Allowed", { status: 405, headers: { "Allow": "GET, DELETE" } });
-  } catch (err) {
+  } catch (err: any) {
     return new Response(JSON.stringify({ error: String(err?.message || err) }), { status: 500, headers: json });
   }
 }
