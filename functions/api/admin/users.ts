@@ -1,4 +1,4 @@
-type Row = { id: string | number; email?: string; created_at?: string | number };
+type Row = { id: number; email: string; created_at: number };
 
 export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
   const req = ctx.request;
@@ -6,57 +6,47 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
   if (!access) return new Response("Unauthorized", { status: 401 });
 
   const method = req.method.toUpperCase();
-
   if (method === "GET") {
-    const rows = await listUsers(ctx.env.DB);
-    return json({ ok: true, route: "/api/admin/users", count: rows.length, items: rows });
+    const rows = await ctx.env.DB.prepare(
+      "SELECT id, email, created_at FROM users ORDER BY created_at DESC LIMIT 200"
+    ).all<Row>();
+    return json({ ok: true, route: "/api/admin/users", count: rows.results.length, items: rows.results });
   }
 
-  return new Response("Method Not Allowed", { status: 405, headers: { Allow: "GET" } });
+  if (method === "POST") {
+    const body = await safeJson(req);
+    const email = String(body?.email ?? "").trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ ok: false, error: "invalid_email" }, 400);
+
+    // Create user with role=user and timestamps defaulted by schema
+    const ins = await ctx.env.DB
+      .prepare("INSERT INTO users (email, role) VALUES (?1, 'user')")
+      .bind(email)
+      .run();
+    const id = Number(ins.meta?.last_row_id ?? 0);
+
+    const row = await ctx.env.DB.prepare(
+      "SELECT id, email, created_at FROM users WHERE id=?1"
+    ).bind(id).first<Row>();
+
+    return json({ ok: true, created: row }, 201);
+  }
+
+  if (method === "DELETE") {
+    const url = new URL(req.url);
+    const id = Number(url.searchParams.get("id") ?? 0);
+    if (!Number.isInteger(id) || id <= 0) return json({ ok: false, error: "invalid_id" }, 400);
+
+    const del = await ctx.env.DB.prepare("DELETE FROM users WHERE id=?1").bind(id).run();
+    const changed = Number(del.meta?.changes ?? 0);
+    return json({ ok: true, deleted: changed });
+  }
+
+  return new Response("Method Not Allowed", { status: 405, headers: { Allow: "GET, POST, DELETE" } });
 };
 
-async function listUsers(db: D1Database): Promise<Row[]> {
-  // Try common table names without breaking if one does not exist.
-  const queries = [
-    `SELECT id, email, created_at FROM users ORDER BY created_at DESC LIMIT 200`,
-    `SELECT id, email, created_at FROM accounts ORDER BY created_at DESC LIMIT 200`,
-  ];
-
-  for (const sql of queries) {
-    try {
-      const r = await db.prepare(sql).all();
-      // If the table exists and has rows or zero rows, return shape
-      if (r && Array.isArray(r.results)) {
-        return r.results as Row[];
-      }
-    } catch {
-      // ignore and try next
-    }
-  }
-
-  // As a last resort, enumerate any table that has an email column
-  try {
-    const candidates = await db
-      .prepare(
-        `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name`
-      )
-      .all();
-
-    for (const row of candidates.results as { name: string }[]) {
-      try {
-        const test = await db.prepare(
-          `SELECT id, email, created_at FROM ${row.name} ORDER BY 1 DESC LIMIT 50`
-        ).all();
-        if (test && Array.isArray(test.results)) return test.results as Row[];
-      } catch {
-        // skip tables without these columns
-      }
-    }
-  } catch {
-    // ignore
-  }
-
-  return [];
+async function safeJson(req: Request): Promise<unknown> {
+  try { return await req.json(); } catch { return {}; }
 }
 
 function json(data: unknown, status = 200): Response {
