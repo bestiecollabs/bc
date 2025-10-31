@@ -60,7 +60,6 @@
       console.log("admin items count", items.length);
 
       for (const k of Object.keys(bodies)) if (bodies[k]) bodies[k].innerHTML = "";
-
       items.sort((a,b) => String(b.created_at||"").localeCompare(String(a.created_at||"")));
       for (const u of items) {
         const key = bucket(u);

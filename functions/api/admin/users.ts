@@ -1,7 +1,7 @@
 export async function onRequest({ env, request }) {
   const json = { "content-type": "application/json; charset=utf-8" };
 
-  // Cloudflare Access
+  // Cloudflare Access guard
   const h = request.headers;
   const ok =
     !!(h.get("CF-Access-Jwt-Assertion") ||
@@ -13,6 +13,7 @@ export async function onRequest({ env, request }) {
     const url = new URL(request.url);
 
     if (request.method === "GET") {
+      // schema-aware selection with stable output keys
       const info = await env.DB.prepare("PRAGMA table_info(users)").all();
       const names = new Set((info?.results || []).map(r => String(r.name).toLowerCase()));
       const has = (c) => names.has(String(c).toLowerCase());
@@ -30,7 +31,6 @@ export async function onRequest({ env, request }) {
       sel.push(has("role") ? "role" : "NULL AS role");
       sel.push(has("status") ? "status" : "'active' AS status");
 
-      // derive booleans for UI from *_at timestamps if needed
       if (has("suspended"))        sel.push("suspended");
       else if (has("suspended_at"))sel.push("CASE WHEN suspended_at IS NOT NULL THEN 1 ELSE 0 END AS suspended");
       else                         sel.push("0 AS suspended");
@@ -39,17 +39,16 @@ export async function onRequest({ env, request }) {
       else if (has("deleted_at"))  sel.push("CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END AS deleted");
       else                         sel.push("0 AS deleted");
 
-      // created_at fallback
       if (has("created_at"))       sel.push("created_at");
       else if (has("createdon"))   sel.push("createdon AS created_at");
       else                         sel.push("NULL AS created_at");
 
       const orderCol = has("created_at") ? "created_at" : (has("id") ? "id" : "rowid");
-      const q = `SELECT ${sel.join(", ")} FROM users ORDER BY ${orderCol} DESC`;
-      const rs = await env.DB.prepare(q).all();
+      const rs = await env.DB.prepare(`SELECT ${sel.join(", ")} FROM users ORDER BY ${orderCol} DESC`).all();
+
       const items = (rs.results || []).map(u => {
         const out = { ...u };
-        // normalize created_at to ISO string for the UI
+        // created_at may be epoch seconds; convert to ISO for UI
         if (typeof out.created_at === "number") {
           const ms = out.created_at < 1e12 ? out.created_at * 1000 : out.created_at;
           out.created_at = new Date(ms).toISOString();
