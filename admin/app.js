@@ -6,6 +6,27 @@ async function fetchUsers() {
   clearStatus();
 }
 
+function roleSelect(id, role) {
+  const r = document.createElement("select");
+  ["user","admin"].forEach(v => {
+    const o = document.createElement("option");
+    o.value = v; o.textContent = v; if (v === role) o.selected = true;
+    r.appendChild(o);
+  });
+  r.addEventListener("change", async () => {
+    setStatus("Updating role...");
+    const res = await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ id, role: r.value }),
+    });
+    const j = await res.json();
+    setStatus(j.ok ? "Role updated" : ("Error: " + (j.error || "unknown")));
+  });
+  return r;
+}
+
 function render(items) {
   const tbody = document.getElementById("rows");
   tbody.innerHTML = "";
@@ -15,9 +36,11 @@ function render(items) {
     tr.innerHTML = `
       <td>${u.id}</td>
       <td>${u.email}</td>
+      <td class="role-cell"></td>
       <td>${dt ? dt.toLocaleString() : ""}</td>
       <td><button data-id="${u.id}" class="del">Delete</button></td>`;
     tbody.appendChild(tr);
+    tr.querySelector(".role-cell").appendChild(roleSelect(u.id, u.role || "user"));
   }
   tbody.querySelectorAll("button.del").forEach(btn => {
     btn.addEventListener("click", async () => {
