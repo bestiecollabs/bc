@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <td>${u.id ?? ''}</td>
       <td>${u.email ?? ''}</td>
       <td>${u.username ?? ''}</td>
-      <td>${u.role ?? ''}</td>
+      <td>${u.is_admin ? "admin" : (u.role ?? "")}</td>
       <td>${fmtTime(u.created_at)}</td>
     `;
     let actions = btn('View','view',u.id);
@@ -115,3 +115,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   load();
 });
+
