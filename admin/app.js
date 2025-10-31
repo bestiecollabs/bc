@@ -1,4 +1,8 @@
 (() => {
+  // mark that app.js actually executed
+  window.__admin_app_ran = true;
+  console.log("admin app.js loaded");
+
   const $ = (s, r=document) => r.querySelector(s);
 
   const byHeading = (label) => {
@@ -34,11 +38,11 @@
     const cells = [
       u.id ?? "",
       u.email ?? "",
-      u.username ?? "",          // Username column
+      u.username ?? "",    // Username column
       acctType(u),
       fmt(u.created_at ?? u.createdAt)
     ].map(v => `<td>${String(v)}</td>`).join("");
-    return `<tr>${cells}<td></td></tr>`; // actions placeholder
+    return `<tr>${cells}<td></td></tr>`;
   };
 
   const bucket = (u) => {
@@ -52,7 +56,11 @@
 
   async function load() {
     const r = await fetch("/api/admin/users", { credentials: "include", headers: { "Accept": "application/json" } });
-    if (!r.ok || !(r.headers.get("content-type")||"").includes("application/json")) return; // not authorized or wrong response
+    const ct = r.headers.get("content-type") || "";
+    if (!r.ok || !ct.includes("application/json")) {
+      console.warn("admin/users not JSON or unauthorized", r.status, ct);
+      return;
+    }
     const data = await r.json().catch(() => ({}));
     const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.users) ? data.users : []);
 
@@ -65,6 +73,7 @@
       const tb = bodies[key];
       if (tb) tb.insertAdjacentHTML("beforeend", rowHtml(u));
     }
+    console.log("admin render complete", { count: items.length });
   }
 
   window.addEventListener("DOMContentLoaded", load);
