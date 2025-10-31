@@ -37,12 +37,12 @@ async function loadUsers() {
   statusEl.textContent = "Loading users...";
   try {
     const headers = window.__cfAccessToken ? { "CF-Access-Jwt-Assertion": window.__cfAccessToken } : {};
-    const res = await fetch("/api/admin/users", { headers });
+    const res = await fetch("/api/admin/users", { credentials: "include", headers });
     if (!res.ok) {
-      const txt = await res.text().catch(()=>"");
-      statusEl.textContent = `Error ${res.status}: ${txt || "fetch failed"}`;
-      return;
-    }
+  const txt = await res.text().catch(()=>"");
+  statusEl.textContent = `Error ${res.status}: ${txt.slice(0,200)}`;
+  return;
+}
     const data = await res.json().catch(()=>({ users: [] }));
     const users = Array.isArray(data) ? data : (data.users || []);
     statusEl.textContent = `Loaded ${users.length} users`;
@@ -67,7 +67,7 @@ async function loadUsers() {
   }
 }
 "@ : {};
-    const res = await fetch("/api/admin/users", { headers });
+    const res = await fetch("/api/admin/users", { credentials: "include", headers });
     const data = await res.json();
     const users = Array.isArray(data) ? data : (data.users || []);
 
@@ -97,5 +97,6 @@ async function loadUsers() {
 
   document.addEventListener("DOMContentLoaded", loadUsers);
 })();
+
 
 
