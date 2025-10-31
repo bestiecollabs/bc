@@ -1,4 +1,4 @@
-type Row = { id: number; email: string; role: "brand" | "creator"; created_at: number };
+type Row = { id: number; email: string; role: "brand"|"creator"|"admin"; created_at: number };
 
 export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
   const req = ctx.request;
@@ -18,33 +18,26 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
     const r = await db.prepare(
       "SELECT id, email, role, created_at FROM users ORDER BY created_at DESC LIMIT 200"
     ).all<Row>();
-    return json({ ok: true, count: r.results.length, items: r.results });
+    // Map role -> account_type for the UI
+    const items = (r.results ?? []).map(u => ({
+      id: u.id,
+      email: u.email,
+      account_type: u.role,   // brand | creator | admin
+      created_at: u.created_at,
+    }));
+    return json({ ok: true, count: items.length, items });
   }
 
   if (method === "POST") {
     const body = await safeJson(req) as any;
     const email = String(body?.email ?? "").trim().toLowerCase();
-    const role = (String(body?.role ?? "creator").toLowerCase() as "brand"|"creator");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ ok: false, error: "invalid_email" }, 400);
-    if (!["brand","creator"].includes(role)) return json({ ok: false, error: "invalid_role" }, 400);
 
-    const ins = await db.prepare("INSERT INTO users (email, role) VALUES (?1, ?2)").bind(email, role).run();
+    // Default new users to 'creator' unless you later add a selector
+    const ins = await db.prepare("INSERT INTO users (email, role) VALUES (?1, 'creator')").bind(email).run();
     const id = Number(ins.meta?.last_row_id ?? 0);
     const row = await db.prepare("SELECT id, email, role, created_at FROM users WHERE id=?1").bind(id).first<Row>();
-    return json({ ok: true, created: row }, 201);
-  }
-
-  if (method === "PATCH") {
-    const body = await safeJson(req) as any;
-    const id = Number(body?.id ?? 0);
-    const role = (String(body?.role ?? "").toLowerCase() as "brand"|"creator");
-    if (!Number.isInteger(id) || id <= 0) return json({ ok: false, error: "invalid_id" }, 400);
-    if (!["brand","creator"].includes(role)) return json({ ok: false, error: "invalid_role" }, 400);
-
-    const up = await db.prepare("UPDATE users SET role=?1, updated_at=unixepoch() WHERE id=?2").bind(role, id).run();
-    if (Number(up.meta?.changes ?? 0) === 0) return json({ ok: false, error: "not_found" }, 404);
-    const row = await db.prepare("SELECT id, email, role, created_at FROM users WHERE id=?1").bind(id).first<Row>();
-    return json({ ok: true, updated: row });
+    return json({ ok: true, created: { id: row!.id, email: row!.email, account_type: row!.role, created_at: row!.created_at } }, 201);
   }
 
   if (method === "DELETE") {
@@ -55,7 +48,7 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
     return json({ ok: true, deleted: Number(del.meta?.changes ?? 0) });
   }
 
-  return new Response("Method Not Allowed", { status: 405, headers: { Allow: "GET, POST, PATCH, DELETE" } });
+  return new Response("Method Not Allowed", { status: 405, headers: { Allow: "GET, POST, DELETE" } });
 };
 
 async function safeJson(req: Request): Promise<unknown> { try { return await req.json(); } catch { return {}; } }
