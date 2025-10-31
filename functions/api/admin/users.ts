@@ -1,4 +1,4 @@
-type Row = { id: number; email: string; role: string; created_at: number };
+type Row = { id: number; email: string; role: "brand" | "creator"; created_at: number };
 
 export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
   const req = ctx.request;
@@ -18,14 +18,17 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
     const r = await db.prepare(
       "SELECT id, email, role, created_at FROM users ORDER BY created_at DESC LIMIT 200"
     ).all<Row>();
-    return json({ ok: true, route: "/api/admin/users", count: r.results.length, items: r.results });
+    return json({ ok: true, count: r.results.length, items: r.results });
   }
 
   if (method === "POST") {
-    const body = await safeJson(req);
-    const email = String((body as any)?.email ?? "").trim().toLowerCase();
+    const body = await safeJson(req) as any;
+    const email = String(body?.email ?? "").trim().toLowerCase();
+    const role = (String(body?.role ?? "creator").toLowerCase() as "brand"|"creator");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ ok: false, error: "invalid_email" }, 400);
-    const ins = await db.prepare("INSERT INTO users (email, role) VALUES (?1, 'user')").bind(email).run();
+    if (!["brand","creator"].includes(role)) return json({ ok: false, error: "invalid_role" }, 400);
+
+    const ins = await db.prepare("INSERT INTO users (email, role) VALUES (?1, ?2)").bind(email, role).run();
     const id = Number(ins.meta?.last_row_id ?? 0);
     const row = await db.prepare("SELECT id, email, role, created_at FROM users WHERE id=?1").bind(id).first<Row>();
     return json({ ok: true, created: row }, 201);
@@ -34,9 +37,10 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async (ctx) => {
   if (method === "PATCH") {
     const body = await safeJson(req) as any;
     const id = Number(body?.id ?? 0);
-    const role = String(body?.role ?? "").trim().toLowerCase();
+    const role = (String(body?.role ?? "").toLowerCase() as "brand"|"creator");
     if (!Number.isInteger(id) || id <= 0) return json({ ok: false, error: "invalid_id" }, 400);
-    if (!["user","admin"].includes(role)) return json({ ok: false, error: "invalid_role" }, 400);
+    if (!["brand","creator"].includes(role)) return json({ ok: false, error: "invalid_role" }, 400);
+
     const up = await db.prepare("UPDATE users SET role=?1, updated_at=unixepoch() WHERE id=?2").bind(role, id).run();
     if (Number(up.meta?.changes ?? 0) === 0) return json({ ok: false, error: "not_found" }, 404);
     const row = await db.prepare("SELECT id, email, role, created_at FROM users WHERE id=?1").bind(id).first<Row>();
