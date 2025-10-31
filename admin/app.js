@@ -19,16 +19,32 @@ function render(items){
     const tr = document.createElement("tr");
     const dt = u.created_at ? new Date(Number(u.created_at)*1000) : null;
     tr.innerHTML = `
-      <td>${u.id}</td>
       <td>${u.email}</td>
+      <td>${u.username||""}</td>
       <td>${u.account_type||""}</td>
       <td>${dt ? dt.toLocaleString() : ""}</td>
       <td class="actions"></td>`;
+    // keep ID as first col if you prefer; adjust header accordingly
     tbody.appendChild(tr);
 
     const actions = tr.querySelector(".actions");
 
-    // Suspend/Unsuspend button
+    const unameBtn = document.createElement("button");
+    unameBtn.textContent = "Set username";
+    unameBtn.addEventListener("click", async ()=>{
+      const v = prompt("Username (3-30, a-z 0-9 . _ -):", u.username||"");
+      if (v==null) return;
+      setStatus("Saving username...");
+      const res = await fetch("/api/admin/users", {
+        method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include",
+        body: JSON.stringify({ action:"set_username", id:u.id, username:v })
+      });
+      const j = await res.json();
+      setStatus(j.ok ? "Saved" : ("Error: " + (j.error || "unknown")));
+      fetchUsers();
+    });
+    actions.appendChild(unameBtn);
+
     const sBtn = document.createElement("button");
     sBtn.textContent = u.suspended ? "Unsuspend" : "Suspend";
     sBtn.addEventListener("click", async ()=>{
@@ -38,7 +54,6 @@ function render(items){
     });
     actions.appendChild(sBtn);
 
-    // Delete/Undelete button
     const dBtn = document.createElement("button");
     dBtn.textContent = u.deleted ? "Undelete" : "Delete";
     dBtn.addEventListener("click", async ()=>{
