@@ -1,118 +1,71 @@
-/* admin/app.js - renderer with actions */
-document.addEventListener('DOMContentLoaded', () => {
-  const els = {
-    active:    document.getElementById('activeRows'),
-    suspended: document.getElementById('suspendedRows'),
-    deleted:   document.getElementById('deletedRows'),
-    status:    document.getElementById('status'),
-    emailNew:  document.getElementById('email'),
-    form:      document.getElementById('createForm'),
+(() => {
+  const $ = (s, r=document) => r.querySelector(s);
+
+  const byHeading = (label) => {
+    const t = String(label).toLowerCase();
+    const h = Array.from(document.querySelectorAll("h1,h2,h3")).find(el =>
+      el.textContent.trim().toLowerCase().startsWith(t)
+    );
+    if (!h) return null;
+    let el = h.nextElementSibling;
+    while (el && el.tagName !== "TABLE") el = el.nextElementSibling;
+    return el || null;
   };
 
-  const fmtTime = (ts) => {
-    if (ts == null) return '';
-    try { const ms = ts > 1e12 ? ts : ts * 1000; return new Date(ms).toLocaleString(); }
-    catch { return String(ts); }
+  const bodyFor = (section) =>
+    $(`#${section}Rows`) ||
+    $(`table[data-section="${section}"] tbody`) ||
+    (byHeading(section)?.tBodies?.[0] || null);
+
+  const bodies = {
+    Active: bodyFor("Active"),
+    Suspended: bodyFor("Suspended"),
+    Deleted: bodyFor("Deleted"),
   };
 
-  const splitByStatus = (users) => {
-    const norm = (s) => (s || 'active').toLowerCase();
-    return {
-      active:    users.filter(u => norm(u.status) === 'active'),
-      suspended: users.filter(u => norm(u.status) === 'suspended'),
-      deleted:   users.filter(u => norm(u.status) === 'deleted'),
-    };
+  const fmt = (s) => {
+    if (!s) return "";
+    const d = new Date(s);
+    return isNaN(d) ? String(s) : d.toLocaleString();
+  };
+  const acctType = (u) => u.account_type ?? u.role ?? (u.is_admin ? "admin" : "user");
+
+  const rowHtml = (u) => {
+    const cells = [
+      u.id ?? "",
+      u.email ?? "",
+      u.username ?? "",          // Username column
+      acctType(u),
+      fmt(u.created_at ?? u.createdAt)
+    ].map(v => `<td>${String(v)}</td>`).join("");
+    return `<tr>${cells}<td></td></tr>`; // actions placeholder
   };
 
-  const btn = (label, action, id, extra='') =>
-    `<button class="btn btn-ghost" data-action="${action}" data-id="${id}" ${extra}>${label}</button>`;
-
-  const rowHtml = (u, kind) => {
-    const base = `
-      <td>${u.id ?? ''}</td>
-      <td>${u.email ?? ''}</td>
-      <td>${u.username ?? ''}</td>
-      <td>${u.is_admin ? "admin" : (u.role ?? "")}</td>
-      <td>${fmtTime(u.created_at)}</td>
-    `;
-    let actions = btn('View','view',u.id);
-    if (kind === 'active') {
-      actions = btn('Suspend','suspend',u.id) + btn('Delete','delete',u.id,'data-confirm="Are you sure?"') + actions;
-    } else if (kind === 'suspended') {
-      actions = btn('Restore','restore',u.id) + btn('Delete','delete',u.id,'data-confirm="Are you sure?"') + actions;
-    } else if (kind === 'deleted') {
-      actions = btn('Restore','restore',u.id) + actions;
-    }
-    return base + `<td class="actions">${actions}</td>`;
+  const bucket = (u) => {
+    const s = String(u.status ?? "").toLowerCase();
+    const del = u.deleted === 1 || u.deleted === true || String(u.deleted) === "1" || s.includes("delete");
+    const sus = u.suspended === 1 || u.suspended === true || String(u.suspended) === "1" || s.includes("suspend");
+    if (del) return "Deleted";
+    if (sus) return "Suspended";
+    return "Active";
   };
-
-  const render = (tbody, list, kind) => {
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    for (const u of list) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = rowHtml(u, kind);
-      tbody.appendChild(tr);
-    }
-  };
-
-  async function apiAction(payload) {
-    const r = await fetch('/api/admin/users', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    return r.ok ? r.json().catch(()=>({})) : Promise.reject(new Error('HTTP '+r.status));
-  }
 
   async function load() {
-    els.status && (els.status.textContent = 'Loading...');
-    const r = await fetch('/api/admin/users', { credentials: 'include' });
-    if (!r.ok) { els.status && (els.status.textContent = `HTTP ${r.status}`); return; }
-    let data; try { data = await r.json(); } catch { els.status && (els.status.textContent = 'Invalid JSON'); return; }
+    const r = await fetch("/api/admin/users", { credentials: "include", headers: { "Accept": "application/json" } });
+    if (!r.ok || !(r.headers.get("content-type")||"").includes("application/json")) return; // not authorized or wrong response
+    const data = await r.json().catch(() => ({}));
+    const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.users) ? data.users : []);
 
-    let buckets;
-    if (Array.isArray(data?.users)) buckets = splitByStatus(data.users);
-    else buckets = { active: data.active ?? [], suspended: data.suspended ?? [], deleted: data.deleted ?? [] };
+    for (const k of Object.keys(bodies)) if (bodies[k]) bodies[k].innerHTML = "";
 
-    render(els.active, buckets.active, 'active');
-    render(els.suspended, buckets.suspended, 'suspended');
-    render(els.deleted, buckets.deleted, 'deleted');
-    els.status && (els.status.textContent = '');
-  }
+    items.sort((a,b) => String(b.created_at||"").localeCompare(String(a.created_at||"")));
 
-  // Create new user
-  if (els.form && els.emailNew) {
-    els.form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = els.emailNew.value.trim(); if (!email) return;
-      els.status && (els.status.textContent = 'Creating...');
-      try { await apiAction({ action: 'create', email }); els.emailNew.value=''; await load(); }
-      catch (err) { els.status && (els.status.textContent = 'Create failed: ' + err.message); }
-    });
-  }
-
-  // Action delegation
-  const onClick = async (e) => {
-    const t = e.target.closest('button[data-action][data-id]'); if (!t) return;
-    const action = t.getAttribute('data-action'); const id = Number(t.getAttribute('data-id'));
-    if (t.dataset.confirm && !confirm(t.dataset.confirm)) return;
-
-    if (action === 'view') { alert('User ID: ' + id); return; }
-
-    els.status && (els.status.textContent = action.charAt(0).toUpperCase()+action.slice(1)+'...');
-    try {
-      // Supported actions: suspend, delete, restore
-      await apiAction({ action, id });
-      await load();
-    } catch (err) {
-      els.status && (els.status.textContent = action + ' failed: ' + err.message);
+    for (const u of items) {
+      const key = bucket(u);
+      const tb = bodies[key];
+      if (tb) tb.insertAdjacentHTML("beforeend", rowHtml(u));
     }
-  };
+  }
 
-  ['active','suspended','deleted'].forEach(k => els[k]?.addEventListener('click', onClick));
-
-  load();
-});
-
+  window.addEventListener("DOMContentLoaded", load);
+})();
