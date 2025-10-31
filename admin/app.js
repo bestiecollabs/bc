@@ -6,27 +6,6 @@ async function fetchUsers() {
   clearStatus();
 }
 
-function roleSelect(id, role) {
-  const r = document.createElement("select");
-  ["creator","brand"].forEach(v => {
-    const o = document.createElement("option");
-    o.value = v; o.textContent = v; if (v === role) o.selected = true;
-    r.appendChild(o);
-  });
-  r.addEventListener("change", async () => {
-    setStatus("Updating role...");
-    const res = await fetch("/api/admin/users", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ id, role: r.value }),
-    });
-    const j = await res.json();
-    setStatus(j.ok ? "Role updated" : ("Error: " + (j.error || "unknown")));
-  });
-  return r;
-}
-
 function render(items) {
   const tbody = document.getElementById("rows");
   tbody.innerHTML = "";
@@ -36,11 +15,10 @@ function render(items) {
     tr.innerHTML = `
       <td>${u.id}</td>
       <td>${u.email}</td>
-      <td class="role-cell"></td>
+      <td>${(u.account_type || '').toString()}</td>
       <td>${dt ? dt.toLocaleString() : ""}</td>
       <td><button data-id="${u.id}" class="del">Delete</button></td>`;
     tbody.appendChild(tr);
-    tr.querySelector(".role-cell").appendChild(roleSelect(u.id, u.role || "creator"));
   }
   tbody.querySelectorAll("button.del").forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -58,14 +36,13 @@ function render(items) {
 document.getElementById("createForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const email = document.getElementById("email").value.trim();
-  const role = document.getElementById("role").value;
   if (!email) return;
   setStatus("Creating...");
   const r = await fetch("/api/admin/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email, role }),
+    body: JSON.stringify({ email }), // default account_type is creator server-side
   });
   const j = await r.json();
   setStatus(j.ok ? "Created" : ("Error: " + (j.error || "unknown")));

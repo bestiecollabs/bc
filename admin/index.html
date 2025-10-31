@@ -15,19 +15,21 @@
   <header>
     <h1 style="margin:0">Users</h1>
     <form id="createForm" style="margin-left:auto; display:flex; gap:8px">
-      <input type="email" id="email" placeholder="newuser@example.com" required /><select id="role"><option value="creator">creator</option><option value="brand">brand</option></select>
+      <input type="email" id="email" placeholder="newuser@example.com" required />
       <button type="submit">Create</button>
     </form>
   </header>
   <div id="status"></div>
   <table>
-    <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+    <thead><tr><th>ID</th><th>Email</th><th>Account type</th><th>Created</th><th>Actions</th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
 
 <script src="/admin/app.js" defer></script>
 </body>
 </html>
+
+
 
 
 
