@@ -1,86 +1,40 @@
-# AI_README
+# Admin API Routing and Access Notes (2025-10-31)
 
-Project: Bestie Collabs
+Paths
+- /api/admin/* and /admin/* are protected by Cloudflare Access.
+- Pages Functions serve /api/* and /db/* as defined in functions/_routes.json.
 
-Scope: Admin + Creator/Brand directory. Cloudflare Pages (frontend) + Cloudflare Workers API (backend) + Cloudflare D1.
+Functions routing
+- Route file: functions/_routes.json
+  {
+    "version": 1,
+    "include": [ "/api/*", "/db/*" ],
+    "exclude": [ "/*.*", "/assets/*", "/static/*" ]
+  }
+- Users endpoint must be a folder route:
+  functions/api/admin/users/index.ts
+- Do not keep a sibling file functions/api/admin/users.ts. It collides with the folder.
 
-## Tech Stack
+Access configuration
+- Application: bestiecollabs (Self-hosted)
+- Domains included:
+  - bestiecollabs.com/admin/*
+  - bestiecollabs.com/api/admin/*
+- Policy: Allow service token
+  - Token name: bc_service_auth
+  - Required headers for requests:
+    - CF-Access-Client-Id
+    - CF-Access-Client-Secret
 
-* Frontend: HTML, CSS, JavaScript only.
-* Hosting: Cloudflare Pages (project: bestiecollabs).
-* Backend: Cloudflare Workers (API: [https://api.bestiecollabs.com](https://api.bestiecollabs.com)).
-* Database: Cloudflare D1 (database: bestiedb; binding: DB).
-* Auth: Cloudflare Access service token `bc_admin_gpt` with policy "Allow service token".
-* OAuth: callback at `/auth/callback` on api.bestiecollabs.com.
-* Cron: 1st and 15th at 1:45 AM PST with UTC guard.
-* Assets: `b1.png` in repo root.
+Quick tests (PowerShell)
+- Health:
+  Invoke-WebRequest https://bestiecollabs.com/db/ping
+- Access check:
+  Invoke-WebRequest -Headers @{ 'CF-Access-Client-Id'=$env:CF_ACCESS_CLIENT_ID; 'CF-Access-Client-Secret'=$env:CF_ACCESS_CLIENT_SECRET } https://bestiecollabs.com/api/admin/ping
+- Users placeholder should return JSON, not HTML:
+  Invoke-WebRequest -Headers @{ 'CF-Access-Client-Id'=$env:CF_ACCESS_CLIENT_ID; 'CF-Access-Client-Secret'=$env:CF_ACCESS_CLIENT_SECRET } https://bestiecollabs.com/api/admin/users
 
-## Environments and URLs
+Symptoms
+- If you receive the Cloudflare Access HTML sign-in page, the service token is not allowed on that path. Fix the Access app policy and domains.
+- If 404/HTML after Access is fixed, ensure users/index.ts exists and there is no users.ts at the same level.
 
-* Production site: [https://bestiecollabs.com](https://bestiecollabs.com)
-* Production API: [https://api.bestiecollabs.com](https://api.bestiecollabs.com)
-
-## Repo and Deployment
-
-* GitHub: [https://github.com/bestiecollabs/bc](https://github.com/bestiecollabs/bc)
-* Deploy branch: `main` (push to `main` to deploy).
-* Integration Stability Rule: do not break existing behavior.
-* Do not rename, restructure, or create variant files without permission.
-
-## Operational Rules
-
-* PowerShell 7.5.3 required; use `$ErrorActionPreference='Stop'`; wrap critical steps in `try { } catch { }`.
-* Use UTF-8 explicitly for file IO (`Out-File -Encoding utf8`, `Set-Content -Encoding utf8`).
-* Provide rollback note with last known good commit for any deployed change.
-* Add basic health checks; log errors with request IDs.
-* Testing: include a smoke test or minimal repro for each feature; validate timestamps, time zones, and locale.
-* For D1 queries, show schema assumptions and expected row counts.
-
-## Handoff File Rules (for New Chats)
-
-**PowerShell Compatibility**
-Always provide full PowerShell-ready code blocks so I can run them directly in PowerShell. Always double check codes for accuracy.
-
-**Full Code Delivery**
-Always put the step #, include the full code, the exact file directory path, a clear explanation of what the code does, and what to expect after running it.
-
-**Concise Instructions**
-Provide short, direct, and detailed instructions for every step.
-
-**Understand the Codebase First**
-Before writing or editing code, review all files in the repo to understand the project structure and logic. If a needed file is missing, ask me for it immediately before continuing.
-
-**Respect Existing Work**
-This is a continuation from prior chats. Do not remove or override working features to land new changes.
-
-**Maintain Consistent Structure**
-Match existing file layout, naming, and coding conventions.
-
-**No Backup or Variant Files**
-Do not create .bak or variant files. Always provide clean code.
-
-**Fix, Don’t Patch**
-No temporary solutions. Identify root causes and update code cleanly.
-
-## SOP
-> Enforcement: All chats must follow the SOP exactly. If a conflict exists between prior instructions and the SOP, follow the SOP and note the conflict in the next message.
-# SOP_SEED
-
-## Goal
-Keep the project stable while shipping small, verifiable steps.
-
-## Standard Flow
-
-1) **Change management**
-   - Read target files fully.
-   - Edit with full-file replacements only.
-   - Keep code style and structure consistent.
-
-2) **Deliverables**
-   - Full code for changed files.
-   - Exact paths.
-   - Short what-it-does and what-to-expect notes.
-   - One PowerShell script that writes all updated files (Seed included).
-
-3) Local File Root Directory
-   - C:\bc\cloudflare\html>
