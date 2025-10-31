@@ -37,38 +37,64 @@
 
 
 
+
+
 <script>
-// Minimal client glue for the unified /api/admin/users route
-const $ = s => document.querySelector(s);
-const tbody = document.querySelector("#tbl tbody") || document.createElement("tbody");
-const statusEl = document.querySelector("#status") || document.createElement("p");
+(() => {
+  const byHeading = (name) => {
+    const n = String(name).toLowerCase();
+    const hs = Array.from(document.querySelectorAll("h2,h3"));
+    const h = hs.find(el => el.textContent.trim().toLowerCase() === n);
+    if (!h) return null;
+    let el = h.nextElementSibling;
+    while (el && el.tagName !== "TABLE") el = el.nextElementSibling;
+    return el || null;
+  };
 
-async function loadUsers() {
-  statusEl.textContent = "Loading";
-  const r = await fetch("/api/admin/users", { credentials: "include" });
-  if (!r.ok) { statusEl.textContent = "Unauthorized or error"; return; }
-  const { users = [] } = await r.json();
-  if (tbody) tbody.innerHTML = "";
-  users.forEach(u => {
+  const tables = {
+    active: byHeading("Active"),
+    suspended: byHeading("Suspended"),
+    deleted: byHeading("Deleted"),
+  };
+  const bodies = Object.fromEntries(Object.entries(tables).map(([k,t]) => [k, t ? (t.querySelector("tbody") || t.appendChild(document.createElement("tbody"))) : null]));
+
+  const fmtDate = (s) => {
+    if (!s) return "";
+    try { return new Date(s).toLocaleString(); } catch { return String(s); }
+  };
+
+  const mkRow = (u) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = [
-      u.id ?? "", u.email ?? "", u.username ?? "", u.status ?? "",
-      u.role ?? "", u.is_admin ?? "", u.created_at ?? ""
-    ].map(v => `<td>${String(v)}</td>`).join("")
-      + `<td><button class="del" data-id="${u.id}">Delete</button></td>`;
-    tbody.appendChild(tr);
-  });
-  statusEl.textContent = `Rows: ${users.length}`;
-}
+    const cells = [
+      u.id ?? "",
+      u.email ?? "",
+      u.username ?? "",
+      u.role ?? u.account_type ?? "",
+      fmtDate(u.created_at ?? u.createdAt),
+    ].map(v => `<td>${String(v)}</td>`).join("");
+    tr.innerHTML = cells + `<td></td>`; // actions column placeholder
+    return tr;
+  };
 
-document.addEventListener("click", async (e) => {
-  const btn = e.target.closest("button.del");
-  if (!btn) return;
-  const id = btn.getAttribute("data-id");
-  btn.disabled = true;
-  const r = await fetch(`/api/admin/users?id=${encodeURIComponent(id)}`, { method: "DELETE", credentials: "include" });
-  if (r.ok) loadUsers(); else btn.disabled = false;
-});
+  async function load() {
+    const r = await fetch("/api/admin/users", { credentials: "include" });
+    if (!r.ok) { console.warn("admin/users fetch failed", r.status); return; }
+    const data = await r.json().catch(() => ({}));
+    const users = Array.isArray(data.users) ? data.users : [];
 
-window.addEventListener("DOMContentLoaded", loadUsers);
+    if (bodies.active) bodies.active.innerHTML = "";
+    if (bodies.suspended) bodies.suspended.innerHTML = "";
+    if (bodies.deleted) bodies.deleted.innerHTML = "";
+
+    for (const u of users) {
+      const st = String(u.status || "active").toLowerCase();
+      const bucket = st.includes("suspend") ? "suspended" : (st.includes("delete") ? "deleted" : "active");
+      const tb = bodies[bucket];
+      if (tb) tb.appendChild(mkRow(u));
+    }
+    console.log(`Admin users loaded: ${users.length}`);
+  }
+
+  window.addEventListener("DOMContentLoaded", load);
+})();
 </script>
