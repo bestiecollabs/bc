@@ -1,76 +1,64 @@
-async function fetchUsers() {
+async function fetchUsers(){
   setStatus("Loading...");
-  const r = await fetch("/api/admin/users", { credentials: "include" });
+  const r = await fetch("/api/admin/users",{credentials:"include"});
   const j = await r.json();
-  render(j.items ?? []);
+  render(j.items||[]);
   clearStatus();
 }
+function render(items){
+  const act = document.getElementById("activeRows");
+  const sus = document.getElementById("suspendedRows");
+  const del = document.getElementById("deletedRows");
+  act.innerHTML = sus.innerHTML = del.innerHTML = "";
 
-function render(items) {
-  const tbody = document.getElementById("rows");
-  tbody.innerHTML = "";
-  for (const u of items) {
+  const rowsFor = (where) => where==="active" ? act : where==="suspended" ? sus : del;
+
+  for(const u of items){
+    const where = u.deleted ? "deleted" : u.suspended ? "suspended" : "active";
+    const tbody = rowsFor(where);
     const tr = document.createElement("tr");
-    const dt = u.created_at ? new Date(Number(u.created_at) * 1000) : null;
+    const dt = u.created_at ? new Date(Number(u.created_at)*1000) : null;
     tr.innerHTML = `
       <td>${u.id}</td>
       <td>${u.email}</td>
-      <td>${(u.account_type || "").toString()}</td>
+      <td>${u.account_type||""}</td>
       <td>${dt ? dt.toLocaleString() : ""}</td>
       <td class="actions"></td>`;
     tbody.appendChild(tr);
 
     const actions = tr.querySelector(".actions");
 
-    const suspendBtn = document.createElement("button");
-    suspendBtn.textContent = u.suspended ? "Unsuspend" : "Suspend";
-    suspendBtn.addEventListener("click", async () => {
-      setStatus((u.suspended ? "Unsuspending..." : "Suspending..."));
-      const res = await fetch("/api/admin/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ action: u.suspended ? "unsuspend" : "suspend", id: u.id }),
-      });
-      const j = await res.json();
-      setStatus(j.ok ? "Done" : ("Error: " + (j.error || "unknown")));
-      await fetchUsers();
+    // Suspend/Unsuspend button
+    const sBtn = document.createElement("button");
+    sBtn.textContent = u.suspended ? "Unsuspend" : "Suspend";
+    sBtn.addEventListener("click", async ()=>{
+      setStatus(u.suspended?"Unsuspending...":"Suspending...");
+      const res = await fetch("/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({action:u.suspended?"unsuspend":"suspend", id:u.id})});
+      const j = await res.json(); setStatus(j.ok?"Done":"Error: "+(j.error||"unknown")); fetchUsers();
     });
-    actions.appendChild(suspendBtn);
+    actions.appendChild(sBtn);
 
-    // Optional hard delete button hidden behind confirm (disabled by default)
-    // const delBtn = document.createElement("button");
-    // delBtn.textContent = "Delete";
-    // delBtn.addEventListener("click", async () => {
-    //   if (!confirm("Hard delete user " + u.id + "? This cannot be undone.")) return;
-    //   setStatus("Deleting...");
-    //   const r = await fetch("/api/admin/users?id=" + encodeURIComponent(u.id), { method: "DELETE", credentials: "include" });
-    //   const j = await r.json();
-    //   setStatus(j.ok ? "Deleted" : ("Error: " + (j.error || "unknown")));
-    //   await fetchUsers();
-    // });
-    // actions.appendChild(delBtn);
+    // Delete/Undelete button
+    const dBtn = document.createElement("button");
+    dBtn.textContent = u.deleted ? "Undelete" : "Delete";
+    dBtn.addEventListener("click", async ()=>{
+      if(!u.deleted && !confirm("Soft delete user "+u.id+"?")) return;
+      setStatus(u.deleted?"Undeleting...":"Deleting...");
+      const res = await fetch("/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({action:u.deleted?"undelete":"delete", id:u.id})});
+      const j = await res.json(); setStatus(j.ok?"Done":"Error: "+(j.error||"unknown")); fetchUsers();
+    });
+    actions.appendChild(dBtn);
   }
 }
-
-document.getElementById("createForm").addEventListener("submit", async (e) => {
+document.getElementById("createForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const email = document.getElementById("email").value.trim();
-  if (!email) return;
+  if(!email) return;
   setStatus("Creating...");
-  const r = await fetch("/api/admin/users", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email }), // server defaults to creator
-  });
-  const j = await r.json();
-  setStatus(j.ok ? "Created" : ("Error: " + (j.error || "unknown")));
-  e.target.reset();
-  await fetchUsers();
+  const r = await fetch("/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email})});
+  const j = await r.json(); setStatus(j.ok?"Created":"Error: "+(j.error||"unknown"));
+  e.target.reset(); fetchUsers();
 });
-
-function setStatus(t) { document.getElementById("status").textContent = t; }
-function clearStatus() { setStatus(""); }
-
+function setStatus(t){ document.getElementById("status").textContent=t; }
+function clearStatus(){ setStatus(""); }
 fetchUsers();

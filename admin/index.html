@@ -1,36 +1,33 @@
 <!doctype html>
-<html lang="en">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<html lang="en"><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Admin - Users</title>
 <style>
-  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
-  header { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
-  input, button { padding: 8px 10px; }
-  table { border-collapse: collapse; width: 100%; margin-top: 16px; }
-  th, td { border: 1px solid #ddd; padding: 8px; }
-  th { text-align: left; }
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:24px}
+  header{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+  input,button,select{padding:8px 10px}
+  table{border-collapse:collapse;width:100%;margin-top:12px}
+  th,td{border:1px solid #ddd;padding:8px}
+  th{text-align:left}
+  h2{margin-top:28px}
 </style>
 <body>
   <header>
     <h1 style="margin:0">Users</h1>
-    <form id="createForm" style="margin-left:auto; display:flex; gap:8px">
+    <form id="createForm" style="margin-left:auto;display:flex;gap:8px">
       <input type="email" id="email" placeholder="newuser@example.com" required />
       <button type="submit">Create</button>
     </form>
   </header>
   <div id="status"></div>
-  <table>
-    <thead><tr><th>ID</th><th>Email</th><th>Account type</th><th>Created</th><th>Actions</th></tr></thead>
-    <tbody id="rows"></tbody>
-  </table>
 
-<script src="/admin/app.js" defer></script>
-</body>
-</html>
+  <h2>Active</h2>
+  <table><thead><tr><th>ID</th><th>Email</th><th>Account type</th><th>Created</th><th>Actions</th></tr></thead><tbody id="activeRows"></tbody></table>
 
+  <h2>Suspended</h2>
+  <table><thead><tr><th>ID</th><th>Email</th><th>Account type</th><th>Created</th><th>Actions</th></tr></thead><tbody id="suspendedRows"></tbody></table>
 
+  <h2>Deleted</h2>
+  <table><thead><tr><th>ID</th><th>Email</th><th>Account type</th><th>Created</th><th>Actions</th></tr></thead><tbody id="deletedRows"></tbody></table>
 
-
-
-
+  <script src="/admin/app.js" defer></script>
+</body></html>
