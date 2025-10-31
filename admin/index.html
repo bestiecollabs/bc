@@ -32,38 +32,11 @@
   
 <script type="module" src="./app.js"></script>
 
-<script>
-  (function(){
-    console.log('admin bootstrap start');
-    // ensure app.js tag exists
-    if(!document.querySelector('script[src^="/admin/app.js"]')){
-      var s=document.createElement('script');
-      s.src='/admin/app.js?v=2afe019'; s.defer=true; document.body.appendChild(s);
-      console.log('admin app.js injected');
-    }
-    // fallback renderer if app.js did not mark execution
-    setTimeout(async function(){
-      if(!window.__admin_app_ran){
-        console.warn('admin fallback renderer active');
-        try{
-          var r=await fetch('/api/admin/users',{credentials:'include',headers:{'Accept':'application/json'}});
-          var ct=r.headers.get('content-type')||'';
-          if(!r.ok||ct.indexOf('application/json')<0){ console.warn('api not json/authorized', r.status, ct); return; }
-          var j=await r.json(); var items=j.items||j.users||[];
-          var tbs=document.querySelectorAll('table tbody');
-          if(tbs[0]){
-            tbs[0].innerHTML = items.map(function(u){
-              return '<tr><td>'+(u.id||'')+'</td><td>'+(u.email||'')+'</td><td>'+(u.username||'')+'</td><td>'+(u.account_type||u.role||'')+'</td><td>'+(u.created_at||'')+'</td><td></td></tr>';
-            }).join('');
-          }
-          console.log('fallback rendered', items.length);
-        }catch(e){ console.error('fallback error', e); }
-      }
-    }, 1200);
-  })();
-</script>
-<script src="/admin/app.js?v=2afe019" defer></script>
+
+
+<script src="/admin/app.js?v=80cae5a" defer></script>
 </body></html>
+
 
 
 
