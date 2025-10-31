@@ -1,7 +1,7 @@
 async function fetchUsers(){
   setStatus("Loading...");
   const r = await fetch("/api/admin/users",{credentials:"include"});
-  const j = await r.json();
+  const j = await r.json(); if(Array.isArray(j?.users)){const __list=j.users;const __norm=s=>(s||"active");j.active=__list.filter(u=>__norm(u.status)==="active");j.suspended=__list.filter(u=>__norm(u.status)==="suspended");j.deleted=__list.filter(u=>__norm(u.status)==="deleted");console.log("[admin] counts",{active:j.active.length,suspended:j.suspended.length,deleted:j.deleted.length});}
   render(j.items||[]);
   clearStatus();
 }
@@ -71,7 +71,7 @@ document.getElementById("createForm").addEventListener("submit", async (e)=>{
   if(!email) return;
   setStatus("Creating...");
   const r = await fetch("/api/admin/users",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email})});
-  const j = await r.json(); setStatus(j.ok?"Created":"Error: "+(j.error||"unknown"));
+  const j = await r.json(); if(Array.isArray(j?.users)){const __list=j.users;const __norm=s=>(s||"active");j.active=__list.filter(u=>__norm(u.status)==="active");j.suspended=__list.filter(u=>__norm(u.status)==="suspended");j.deleted=__list.filter(u=>__norm(u.status)==="deleted");console.log("[admin] counts",{active:j.active.length,suspended:j.suspended.length,deleted:j.deleted.length});} setStatus(j.ok?"Created":"Error: "+(j.error||"unknown"));
   e.target.reset(); fetchUsers();
 });
 function setStatus(t){ document.getElementById("status").textContent=t; }
@@ -81,7 +81,7 @@ fetchUsers();
 /* FIX: render by named keys to avoid column order bugs */
 async function loadUsers() {
   const r = await fetch("/api/admin/users", { headers: window.__cfAccessToken ? { "CF-Access-Jwt-Assertion": window.__cfAccessToken } : {} });
-  const data = await r.json();
+  const data = await r.json(); if(Array.isArray(data?.users)){const __list=data.users;const __norm=s=>(s||"active");data.active=__list.filter(u=>__norm(u.status)==="active");data.suspended=__list.filter(u=>__norm(u.status)==="suspended");data.deleted=__list.filter(u=>__norm(u.status)==="deleted");console.log("[admin] counts",{active:data.active.length,suspended:data.suspended.length,deleted:data.deleted.length});}
   const users = Array.isArray(data) ? data : data.users || [];
   const tbody = document.querySelector("#users-tbody");
   if (!tbody) return;
@@ -101,4 +101,5 @@ async function loadUsers() {
     tbody.appendChild(tr);
   }
 }
+
 
