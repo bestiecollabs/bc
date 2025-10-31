@@ -387,3 +387,28 @@
 </html>
 
 
+
+/* FIX: render by named keys to avoid column order bugs */
+async function loadUsers() {
+  const r = await fetch("/api/admin/users", { headers: window.__cfAccessToken ? { "CF-Access-Jwt-Assertion": window.__cfAccessToken } : {} });
+  const data = await r.json();
+  const users = Array.isArray(data) ? data : data.users || [];
+  const tbody = document.querySelector("#users-tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  for (const u of users) {
+    const { id, username, email, role, status, created_at } = u;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${id ?? ""}</td>
+      <td>${username ?? ""}</td>
+      <td>${email ?? ""}</td>
+      <td>${role ?? ""}</td>
+      <td>${status ?? ""}</td>
+      <td>${created_at ? new Date(created_at).toLocaleString() : ""}</td>
+      <td><button class="btn-delete" data-id="${id}">Delete</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
