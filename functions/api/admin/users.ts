@@ -92,8 +92,11 @@ function validUser(s:string){ return /^[a-z0-9._-]{3,30}$/.test(s); }
 
 function num(v:any){ const n=Number(v); return Number.isInteger(n)&&n>0?n:0; }
 async function adminCount(db:D1Database, excludingId?:number){ const q = excludingId? "SELECT COUNT(*) AS c FROM users WHERE is_admin=1 AND deleted_at IS NULL AND id<>?1" : "SELECT COUNT(*) AS c FROM users WHERE is_admin=1 AND deleted_at IS NULL"; const r = excludingId? await db.prepare(q).bind(excludingId).first<{c:number}>() : await db.prepare(q).first<{c:number}>(); return Number((r as any)?.c??0); }
-async function audit(db:D1Database, actor:string, action:string, target:number, meta:unknown){ await ensureAudit(db); await db.prepare("INSERT INTO admin_audit(actor_email,action,target_user_id,meta) VALUES (?1,?2,?3,?4)").bind(actor,action,target,JSON.stringify(meta??{})).run(); }
-let auditReady=false; async function ensureAudit(db:D1Database){ if(auditReady) return; await db.prepare("CREATE TABLE IF NOT EXISTS admin_audit(id INTEGER PRIMARY KEY, actor_email TEXT NOT NULL, action TEXT NOT NULL, target_user_id INTEGER, meta TEXT, created_at INTEGER NOT NULL DEFAULT (unixepoch()))").run(); auditReady=true; }
+async function audit(db:D1Database, actor:string, action:string, target:number, meta:unknown){ await ensureAudit(db); await db.prepare("INSERT INTO admin_audit (actor_id, action, target_id, meta, created_at) VALUES (?1,?2,?3,?4)").bind(actor,action,target,JSON.stringify(meta??{})).run(); }
+let auditReady=false; async function ensureAudit(db:D1Database){ if(auditReady) return; await db.prepare("CREATE TABLE IF NOT EXISTS admin_audit(id INTEGER PRIMARY KEY, actor_email TEXT NOT NULL, action TEXT NOT NULL, target_id INTEGER, meta TEXT, created_at INTEGER NOT NULL DEFAULT (unixepoch()))").run(); auditReady=true; }
 function getEmailFromJwt(jwt:string){ try{const p=jwt.split("."); if(p.length<2)return null; const payload=JSON.parse(atob(p[1].replace(/-/g,"+").replace(/_/g,"/"))); return String(payload.email||payload.sub||"")||null;}catch{return null;} }
 async function safeJson(req:Request){ try{ return await req.json(); } catch { return {}; } }
 function json(data:unknown,status=200){ return new Response(JSON.stringify(data),{ status, headers:{ "Content-Type":"application/json","Cache-Control":"no-store"} }); }
+
+
+
