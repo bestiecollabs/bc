@@ -8,7 +8,7 @@ async function fetchUsers() {
 
 function roleSelect(id, role) {
   const r = document.createElement("select");
-  ["user","admin"].forEach(v => {
+  ["creator","brand"].forEach(v => {
     const o = document.createElement("option");
     o.value = v; o.textContent = v; if (v === role) o.selected = true;
     r.appendChild(o);
@@ -40,7 +40,7 @@ function render(items) {
       <td>${dt ? dt.toLocaleString() : ""}</td>
       <td><button data-id="${u.id}" class="del">Delete</button></td>`;
     tbody.appendChild(tr);
-    tr.querySelector(".role-cell").appendChild(roleSelect(u.id, u.role || "user"));
+    tr.querySelector(".role-cell").appendChild(roleSelect(u.id, u.role || "creator"));
   }
   tbody.querySelectorAll("button.del").forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -58,13 +58,14 @@ function render(items) {
 document.getElementById("createForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const email = document.getElementById("email").value.trim();
+  const role = document.getElementById("role").value;
   if (!email) return;
   setStatus("Creating...");
   const r = await fetch("/api/admin/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, role }),
   });
   const j = await r.json();
   setStatus(j.ok ? "Created" : ("Error: " + (j.error || "unknown")));
