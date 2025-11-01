@@ -3,412 +3,46 @@
 <head>
   <meta charset="utf-8">
   <title>Create account · Bestie Collabs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="/favicon.png">
-  <meta name="theme-color" content="#5E7BFF">
-  <link rel="stylesheet" href="/air.css">
-  <style>
-    :root { --fun:#4C6FFF; --fun-600:#3B5BDF; --line:#e2e8f0; --card:#ffffff; }
-    body{margin:0}
-    .hero{padding-top:28px;padding-bottom:8px}
-    .cols{display:grid;grid-template-columns:1fr;gap:16px;align-items:start;width:56.25%;min-width:340px;margin:0 auto;}
-    @media (max-width:980px){.cols{width:92%;min-width:auto}}
-    .section{padding-top:16px;padding-bottom:24px}
-    .card h2{margin:0 0 12px;text-align:center;font-size:22px}
-    .subcard h3{margin:0 0 10px;text-align:center;font-size:20px}
-    .card input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;font-size:16px;outline:0;box-shadow:0 2px 14px rgba(86,81,255,.06) inset;}
-    .card input:focus{border-color:var(--fun);box-shadow:0 0 0 3px rgba(76,111,255,.15),0 2px 14px rgba(86,81,255,.06) inset;}
-    label{display:block;font-size:14px;margin:6px 0 4px}
-    input[type="radio"],input[type="checkbox"]{width:16px;height:16px;accent-color:var(--fun);margin:0}
-    .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .formgrid .full{grid-column:1 / -1}
-    .role-inline{display:flex;align-items:center;gap:12px;justify-content:center;margin:6px 0 14px}
-    .role-title{font-size:20px}
-    .role-inline label{display:flex;align-items:center;gap:6px;margin:0}
-    .subcard{position:relative;padding-top:8px}
-    .termsRow{display:flex;justify-content:center;gap:10px}
-    .actions{text-align:center;margin-top:10px}
-    .btn-lg{padding:14px 36px;font-size:16px;border-radius:999px}
-    .btn[disabled]{opacity:.5;filter:grayscale(80%);cursor:not-allowed}
-    .btn{border:0;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer;text-decoration:none}
-    .btn-fun{background:var(--fun);color:#fff;font-weight:800}
-    .btn-fun:hover{background:var(--fun-600)}
-    .btn-ghost{background:#f1f5f9;color:#0f172a}
-    .card{padding-bottom:14px}
-    .error{color:#c00;font-size:13px;margin-top:4px;display:none}
-    .alert{margin:8px 0 0;padding:10px 12px;border:1px solid #fecaca;background:#fee2e2;color:#7f1d1d;border-radius:10px;display:none;white-space:pre-wrap}
-    .hint{color:#64748b;font-size:12px}
-    .hint-error{color:#c00}
-
-    /* tooltip */
-    .tooltip{position:fixed;z-index:1000;background:#fff;color:#0f172a;padding:10px 12px;border-radius:8px;
-      font-size:14px;max-width:320px;text-align:center;pointer-events:none;opacity:0;transform:translateX(-50%);
-      box-shadow:0 6px 18px rgba(0,0,0,.18);transition:opacity .12s ease;border:1px solid var(--line)}
-    .tooltip.show{opacity:1}
-
-    /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1200;display:none}
-    .modal-backdrop.show{display:block}
-    .modal{
-      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-      background:#fff;border:1px solid var(--line);border-radius:14px;z-index:1210;
-      width:min(520px,92%);padding:0;box-shadow:0 14px 44px rgba(0,0,0,.22);display:none
-    }
-    .modal.show{display:block}
-    .modal .modal-header{
-      cursor:move;user-select:none;padding:14px 16px;border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(76,111,255,0.06), transparent)
-    }
-    .modal h4{margin:0;font-size:18px;text-align:center}
-    .modal .modal-body{padding:14px 18px}
-    .modal p{margin:0 0 12px;text-align:center;color:#475569}
-    .modal .rowbtns{display:flex;gap:10px;justify-content:center;padding:0 0 16px}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="/air.css" rel="stylesheet">
 </head>
 <body>
-<header class="site-header">
-  <div class="wrap row">
-    <a class="brandmark" href="/"><img src="/b1.png" alt="Bestie Collabs"><span class="title">Bestie Collabs</span></a>
-    <nav>
-      <a href="/about/">About</a><a href="/brands/">Brands</a><a href="/creators/">Creators</a><a href="/pricing/">Pricing</a><a href="/support/">Support</a>
-    </nav>
-    <nav class="auth">
-      <a data-link="dashboard" href="/account/" hidden>Dashboard</a>
-      <a data-link="login" href="/login/">Log in</a>
-      <a data-link="create" href="/signup/">Create account</a>
-      <a data-link="logout" href="/logout" hidden>Log out</a>
-    </nav>
-  </div>
-</header>
+  <main class="container" style="max-width:480px;margin:40px auto;">
+    <h1>Create account</h1>
+    <form id="signupForm" novalidate>
+      <label>Email
+        <input id="email" name="email" type="email" autocomplete="email" required />
+      </label>
 
-<main class="wrap wrap-centered">
-  <section class="hero">
-    <h1 class="funtext">Create Your Bestie Account</h1>
-  </section>
-
-  <section class="section">
-    <div class="cols">
-      <article class="card">
-        <h2 class="funtext">New Account Setup</h2>
-
-        <div class="role-inline">
-          <span class="role-title funtext">I am a</span>
-          <label><input type="radio" name="role" id="roleBrand" value="brand" checked> <span>Brand</span></label>
-          <label><input type="radio" name="role" id="roleCreator" value="creator"> <span>Creator</span></label>
+      <label>Password
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="password" name="password" type="password" minlength="8" required />
+          <button type="button" id="togglePwd" aria-label="Show password">Show</button>
         </div>
+        <small>At least 8 characters.</small>
+      </label>
 
-        <div class="formgrid">
-          <div>
-            <label>First Name</label>
-            <input id="first_name" type="text" autocomplete="given-name" required>
-          </div>
-          <div>
-            <label>Last Name</label>
-            <input id="last_name" type="text" autocomplete="family-name" required>
-          </div>
-
-          <div class="full">
-            <label>Email</label>
-            <input id="email" type="email" autocomplete="email" required>
-            <div id="email_error" class="error">Email — Email already in use</div>
-          </div>
-
-          <div class="full">
-            <label>
-              Create User ID
-              <span id="hint_user" class="hint">(3 - 15 char)</span>
-              <span id="hint_user_taken" class="hint hint-error" style="display:none">(user id already taken)</span>
-            </label>
-            <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required>
-            <div id="user_error" class="error">User ID already in use</div>
-          </div>
-
-          <div>
-            <label>
-              Password
-              <span id="hint_pass" class="hint">(8 - 15 char)</span>
-            </label>
-            <input id="password" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
-          </div>
-          <div>
-            <label id="label_password2">Confirm Password</label>
-            <input id="password2" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
-            <div id="pass_error" class="error">Passwords do not match</div>
-          </div>
-
-          <div class="full"><div id="form_error" class="alert"></div></div>
+      <label>Confirm password
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="confirm" name="confirm" type="password" minlength="8" required />
+          <button type="button" id="toggleConfirm" aria-label="Show confirm password">Show</button>
         </div>
-      </article>
+      </label>
 
-      <article class="card subcard">
-        <h3 class="funtext">Terms And Privacy</h3>
-        <div class="termsRow">
-          <label>
-            <input type="checkbox" id="agree" required>
-            <span>I Agree To Bestie Collabs <a href="/terms/">Terms</a> And <a href="/privacy/">Privacy</a></span>
-          </label>
-        </div>
-      </article>
-    </div>
+      <fieldset>
+        <legend>Account type</legend>
+        <!-- Both start empty; required ensures user must choose -->
+        <label><input type="radio" name="role" value="brand" required> Brand</label>
+        <label style="margin-left:16px;"><input type="radio" name="role" value="creator" required> Creator</label>
+      </fieldset>
 
-    <div class="actions">
-      <button class="btn btn-lg" id="createBtn" type="button" disabled>Create Account</button>
-    </div>
-  </section>
-</main>
+      <button id="submitBtn" type="submit">Create account</button>
+      <p id="msg" role="status" aria-live="polite"></p>
+    </form>
 
-<footer class="wrap">
-  <nav class="links" aria-label="Footer">
-    <a href="/about/">About</a><a href="/brands/">Brands</a><a href="/cookie/">Cookie</a>
-    <a href="/creators/">Creators</a><a href="/dmca/">DMCA</a><a href="/pricing/">Pricing</a>
-    <a href="/privacy/">Privacy</a><a href="/support/">Support</a><a href="/terms/">Terms</a>
-  </nav>
-</footer>
+    <p>Already have an account? <a href="/login/">Log in</a></p>
+  </main>
 
-<!-- Draggable Email-taken modal -->
-<div id="modal-backdrop" class="modal-backdrop" aria-hidden="true"></div>
-<div id="modal-email" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-email-title" aria-describedby="modal-email-desc">
-  <div id="modal-email-header" class="modal-header">
-    <h4 id="modal-email-title">That Email Is Already Used</h4>
-  </div>
-  <div class="modal-body">
-    <p id="modal-email-desc">Log in now, reset your password or try again.</p>
-    <div class="rowbtns">
-      <a href="/login/" class="btn btn-fun"><strong>Log In</strong></a>
-      <a href="/reset/" class="btn btn-fun"><strong>Reset Password</strong></a>
-      <button id="modal-close" class="btn btn-fun" type="button"><strong>Try Again</strong></button>
-    </div>
-  </div>
-</div>
-
-<script src="/auth.js" defer></script>
-<script>
-(function(){
-  const ids=['first_name','last_name','email','username','password','password2','agree','roleBrand','roleCreator'];
-  const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
-  const btn=document.getElementById('createBtn');
-  const banner=document.getElementById('form_error');
-  const userErr=document.getElementById('user_error');
-  const emailErr=document.getElementById('email_error');
-  const hintUser=document.getElementById('hint_user');
-  const hintUserTaken=document.getElementById('hint_user_taken');
-  const hintPass=document.getElementById('hint_pass');
-  const passError=document.getElementById('pass_error');
-
-  // tooltip
-  const tip=document.createElement('div'); tip.className='tooltip'; tip.setAttribute('aria-hidden','true'); document.body.appendChild(tip);
-  function showTip(e){
-    if(!btn.disabled) return hideTip();
-    const reasons=[];
-    const email=el.email.value.trim();
-    const user =el.username.value.trim();
-    const p1   =el.password.value;
-    const p2   =el.password2.value;
-    if(!el.first_name.value.trim()) reasons.push('Enter first name');
-    if(!el.last_name.value.trim()) reasons.push('Enter last name');
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) reasons.push('Enter a valid email');
-    if(!/^[A-Za-z0-9_]{3,15}$/.test(user)) reasons.push('User ID must be 3–15 chars, letters/numbers/_');
-    if(!(p1.length>=8 && p1.length<=15)) reasons.push('Password must be 8–15 chars');
-    if(!(p1===p2 && p2.length>0)) reasons.push('Passwords must match');
-    if(!el.agree.checked) reasons.push('Agree to Terms');
-    tip.textContent = reasons.length ? reasons.join(' • ') : 'Complete all required fields';
-    tip.style.left = e.clientX + 'px';
-    tip.classList.add('show'); tip.setAttribute('aria-hidden','false');
-    requestAnimationFrame(()=>{ const h=tip.offsetHeight||36; tip.style.top=(e.clientY-12-h)+'px'; });
-  }
-  function moveTip(e){ if(!tip.classList.contains('show')) return; tip.style.left=e.clientX+'px'; const h=tip.offsetHeight||36; tip.style.top=(e.clientY-12-h)+'px'; }
-  function hideTip(){ tip.classList.remove('show'); tip.setAttribute('aria-hidden','true'); }
-  btn.addEventListener('mouseenter',showTip);
-  btn.addEventListener('mousemove',moveTip);
-  btn.addEventListener('mouseleave',hideTip);
-  btn.addEventListener('focus',(e)=>showTip({clientX:e.target.getBoundingClientRect().left+e.target.offsetWidth/2,clientY:e.target.getBoundingClientRect().top}));
-  btn.addEventListener('blur',hideTip);
-
-  // modal refs
-  const backdrop=document.getElementById('modal-backdrop');
-  const modal=document.getElementById('modal-email');
-  const modalHeader=document.getElementById('modal-email-header');
-  const modalClose=document.getElementById('modal-close');
-
-  function openModal(){ backdrop.classList.add('show'); modal.classList.add('show'); }
-  function closeModal(){ backdrop.classList.remove('show'); modal.classList.remove('show'); }
-  modalClose?.addEventListener('click',closeModal);
-  backdrop?.addEventListener('click',closeModal);
-  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
-
-  // draggable modal
-  (function makeDraggable(){
-    let dragging=false, startX=0, startY=0, startLeft=0, startTop=0;
-    modalHeader.addEventListener('mousedown', (e)=>{
-      dragging=true;
-      const rect=modal.getBoundingClientRect();
-      startX=e.clientX; startY=e.clientY;
-      startLeft=rect.left; startTop=rect.top;
-      document.body.style.userSelect='none';
-    });
-    window.addEventListener('mousemove',(e)=>{
-      if(!dragging) return;
-      const dx=e.clientX-startX, dy=e.clientY-startY;
-      modal.style.left=(startLeft+dx)+'px';
-      modal.style.top=(startTop+dy)+'px';
-      modal.style.transform='translate(0,0)';
-    });
-    window.addEventListener('mouseup',()=>{
-      if(!dragging) return;
-      dragging=false;
-      document.body.style.userSelect='';
-    });
-  })();
-
-  const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  let busy=false;
-  function setBusy(s){ busy=s; btn.textContent=s?'Creating…':'Create Account'; btn.disabled=s||btn.disabled; }
-  function showBanner(t){ banner.textContent=t; banner.style.display='block'; }
-  function hideBanner(){ banner.textContent=''; banner.style.display='none'; }
-
-  function validate(){
-    userErr.style.display='none';
-    emailErr.style.display='none';
-    hideBanner();
-
-    const first=el.first_name.value.trim();
-    const last =el.last_name.value.trim();
-    const email=el.email.value.trim();
-    const user =el.username.value.trim();
-    const p1   =el.password.value;
-    const p2   =el.password2.value;
-
-    const userLenBad = !!user && !/^[A-Za-z0-9_]{3,15}$/.test(user);
-    hintUser.classList.toggle('hint-error', userLenBad);
-
-    const passLenBad = !!p1 && p1.length < 8;
-    hintPass.classList.toggle('hint-error', passLenBad);
-
-    const mismatch = !!p2 && p1 !== p2;
-    passError.style.display = mismatch ? 'block' : 'none';
-
-    const emailOk=validEmail(email);
-    const userOk =/^[A-Za-z0-9_]{3,15}$/.test(user);
-    const passOk =p1.length>=8 && p1.length<=15 && !mismatch && p2.length>0;
-
-    const allOk=!!first && !!last && emailOk && userOk && passOk && el.agree.checked && !busy;
-    btn.disabled=!allOk;
-    if(!allOk) hintUserTaken.style.display='none';
-  }
-  Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
-  el.username.addEventListener('input', ()=>{ hintUserTaken.style.display='none'; });
-  validate();
-
-  async function postJSON(url,data){
-    try{
-      const res=await fetch(url,{ method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'}, credentials:'include', body:JSON.stringify(data) });
-      const text=await res.text(); let json=null; try{ json=JSON.parse(text); }catch{}
-      return { ok:res.ok, status:res.status, json, text };
-    }catch(e){ return { ok:false, status:0, json:null, text:String(e) }; }
-  }
-  async function hardLogout(){ try{ await fetch('/logout',{credentials:'include'}); }catch(_){ } }
-
-  // username probe without creating an account
-  async function probeUsername(base){
-    const probe = { ...base, password:'x', accepted_terms:false };
-    const r = await postJSON('/api/signup/complete', probe);
-    if(r.status===409) return { taken:true };
-    const code = ((r.json && (r.json.error||r.json.code))||'').toLowerCase();
-    if(/user.*exist|username|user_id/.test(code)) return { taken:true };
-    return { taken:false };
-  }
-
-  btn.addEventListener('click', async ()=>{
-    if(btn.disabled) return;
-    setBusy(true); validate();
-
-    const role = document.getElementById('roleCreator').checked ? 'creator' : 'brand';
-    const username = el.username.value.trim();
-    const base = {
-      email: el.email.value.trim(),
-      username,
-      user_id: username,
-      full_name: (el.first_name.value.trim() + ' ' + el.last_name.value.trim()).trim(),
-      role
-    };
-
-    // 1) precheck email — only place that opens the email modal
-    const s1 = await postJSON('/auth/start', { email: base.email, role });
-    if(!s1.ok || (s1.json && s1.json.ok===false)){
-      const e = (s1.json && (s1.json.error||s1.json.code)) || '';
-      if(s1.status===409 || /already|email/i.test(e)){
-        await hardLogout();
-        emailErr.style.display='block';
-        openModal();
-        setBusy(false); validate(); return;
-      }
-      showBanner(`/auth/start failed. status ${s1.status}. body: ${s1.text.slice(0,300)}`);
-      await hardLogout(); setBusy(false); validate(); return;
-    }
-
-    // 2) precheck username
-    const u = await probeUsername(base);
-    await hardLogout();
-    if(u.taken){
-      userErr.style.display='block';
-      hintUserTaken.style.display='inline';
-      setBusy(false); validate(); return;
-    }
-
-    // 3) create
-    const payload = { ...base, password: el.password.value, accepted_terms: !!el.agree.checked, terms_version:'v1' };
-    const s2 = await postJSON('/api/signup/complete', payload);
-    if(!s2.ok || (s2.json && s2.json.ok===false)){
-      await hardLogout();
-      if(s2.status===409){
-        userErr.style.display='block'; hintUserTaken.style.display='inline';
-        setBusy(false); validate(); return;
-      }
-      const code = ((s2.json && (s2.json.error||s2.json.code))||'').toLowerCase();
-      if(/user.*exist|username|user_id/.test(code)){ userErr.style.display='block'; hintUserTaken.style.display='inline'; setBusy(false); validate(); return; }
-      if(/role_mismatch/.test(code)){ showBanner('Selected role does not match your saved signup role.'); setBusy(false); validate(); return; }
-      if(/not_started/.test(code)){ showBanner('Signup not started. Please try again.'); setBusy(false); validate(); return; }
-      if(/^missing_/.test(code)){ showBanner(`Missing field: ${code.replace('missing_','')}`); setBusy(false); validate(); return; }
-      showBanner(`/api/signup/complete failed. status ${s2.status}. body: ${s2.text.slice(0,300)}`);
-      setBusy(false); validate(); return;
-    }
-
-    if(s2.json && s2.json.ok===true){
-      try{ window.location.assign('/account/'); } catch(_) { showBanner('Account created. Continue to your account.'); }
-    }else{
-      await hardLogout();
-      showBanner('Unexpected response from server.');
-    }
-    setBusy(false); validate();
-  });
-})();
-</script>
+  <script src="/signup/app.js" defer></script>
 </body>
 </html>
-
-
-
-/* FIX: render by named keys to avoid column order bugs */
-async function loadUsers() {
-  const r = await fetch("/api/admin/users", { headers: window.__cfAccessToken ? { "CF-Access-Jwt-Assertion": window.__cfAccessToken } : {} });
-  const data = await r.json();
-  const users = Array.isArray(data) ? data : data.users || [];
-  const tbody = document.querySelector("#users-tbody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-  for (const u of users) {
-    const { id, username, email, role, status, created_at } = u;
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${id ?? ""}</td>
-      <td>${username ?? ""}</td>
-      <td>${email ?? ""}</td>
-      <td>${role ?? ""}</td>
-      <td>${status ?? ""}</td>
-      <td>${created_at ? new Date(created_at).toLocaleString() : ""}</td>
-      <td><button class="btn-delete" data-id="${id}">Delete</button></td>
-    `;
-    tbody.appendChild(tr);
-  }
-}
-
