@@ -9,27 +9,29 @@
   const hintUser=document.getElementById('hint_user');
   const hintUserTaken=document.getElementById('hint_user_taken');
   const hintPass=document.getElementById('hint_pass');
-  const ico1=document.getElementById('ico1');
-  const ico2=document.getElementById('ico2');
+const ico2=document.getElementById('ico2');
 
   // Eye toggle identical to login: element is <i class="ico eye">; swap to eye-off; prevent focus jump
-  function addReveal(inputId, btnId, icon){
-    const input=document.getElementById(inputId);
-    const btn=document.getElementById(btnId);
-    btn.addEventListener('mousedown', e=>e.preventDefault());
-    btn.addEventListener('click', ()=>{
-      const show = input.type === 'password';
-      input.type = show ? 'text' : 'password';
-      icon.className = show ? 'ico eye-off' : 'ico eye';
-      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
-      btn.title = show ? 'Hide password' : 'Show password';
-      input.focus({ preventScroll:true });
+  );
     });
   }
-  addReveal('password','reveal1',ico1);
-  addReveal('password2','reveal2',ico2);
-
-  let busy=false, allOk=false;
+addReveal('password2','reveal2',ico2);
+  // Login-style eye toggle
+  (function wirePwEyes(){
+    document.querySelectorAll('.pw-eye').forEach(function(btn){
+      var id = btn.getAttribute('aria-controls');
+      var input = document.getElementById(id);
+      if(!input) return;
+      btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      btn.addEventListener('click', function(){
+        var show = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', String(show));
+        input.type = show ? 'text' : 'password';
+        try { input.focus({ preventScroll:true }); } catch(_) {}
+      });
+    });
+  })();
+let busy=false, allOk=false;
   const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
   function validate(){
@@ -133,3 +135,4 @@
     location.assign('/account/');
   });
 })();
+
