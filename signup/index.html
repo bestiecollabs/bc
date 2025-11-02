@@ -31,8 +31,9 @@
 
   <section class="section">
     <div class="cols">
-      <!-- 25% narrower card -->
-      <article class="card" style="max-width:42.2%;min-width:340px;margin:0 auto;padding-bottom:14px">
+
+      <!-- 10% wider than previous: 52.2% -->
+      <article class="card" style="max-width:52.2%;min-width:340px;margin:0 auto;padding-bottom:14px">
         <h2 class="funtext" style="text-align:center;margin:0 0 12px">New Account Setup</h2>
 
         <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin:6px 0 14px">
@@ -41,7 +42,6 @@
           <label style="display:flex;align-items:center;gap:6px;margin:0"><input type="radio" name="role" id="roleCreator" value="creator"> <span>Creator</span></label>
         </div>
 
-        <!-- 2-col form grid -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div>
             <label style="display:block;font-size:14px;margin:6px 0 4px">First Name</label>
@@ -79,10 +79,10 @@
             <div style="position:relative">
               <input id="password" type="password" autocomplete="new-password" minlength="8" maxlength="15" required
                 style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 44px 10px 12px;font-size:16px">
-              <!-- Use the same eye class names as login -->
+              <!-- Use same icon hook as login: i.ico.eye toggled to eye-off -->
               <button id="reveal1" type="button" aria-label="Show password" title="Show password"
                 style="position:absolute;right:6px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:0">
-                <i id="ico1" class="eye" aria-hidden="true" style="display:inline-block;width:20px;height:20px"></i>
+                <i id="ico1" class="ico eye" aria-hidden="true" style="width:20px;height:20px"></i>
               </button>
             </div>
           </div>
@@ -94,18 +94,17 @@
                 style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 44px 10px 12px;font-size:16px">
               <button id="reveal2" type="button" aria-label="Show confirm password" title="Show confirm password"
                 style="position:absolute;right:6px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:0">
-                <i id="ico2" class="eye" aria-hidden="true" style="display:inline-block;width:20px;height:20px"></i>
+                <i id="ico2" class="ico eye" aria-hidden="true" style="width:20px;height:20px"></i>
               </button>
             </div>
-            <div id="pass_error" class="error" style="display:none">Passwords do not match</div>
           </div>
 
           <div style="grid-column:1 / -1"><div id="form_error" class="alert" style="display:none"></div></div>
         </div>
       </article>
 
-      <!-- 25% narrower card; button moved inside here below the checkbox -->
-      <article class="card subcard" style="max-width:42.2%;min-width:340px;margin:12px auto 0">
+      <!-- 10% wider too; Create Account stays inside -->
+      <article class="card subcard" style="max-width:52.2%;min-width:340px;margin:12px auto 0">
         <h3 class="funtext" style="text-align:center;margin:0 0 10px">Terms And Privacy</h3>
         <div style="display:flex;justify-content:center;gap:10px">
           <label style="display:flex;align-items:center;gap:10px">
@@ -114,18 +113,17 @@
           </label>
         </div>
         <div style="text-align:center;margin-top:12px">
-          <!-- fun theme even when disabled -->
           <button class="btn btn-lg btn-fun" id="createBtn" type="button" disabled>Create Account</button>
         </div>
       </article>
 
-      <!-- Sign-in card remains below, same narrower width -->
-      <article class="card" style="max-width:42.2%;min-width:340px;margin:12px auto 0;padding-top:8px">
+      <article class="card" style="max-width:52.2%;min-width:340px;margin:12px auto 0;padding-top:8px">
         <h3 class="funtext" style="margin:0 0 8px;text-align:center">Already Have An Account?</h3>
         <div style="text-align:center">
           <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
         </div>
       </article>
+
     </div>
   </section>
 </main>

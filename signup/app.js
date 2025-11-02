@@ -9,11 +9,10 @@
   const hintUser=document.getElementById('hint_user');
   const hintUserTaken=document.getElementById('hint_user_taken');
   const hintPass=document.getElementById('hint_pass');
-  const passError=document.getElementById('pass_error');
   const ico1=document.getElementById('ico1');
   const ico2=document.getElementById('ico2');
 
-  // Eye toggle identical to login: mousedown prevents focus change; classes "eye" <-> "eye-off"
+  // Eye toggle identical to login: element is <i class="ico eye">; swap to eye-off; prevent focus jump
   function addReveal(inputId, btnId, icon){
     const input=document.getElementById(inputId);
     const btn=document.getElementById(btnId);
@@ -21,9 +20,9 @@
     btn.addEventListener('click', ()=>{
       const show = input.type === 'password';
       input.type = show ? 'text' : 'password';
-      icon.classList.toggle('eye', !show);
-      icon.classList.toggle('eye-off', show);
+      icon.className = show ? 'ico eye-off' : 'ico eye';
       btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      btn.title = show ? 'Hide password' : 'Show password';
       input.focus({ preventScroll:true });
     });
   }
@@ -50,7 +49,6 @@
     const passLenOk = p1.length>=8 && p1.length<=15;
     const match = p1 === p2 && p2.length>0;
 
-    passError && (passError.style.display = p2 && !match ? 'block' : 'none');
     hintUser && hintUser.classList.toggle('hint-error', !!user && !userOk);
     hintPass && hintPass.classList.toggle('hint-error', !!p1 && !passLenOk);
 
@@ -60,7 +58,6 @@
 
   Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
   el.email.addEventListener('input', ()=>{ if(emailUsed) { emailUsed.style.display='none'; } if(emailErr) { emailErr.style.display='none'; } });
-  el.password2.addEventListener('blur', ()=>{ if(el.password.value && el.password2.value && el.password.value !== el.password2.value){ alert('Passwords do not match'); } });
   validate();
 
   function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; btn.disabled = !allOk || busy; }
@@ -84,7 +81,6 @@
 
   btn.addEventListener('click', async ()=>{
     if(btn.disabled) return;
-    if(el.password.value !== el.password2.value){ alert('Passwords do not match'); return; }
 
     setBusy(true);
 
