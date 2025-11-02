@@ -31,76 +31,82 @@
 
   <section class="section">
     <div class="cols">
-      <article class="card">
-        <h2 class="funtext">New Account Setup</h2>
+      <article class="card" style="padding-bottom:14px">
+        <h2 class="funtext" style="text-align:center;margin:0 0 12px">New Account Setup</h2>
 
-        <div class="role-inline">
-          <span class="role-title funtext">I am a</span>
-          <label><input type="radio" name="role" id="roleBrand" value="brand"> <span>Brand</span></label>
-          <label><input type="radio" name="role" id="roleCreator" value="creator"> <span>Creator</span></label>
+        <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin:6px 0 14px">
+          <span class="funtext" style="font-size:20px">I am a</span>
+          <label style="display:flex;align-items:center;gap:6px;margin:0"><input type="radio" name="role" id="roleBrand" value="brand"> <span>Brand</span></label>
+          <label style="display:flex;align-items:center;gap:6px;margin:0"><input type="radio" name="role" id="roleCreator" value="creator"> <span>Creator</span></label>
         </div>
 
-        <div class="formgrid">
+        <!-- 2-col form grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div>
-            <label>First Name</label>
-            <input id="first_name" type="text" autocomplete="given-name" required>
-          </div>
-          <div>
-            <label>Last Name</label>
-            <input id="last_name" type="text" autocomplete="family-name" required>
+            <label style="display:block;font-size:14px;margin:6px 0 4px">First Name</label>
+            <input id="first_name" type="text" autocomplete="given-name" required
+              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
           </div>
 
-          <div class="full">
-            <label>Email <span id="email_used" class="label-error" role="alert" style="display:none">Email already used</span></label>
-            <input id="email" type="email" autocomplete="email" required>
+          <div>
+            <label style="display:block;font-size:14px;margin:6px 0 4px">Last Name</label>
+            <input id="last_name" type="text" autocomplete="family-name" required
+              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <label style="display:block;font-size:14px;margin:6px 0 4px">Email
+              <span id="email_used" class="hint hint-error" style="display:none;margin-left:8px;font-weight:600">Email already used</span>
+            </label>
+            <input id="email" type="email" autocomplete="email" required
+              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
             <div id="email_error" class="error" style="display:none">Email — Email already in use</div>
           </div>
 
-          <div class="full">
-            <label>
-              Create User ID
-              <span id="hint_user" class="hint">(3 - 15 char)</span>
+          <div style="grid-column:1 / -1">
+            <label style="display:block;font-size:14px;margin:6px 0 4px">
+              Create User ID <span id="hint_user" class="hint">(3 - 15 char)</span>
               <span id="hint_user_taken" class="hint hint-error" style="display:none">(user id already taken)</span>
             </label>
-            <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required>
+            <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required
+              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
             <div id="user_error" class="error" style="display:none">User ID already in use</div>
           </div>
 
           <div>
-            <label>
-              Password
-              <span id="hint_pass" class="hint">(8 - 15 char)</span>
-            </label>
-            <div class="rel">
-              <input id="password" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
-              <!-- Eye uses air.css icon classes. Keep width/height fixed. No text to avoid shift. -->
-              <button id="reveal1" class="reveal" type="button" aria-label="Show password" title="Show password"
-                style="position:absolute;right:8px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:none;">
-                <span id="ico1" class="ico ico-eye" aria-hidden="true" style="width:20px;height:20px;"></span>
+            <label style="display:block;font-size:14px;margin:6px 0 4px">Password <span id="hint_pass" class="hint">(8 - 15 char)</span></label>
+            <div style="position:relative">
+              <input id="password" type="password" autocomplete="new-password" minlength="8" maxlength="15" required
+                style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 44px 10px 12px;font-size:16px">
+              <!-- Eye icon uses air.css classes; fixed box prevents movement -->
+              <button id="reveal1" type="button" aria-label="Show password" title="Show password"
+                style="position:absolute;right:6px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:0">
+                <span id="ico1" class="ico eye" aria-hidden="true" style="width:20px;height:20px"></span>
               </button>
             </div>
           </div>
 
           <div>
-            <label id="label_password2">Confirm Password</label>
-            <div class="rel">
-              <input id="password2" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
-              <button id="reveal2" class="reveal" type="button" aria-label="Show confirm password" title="Show confirm password"
-                style="position:absolute;right:8px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:none;">
-                <span id="ico2" class="ico ico-eye" aria-hidden="true" style="width:20px;height:20px;"></span>
+            <label style="display:block;font-size:14px;margin:6px 0 4px">Confirm Password</label>
+            <div style="position:relative">
+              <input id="password2" type="password" autocomplete="new-password" minlength="8" maxlength="15" required
+                style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 44px 10px 12px;font-size:16px">
+              <button id="reveal2" type="button" aria-label="Show confirm password" title="Show confirm password"
+                style="position:absolute;right:6px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:0">
+                <span id="ico2" class="ico eye" aria-hidden="true" style="width:20px;height:20px"></span>
               </button>
             </div>
             <div id="pass_error" class="error" style="display:none">Passwords do not match</div>
           </div>
 
-          <div class="full"><div id="form_error" class="alert" style="display:none"></div></div>
+          <div style="grid-column:1 / -1"><div id="form_error" class="alert" style="display:none"></div></div>
         </div>
       </article>
 
       <article class="card subcard">
-        <h3 class="funtext">Terms And Privacy</h3>
-        <div class="termsRow">
-          <label>
+        <h3 class="funtext" style="text-align:center;margin:0 0 10px">Terms And Privacy</h3>
+        <div style="display:flex;justify-content:center;gap:10px">
+          <label style="display:flex;align-items:center;gap:10px">
             <input type="checkbox" id="agree" required>
             <span>I Agree To Bestie Collabs <a href="/terms/">Terms</a> And <a href="/privacy/">Privacy</a></span>
           </label>
@@ -109,11 +115,9 @@
     </div>
 
     <div class="actions" style="text-align:center;margin-top:10px">
-      <!-- starts disabled; JS switches to btn-fun when valid -->
-      <button class="btn btn-lg btn-ghost" id="createBtn" type="button" disabled>Create Account</button>
+      <button class="btn btn-lg btn-fun" id="createBtn" type="button" disabled>Create Account</button>
     </div>
 
-    <!-- Place the alt card directly under the primary button; tight top padding -->
     <article class="card" style="max-width:56.25%;margin:12px auto 0;padding-top:8px">
       <h3 class="funtext" style="margin:0 0 8px;text-align:center">Already Have An Account?</h3>
       <div style="text-align:center">

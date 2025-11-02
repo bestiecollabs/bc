@@ -1,7 +1,6 @@
 (function(){
   const ids=['first_name','last_name','email','username','password','password2','agree','roleBrand','roleCreator'];
   const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
-
   const btn=document.getElementById('createBtn');
   const banner=document.getElementById('form_error');
   const userErr=document.getElementById('user_error');
@@ -14,19 +13,19 @@
   const ico1=document.getElementById('ico1');
   const ico2=document.getElementById('ico2');
 
-  // Show/Hide with air.css icons; keep input focused to avoid visual shift
-  function addReveal(inputId, btnId, ico){
+  // Eye toggle like login: prevent mousedown focus, toggle class "eye"/"eye-off"
+  function addReveal(inputId, btnId, icon){
     const input=document.getElementById(inputId);
     const btn=document.getElementById(btnId);
-    btn.addEventListener('mousedown', (e)=>{ e.preventDefault(); }); // prevent focus jumping to button
+    btn.addEventListener('mousedown', e=>e.preventDefault());
     btn.addEventListener('click', ()=>{
-      const toText = input.type === 'password';
-      input.type = toText ? 'text' : 'password';
-      ico.classList.toggle('ico-eye', !toText);
-      ico.classList.toggle('ico-eye-off', toText);
-      btn.setAttribute('aria-label', toText ? 'Hide password' : 'Show password');
-      btn.setAttribute('title', toText ? 'Hide password' : 'Show password');
-      input.focus({ preventScroll:true }); // keep input focus to stop any nudge
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      icon.classList.toggle('eye', !show);
+      icon.classList.toggle('eye-off', show);
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      btn.setAttribute('title', show ? 'Hide password' : 'Show password');
+      input.focus({ preventScroll:true });
     });
   }
   addReveal('password','reveal1',ico1);
@@ -35,9 +34,9 @@
   let busy=false, allOk=false;
   const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-  function setBtnVisual(){
-    btn.classList.toggle('btn-fun', allOk && !busy);
-    btn.classList.toggle('btn-ghost', !(allOk && !busy));
+  // Keep fun theme always; only disable/enable state changes
+  function updateBtn(){
+    btn.disabled = !allOk || busy;
   }
 
   function validate(){
@@ -62,8 +61,7 @@
     hintPass.classList.toggle('hint-error', !!p1 && !passLenOk);
 
     allOk = !!first && !!last && validEmail(email) && userOk && passLenOk && match && roleOk && el.agree.checked;
-    btn.disabled = !allOk || busy;
-    setBtnVisual();
+    updateBtn();
   }
 
   Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
@@ -71,7 +69,7 @@
   el.password2.addEventListener('blur', ()=>{ if(el.password.value && el.password2.value && el.password.value !== el.password2.value){ alert('Passwords do not match'); } });
   validate();
 
-  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; btn.disabled = !allOk || busy; setBtnVisual(); }
+  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; updateBtn(); }
 
   async function postJSON(url,data){
     try{
@@ -106,7 +104,6 @@
       role
     };
 
-    // 1) precheck email
     const s1 = await postJSON('/auth/start', { email: base.email, role });
     if(!s1.ok || (s1.json && s1.json.ok===false)){
       const e = (s1.json && (s1.json.error||s1.json.code)) || '';
@@ -120,7 +117,6 @@
       await hardLogout(); setBusy(false); validate(); return;
     }
 
-    // 2) precheck username
     const u = await probeUsername(base);
     await hardLogout();
     if(u.taken){
@@ -129,7 +125,6 @@
       setBusy(false); validate(); return;
     }
 
-    // 3) create
     const payload = { ...base, password: el.password.value, accepted_terms: !!el.agree.checked, terms_version:'v1' };
     const s2 = await postJSON('/api/signup/complete', payload);
     if(!s2.ok || (s2.json && s2.json.ok===false)){
