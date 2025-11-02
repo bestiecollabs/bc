@@ -41,11 +41,11 @@
     .hint{color:#64748b;font-size:12px}
     .hint-error{color:#c00}
     .rel{position:relative}
+    /* Use air.css icon classes; keep position stable */
     .reveal{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .reveal:active{transform:translateY(-50%)} /* prevent nudge */
     .reveal .ico{width:20px;height:20px}
-    .reveal .ico{background-color:var(--fun)} /* purple icon if icons use CSS mask */
-    .alt-actions{margin-top:12px;text-align:center}
+    .reveal .ico{background-color:var(--fun)}
+    .alt-card{margin-top:12px;text-align:center}
   </style>
 </head>
 <body>
@@ -138,15 +138,16 @@
           </label>
         </div>
       </article>
+
+      <article class="card alt-card">
+        <h3 class="funtext">Already Have An Account?</h3>
+        <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
+      </article>
     </div>
 
     <div class="actions">
       <!-- start as ghost; JS swaps to fun when valid -->
       <button class="btn btn-lg btn-ghost" id="createBtn" type="button" disabled>Create Account</button>
-      <div class="alt-actions">
-        <p>Already Have An Account?</p>
-        <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
-      </div>
     </div>
   </section>
 </main>
@@ -158,20 +159,6 @@
     <a href="/privacy/">Privacy</a><a href="/support/">Support</a><a href="/terms/">Terms</a>
   </nav>
 </footer>
-
-<!-- keep modal markup but we no longer open it for email-in-use -->
-<div id="modal-backdrop" class="modal-backdrop" aria-hidden="true"></div>
-<div id="modal-email" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-email-title" aria-describedby="modal-email-desc">
-  <div id="modal-email-header" class="modal-header"><h4 id="modal-email-title">That Email Is Already Used</h4></div>
-  <div class="modal-body">
-    <p id="modal-email-desc">Log in now, reset your password or try again.</p>
-    <div class="rowbtns">
-      <a href="/login/" class="btn btn-fun"><strong>Log In</strong></a>
-      <a href="/reset/" class="btn btn-fun"><strong>Reset Password</strong></a>
-      <button id="modal-close" class="btn btn-fun" type="button"><strong>Try Again</strong></button>
-    </div>
-  </div>
-</div>
 
 <script src="/auth.js" defer></script>
 <script src="/signup/app.js" defer></script>

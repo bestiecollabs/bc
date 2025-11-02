@@ -4,8 +4,8 @@
   const btn=document.getElementById('createBtn');
   const banner=document.getElementById('form_error');
   const userErr=document.getElementById('user_error');
-  const emailErr=document.getElementById('email_error'); // legacy under-input
-  const emailUsed=document.getElementById('email_used'); // inline, same size as label
+  const emailErr=document.getElementById('email_error');
+  const emailUsed=document.getElementById('email_used');
   const hintUser=document.getElementById('hint_user');
   const hintUserTaken=document.getElementById('hint_user_taken');
   const hintPass=document.getElementById('hint_pass');
@@ -13,6 +13,7 @@
   const ico1=document.getElementById('ico1');
   const ico2=document.getElementById('ico2');
 
+  // Eye toggle using air.css icons
   function hookupReveal(inputId, btnId, ico){
     const input=document.getElementById(inputId);
     const btn=document.getElementById(btnId);
@@ -108,7 +109,6 @@
       const e = (s1.json && (s1.json.error||s1.json.code)) || '';
       if(s1.status===409 || /already|email/i.test(e)){
         await hardLogout();
-        // inline notice near label per request
         emailUsed.style.display='inline';
         setBusy(false); validate(); return;
       }
