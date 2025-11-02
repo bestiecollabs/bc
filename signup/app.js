@@ -9,28 +9,15 @@
   const hintUser=document.getElementById('hint_user');
   const hintUserTaken=document.getElementById('hint_user_taken');
   const hintPass=document.getElementById('hint_pass');
-const ico2=document.getElementById('ico2');
+
 
   // Eye toggle identical to login: element is <i class="ico eye">; swap to eye-off; prevent focus jump
   );
     });
   }
-addReveal('password2','reveal2',ico2);
+
   // Login-style eye toggle
-  (function wirePwEyes(){
-    document.querySelectorAll('.pw-eye').forEach(function(btn){
-      var id = btn.getAttribute('aria-controls');
-      var input = document.getElementById(id);
-      if(!input) return;
-      btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
-      btn.addEventListener('click', function(){
-        var show = btn.getAttribute('aria-pressed') !== 'true';
-        btn.setAttribute('aria-pressed', String(show));
-        input.type = show ? 'text' : 'password';
-        try { input.focus({ preventScroll:true }); } catch(_) {}
-      });
-    });
-  })();
+  
 let busy=false, allOk=false;
   const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
@@ -134,5 +121,27 @@ let busy=false, allOk=false;
 
     location.assign('/account/');
   });
-})();
+  // pw-eye toggle and Terms gating (CSP-safe; external JS only)
+  (function(){
+    document.querySelectorAll('.pw-eye').forEach(function(btn){
+      var id = btn.getAttribute('aria-controls');
+      var input = document.getElementById(id);
+      if (!input) return;
+      btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      btn.addEventListener('click', function(){
+        var show = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', String(show));
+        input.type = show ? 'text' : 'password';
+        try { input.focus({ preventScroll:true }); } catch(_) {}
+      });
+    });
+
+    var agree  = document.getElementById('agree');
+    var create = document.getElementById('createBtn');
+    if (agree && create) {
+      create.disabled = !agree.checked;
+      agree.addEventListener('change', function(){ create.disabled = !agree.checked; });
+    }
+  })();})();
+
 
