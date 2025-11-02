@@ -1,6 +1,7 @@
 (function(){
   const ids=['first_name','last_name','email','username','password','password2','agree','roleBrand','roleCreator'];
   const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
+
   const btn=document.getElementById('createBtn');
   const banner=document.getElementById('form_error');
   const userErr=document.getElementById('user_error');
@@ -13,10 +14,11 @@
   const ico1=document.getElementById('ico1');
   const ico2=document.getElementById('ico2');
 
-  // Eye toggle using air.css icons
-  function hookupReveal(inputId, btnId, ico){
+  // Show/Hide with air.css icons; keep input focused to avoid visual shift
+  function addReveal(inputId, btnId, ico){
     const input=document.getElementById(inputId);
     const btn=document.getElementById(btnId);
+    btn.addEventListener('mousedown', (e)=>{ e.preventDefault(); }); // prevent focus jumping to button
     btn.addEventListener('click', ()=>{
       const toText = input.type === 'password';
       input.type = toText ? 'text' : 'password';
@@ -24,10 +26,11 @@
       ico.classList.toggle('ico-eye-off', toText);
       btn.setAttribute('aria-label', toText ? 'Hide password' : 'Show password');
       btn.setAttribute('title', toText ? 'Hide password' : 'Show password');
+      input.focus({ preventScroll:true }); // keep input focus to stop any nudge
     });
   }
-  hookupReveal('password','reveal1',ico1);
-  hookupReveal('password2','reveal2',ico2);
+  addReveal('password','reveal1',ico1);
+  addReveal('password2','reveal2',ico2);
 
   let busy=false, allOk=false;
   const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
