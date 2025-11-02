@@ -13,7 +13,7 @@
   const ico1=document.getElementById('ico1');
   const ico2=document.getElementById('ico2');
 
-  // Eye toggle like login: prevent mousedown focus, toggle class "eye"/"eye-off"
+  // Eye toggle identical to login: mousedown prevents focus change; classes "eye" <-> "eye-off"
   function addReveal(inputId, btnId, icon){
     const input=document.getElementById(inputId);
     const btn=document.getElementById(btnId);
@@ -24,7 +24,6 @@
       icon.classList.toggle('eye', !show);
       icon.classList.toggle('eye-off', show);
       btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
-      btn.setAttribute('title', show ? 'Hide password' : 'Show password');
       input.focus({ preventScroll:true });
     });
   }
@@ -34,15 +33,10 @@
   let busy=false, allOk=false;
   const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-  // Keep fun theme always; only disable/enable state changes
-  function updateBtn(){
-    btn.disabled = !allOk || busy;
-  }
-
   function validate(){
-    userErr.style.display='none';
-    emailErr.style.display='none';
-    emailUsed.style.display='none';
+    userErr && (userErr.style.display='none');
+    emailErr && (emailErr.style.display='none');
+    emailUsed && (emailUsed.style.display='none');
 
     const first=el.first_name.value.trim();
     const last =el.last_name.value.trim();
@@ -56,20 +50,20 @@
     const passLenOk = p1.length>=8 && p1.length<=15;
     const match = p1 === p2 && p2.length>0;
 
-    passError.style.display = p2 && !match ? 'block' : 'none';
-    hintUser.classList.toggle('hint-error', !!user && !userOk);
-    hintPass.classList.toggle('hint-error', !!p1 && !passLenOk);
+    passError && (passError.style.display = p2 && !match ? 'block' : 'none');
+    hintUser && hintUser.classList.toggle('hint-error', !!user && !userOk);
+    hintPass && hintPass.classList.toggle('hint-error', !!p1 && !passLenOk);
 
     allOk = !!first && !!last && validEmail(email) && userOk && passLenOk && match && roleOk && el.agree.checked;
-    updateBtn();
+    btn.disabled = !allOk || busy;
   }
 
   Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
-  el.email.addEventListener('input', ()=>{ emailUsed.style.display='none'; emailErr.style.display='none'; });
+  el.email.addEventListener('input', ()=>{ if(emailUsed) { emailUsed.style.display='none'; } if(emailErr) { emailErr.style.display='none'; } });
   el.password2.addEventListener('blur', ()=>{ if(el.password.value && el.password2.value && el.password.value !== el.password2.value){ alert('Passwords do not match'); } });
   validate();
 
-  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; updateBtn(); }
+  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; btn.disabled = !allOk || busy; }
 
   async function postJSON(url,data){
     try{
@@ -109,7 +103,7 @@
       const e = (s1.json && (s1.json.error||s1.json.code)) || '';
       if(s1.status===409 || /already|email/i.test(e)){
         await hardLogout();
-        emailUsed.style.display='inline';
+        if(emailUsed) emailUsed.style.display='inline';
         setBusy(false); validate(); return;
       }
       banner.textContent = `/auth/start failed. status ${s1.status}. body: ${s1.text.slice(0,300)}`;
@@ -120,8 +114,8 @@
     const u = await probeUsername(base);
     await hardLogout();
     if(u.taken){
-      userErr.style.display='block';
-      hintUserTaken.style.display='inline';
+      if(userErr) userErr.style.display='block';
+      if(hintUserTaken) hintUserTaken.style.display='inline';
       setBusy(false); validate(); return;
     }
 
@@ -129,8 +123,11 @@
     const s2 = await postJSON('/api/signup/complete', payload);
     if(!s2.ok || (s2.json && s2.json.ok===false)){
       await hardLogout();
-      if(s2.status===409 || /user.*exist|username|user_id/.test(((s2.json && (s2.json.error||s2.json.code))||'').toLowerCase())){
-        userErr.style.display='block'; hintUserTaken.style.display='inline'; setBusy(false); validate(); return;
+      const code = ((s2.json && (s2.json.error||s2.json.code))||'').toLowerCase();
+      if(s2.status===409 || /user.*exist|username|user_id/.test(code)){
+        if(userErr) userErr.style.display='block';
+        if(hintUserTaken) hintUserTaken.style.display='inline';
+        setBusy(false); validate(); return;
       }
       banner.textContent = s2.text.slice(0,300) || 'Signup failed.';
       banner.style.display='block';
