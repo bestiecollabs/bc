@@ -39,31 +39,10 @@
     .alert{margin:8px 0 0;padding:10px 12px;border:1px solid #fecaca;background:#fee2e2;color:#7f1d1d;border-radius:10px;display:none;white-space:pre-wrap}
     .hint{color:#64748b;font-size:12px}
     .hint-error{color:#c00}
-    /* reveal buttons */
     .rel{position:relative}
-    .reveal{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:12px;padding:4px 10px}
-    /* tooltip */
-    .tooltip{position:fixed;z-index:1000;background:#fff;color:#0f172a;padding:10px 12px;border-radius:8px;
-      font-size:14px;max-width:320px;text-align:center;pointer-events:none;opacity:0;transform:translateX(-50%);
-      box-shadow:0 6px 18px rgba(0,0,0,.18);transition:opacity .12s ease;border:1px solid var(--line)}
-    .tooltip.show{opacity:1}
-    /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1200;display:none}
-    .modal-backdrop.show{display:block}
-    .modal{
-      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-      background:#fff;border:1px solid var(--line);border-radius:14px;z-index:1210;
-      width:min(520px,92%);padding:0;box-shadow:0 14px 44px rgba(0,0,0,.22);display:none
-    }
-    .modal.show{display:block}
-    .modal .modal-header{
-      cursor:move;user-select:none;padding:14px 16px;border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(76,111,255,0.06), transparent)
-    }
-    .modal h4{margin:0;font-size:18px;text-align:center}
-    .modal .modal-body{padding:14px 18px}
-    .modal p{margin:0 0 12px;text-align:center;color:#475569}
-    .modal .rowbtns{display:flex;gap:10px;justify-content:center;padding:0 0 16px}
+    .reveal{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:0;border:0;background:transparent;width:32px;height:32px;cursor:pointer}
+    /* Expecting air.css to provide .ico, .ico-eye, .ico-eye-off backgrounds */
+    .ico{display:inline-block;width:24px;height:24px;vertical-align:middle}
   </style>
 </head>
 <body>
@@ -132,14 +111,14 @@
             </label>
             <div class="rel">
               <input id="password" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
-              <button id="reveal1" class="reveal btn btn-ghost" type="button" aria-label="Show password">Show</button>
+              <button id="reveal1" class="reveal" type="button" aria-label="Show password" title="Show password"><span id="ico1" class="ico ico-eye" aria-hidden="true"></span></button>
             </div>
           </div>
           <div>
             <label id="label_password2">Confirm Password</label>
             <div class="rel">
               <input id="password2" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
-              <button id="reveal2" class="reveal btn btn-ghost" type="button" aria-label="Show confirm password">Show</button>
+              <button id="reveal2" class="reveal" type="button" aria-label="Show confirm password" title="Show confirm password"><span id="ico2" class="ico ico-eye" aria-hidden="true"></span></button>
             </div>
             <div id="pass_error" class="error">Passwords do not match</div>
           </div>
@@ -160,7 +139,7 @@
     </div>
 
     <div class="actions">
-      <button class="btn btn-lg" id="createBtn" type="button" disabled>Create Account</button>
+      <button class="btn btn-lg btn-fun" id="createBtn" type="button" disabled>Create Account</button>
     </div>
   </section>
 </main>
@@ -173,12 +152,10 @@
   </nav>
 </footer>
 
-<!-- Draggable Email-taken modal -->
+<!-- Email-taken modal -->
 <div id="modal-backdrop" class="modal-backdrop" aria-hidden="true"></div>
 <div id="modal-email" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-email-title" aria-describedby="modal-email-desc">
-  <div id="modal-email-header" class="modal-header">
-    <h4 id="modal-email-title">That Email Is Already Used</h4>
-  </div>
+  <div id="modal-email-header" class="modal-header"><h4 id="modal-email-title">That Email Is Already Used</h4></div>
   <div class="modal-body">
     <p id="modal-email-desc">Log in now, reset your password or try again.</p>
     <div class="rowbtns">
@@ -202,129 +179,68 @@
   const hintUserTaken=document.getElementById('hint_user_taken');
   const hintPass=document.getElementById('hint_pass');
   const passError=document.getElementById('pass_error');
+  const ico1=document.getElementById('ico1');
+  const ico2=document.getElementById('ico2');
 
-  // toggle show/hide for password fields
-  function hookupReveal(inputId, btnId){
-    const i=document.getElementById(inputId);
-    const b=document.getElementById(btnId);
-    if(!i||!b) return;
-    b.addEventListener('click', ()=>{
-      i.type = i.type === 'password' ? 'text' : 'password';
-      b.textContent = i.type === 'password' ? 'Show' : 'Hide';
+  // Show/Hide with air.css icons
+  function hookupReveal(inputId, btnId, ico){
+    const input=document.getElementById(inputId);
+    const btn=document.getElementById(btnId);
+    btn.addEventListener('click', ()=>{
+      const isPw = input.type === 'password';
+      input.type = isPw ? 'text' : 'password';
+      // toggle icon class only; air.css supplies visuals
+      ico.classList.toggle('ico-eye', !isPw);
+      ico.classList.toggle('ico-eye-off', isPw);
+      btn.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+      btn.setAttribute('title', isPw ? 'Hide password' : 'Show password');
     });
   }
-  hookupReveal('password','reveal1');
-  hookupReveal('password2','reveal2');
+  hookupReveal('password','reveal1',ico1);
+  hookupReveal('password2','reveal2',ico2);
 
-  // tooltip
-  const tip=document.createElement('div'); tip.className='tooltip'; tip.setAttribute('aria-hidden','true'); document.body.appendChild(tip);
-  function showTip(e){
-    if(!btn.disabled) return hideTip();
-    const reasons=[];
-    const email=el.email.value.trim();
-    const user =el.username.value.trim();
-    const p1   =el.password.value;
-    const p2   =el.password2.value;
-    const roleOk = el.roleBrand.checked || el.roleCreator.checked;
-    if(!el.first_name.value.trim()) reasons.push('Enter first name');
-    if(!el.last_name.value.trim()) reasons.push('Enter last name');
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) reasons.push('Enter a valid email');
-    if(!/^[A-Za-z0-9_]{3,15}$/.test(user)) reasons.push('User ID must be 3–15 chars, letters/numbers/_');
-    if(!(p1.length>=8 && p1.length<=15)) reasons.push('Password must be 8–15 chars');
-    if(!(p1===p2 && p2.length>0)) reasons.push('Passwords must match');
-    if(!roleOk) reasons.push('Choose account type');
-    if(!el.agree.checked) reasons.push('Agree to Terms');
-    tip.textContent = reasons.length ? reasons.join(' • ') : 'Complete all required fields';
-    tip.style.left = e.clientX + 'px';
-    tip.classList.add('show'); tip.setAttribute('aria-hidden','false');
-    requestAnimationFrame(()=>{ const h=tip.offsetHeight||36; tip.style.top=(e.clientY-12-h)+'px'; });
-  }
-  function moveTip(e){ if(!tip.classList.contains('show')) return; tip.style.left=e.clientX+'px'; const h=tip.offsetHeight||36; tip.style.top=(e.clientY-12-h)+'px'; }
-  function hideTip(){ tip.classList.remove('show'); tip.setAttribute('aria-hidden','true'); }
-  btn.addEventListener('mouseenter',showTip);
-  btn.addEventListener('mousemove',moveTip);
-  btn.addEventListener('mouseleave',hideTip);
-  btn.addEventListener('focus',(e)=>showTip({clientX:e.target.getBoundingClientRect().left+e.target.offsetWidth/2,clientY:e.target.getBoundingClientRect().top}));
-  btn.addEventListener('blur',hideTip);
-
-  // modal refs
+  // Modal
   const backdrop=document.getElementById('modal-backdrop');
   const modal=document.getElementById('modal-email');
-  const modalHeader=document.getElementById('modal-email-header');
   const modalClose=document.getElementById('modal-close');
-
   function openModal(){ backdrop.classList.add('show'); modal.classList.add('show'); }
   function closeModal(){ backdrop.classList.remove('show'); modal.classList.remove('show'); }
   modalClose?.addEventListener('click',closeModal);
   backdrop?.addEventListener('click',closeModal);
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
 
-  // draggable modal
-  (function makeDraggable(){
-    let dragging=false, startX=0, startY=0, startLeft=0, startTop=0;
-    modalHeader.addEventListener('mousedown', (e)=>{
-      dragging=true;
-      const rect=modal.getBoundingClientRect();
-      startX=e.clientX; startY=e.clientY;
-      startLeft=rect.left; startTop=rect.top;
-      document.body.style.userSelect='none';
-    });
-    window.addEventListener('mousemove',(e)=>{
-      if(!dragging) return;
-      const dx=e.clientX-startX, dy=e.clientY-startY;
-      modal.style.left=(startLeft+dx)+'px';
-      modal.style.top=(startTop+dy)+'px';
-      modal.style.transform='translate(0,0)';
-    });
-    window.addEventListener('mouseup',()=>{
-      if(!dragging) return;
-      dragging=false;
-      document.body.style.userSelect='';
-    });
-  })();
+  // State
+  let busy=false, allOk=false;
 
-  const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  let busy=false;
-  function setBusy(s){ busy=s; btn.textContent=s?'Creating…':'Create Account'; btn.disabled=s||btn.disabled; }
-  function showBanner(t){ banner.textContent=t; banner.style.display='block'; }
-  function hideBanner(){ banner.textContent=''; banner.style.display='none'; }
+  function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
   function validate(){
     userErr.style.display='none';
     emailErr.style.display='none';
-    hideBanner();
-
     const first=el.first_name.value.trim();
     const last =el.last_name.value.trim();
     const email=el.email.value.trim();
     const user =el.username.value.trim();
     const p1   =el.password.value;
     const p2   =el.password2.value;
-
-    const userLenBad = !!user && !/^[A-Za-z0-9_]{3,15}$/.test(user);
-    hintUser.classList.toggle('hint-error', userLenBad);
-
-    const passLenBad = !!p1 && p1.length < 8;
-    hintPass.classList.toggle('hint-error', passLenBad);
-
-    const mismatch = !!p2 && p1 !== p2;
-    passError.style.display = mismatch ? 'block' : 'none';
-
-    const emailOk=validEmail(email);
-    const userOk =/^[A-Za-z0-9_]{3,15}$/.test(user);
-    const passOk =p1.length>=8 && p1.length<=15 && !mismatch && p2.length>0;
     const roleOk = el.roleBrand.checked || el.roleCreator.checked;
 
-    const allOk=!!first && !!last && emailOk && userOk && passOk && roleOk && el.agree.checked && !busy;
-    btn.disabled=!allOk;
-    if(!allOk) hintUserTaken.style.display='none';
-  }
-  Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
-  el.username.addEventListener('input', ()=>{ hintUserTaken.style.display='none'; });
-  // alert when leaving confirm field with mismatch
-  el.password2.addEventListener('blur', ()=>{ const p1=el.password.value, p2=el.password2.value; if(p1 && p2 && p1!==p2) alert('Passwords do not match'); });
+    const userOk = /^[A-Za-z0-9_]{3,15}$/.test(user);
+    const passLenOk = p1.length>=8 && p1.length<=15;
+    const match = p1 === p2 && p2.length>0;
+    passError.style.display = p2 && !match ? 'block' : 'none';
+    hintUser.classList.toggle('hint-error', !!user && !userOk);
+    hintPass.classList.toggle('hint-error', !!p1 && !passLenOk);
 
+    allOk = !!first && !!last && validEmail(email) && userOk && passLenOk && match && roleOk && el.agree.checked;
+    btn.disabled = !allOk || busy;
+  }
+
+  Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
+  el.password2.addEventListener('blur', ()=>{ if(el.password.value && el.password2.value && el.password.value !== el.password2.value){ alert('Passwords do not match'); } });
   validate();
+
+  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; btn.disabled = !allOk || busy; }
 
   async function postJSON(url,data){
     try{
@@ -335,7 +251,7 @@
   }
   async function hardLogout(){ try{ await fetch('/logout',{credentials:'include'}); }catch(_){ } }
 
-  // username probe without creating an account
+  // Username probe
   async function probeUsername(base){
     const probe = { ...base, password:'x', accepted_terms:false };
     const r = await postJSON('/api/signup/complete', probe);
@@ -347,17 +263,11 @@
 
   btn.addEventListener('click', async ()=>{
     if(btn.disabled) return;
+    if(el.password.value !== el.password2.value){ alert('Passwords do not match'); return; }
 
-    // guard: alert if mismatch just in case
-    if(el.password.value && el.password2.value && el.password.value !== el.password2.value){
-      alert('Passwords do not match'); return;
-    }
-
-    setBusy(true); validate();
+    setBusy(true);
 
     const role = el.roleCreator.checked ? 'creator' : el.roleBrand.checked ? 'brand' : '';
-    if(!role){ setBusy(false); validate(); return; }
-
     const username = el.username.value.trim();
     const base = {
       email: el.email.value.trim(),
@@ -367,54 +277,33 @@
       role
     };
 
-    // 1) precheck email — only place that opens the email modal
+    // 1) precheck email
     const s1 = await postJSON('/auth/start', { email: base.email, role });
     if(!s1.ok || (s1.json && s1.json.ok===false)){
       const e = (s1.json && (s1.json.error||s1.json.code)) || '';
-      if(s1.status===409 || /already|email/i.test(e)){
-        await hardLogout();
-        emailErr.style.display='block';
-        openModal();
-        setBusy(false); validate(); return;
-      }
-      showBanner(`/auth/start failed. status ${s1.status}. body: ${s1.text.slice(0,300)}`);
+      if(s1.status===409 || /already|email/i.test(e)){ await hardLogout(); emailErr.style.display='block'; openModal(); setBusy(false); validate(); return; }
+      banner.textContent = `/auth/start failed. status ${s1.status}. body: ${s1.text.slice(0,300)}`;
+      banner.style.display='block';
       await hardLogout(); setBusy(false); validate(); return;
     }
 
     // 2) precheck username
     const u = await probeUsername(base);
     await hardLogout();
-    if(u.taken){
-      userErr.style.display='block';
-      hintUserTaken.style.display='inline';
-      setBusy(false); validate(); return;
-    }
+    if(u.taken){ userErr.style.display='block'; hintUserTaken.style.display='inline'; setBusy(false); validate(); return; }
 
     // 3) create
     const payload = { ...base, password: el.password.value, accepted_terms: !!el.agree.checked, terms_version:'v1' };
     const s2 = await postJSON('/api/signup/complete', payload);
     if(!s2.ok || (s2.json && s2.json.ok===false)){
       await hardLogout();
-      if(s2.status===409){
-        userErr.style.display='block'; hintUserTaken.style.display='inline';
-        setBusy(false); validate(); return;
-      }
-      const code = ((s2.json && (s2.json.error||s2.json.code))||'').toLowerCase();
-      if(/user.*exist|username|user_id/.test(code)){ userErr.style.display='block'; hintUserTaken.style.display='inline'; setBusy(false); validate(); return; }
-      if(/role_mismatch/.test(code)){ showBanner('Selected role does not match your saved signup role.'); setBusy(false); validate(); return; }
-      if(/not_started/.test(code)){ showBanner('Signup not started. Please try again.'); setBusy(false); validate(); return; }
-      if(/^missing_/.test(code)){ showBanner(`Missing field: ${code.replace('missing_','')}`); setBusy(false); validate(); return; }
-      showBanner(`/api/signup/complete failed. status ${s2.status}. body: ${s2.text.slice(0,300)}`);
+      if(s2.status===409 || /user.*exist|username|user_id/.test(((s2.json && (s2.json.error||s2.json.code))||'').toLowerCase())){ userErr.style.display='block'; hintUserTaken.style.display='inline'; setBusy(false); validate(); return; }
+      banner.textContent = s2.text.slice(0,300) || 'Signup failed.';
+      banner.style.display='block';
       setBusy(false); validate(); return;
     }
 
-    if(s2.json && s2.json.ok===true){
-      try{ window.location.assign('/account/'); } catch(_) { showBanner('Account created. Continue to your account.'); }
-    }else{
-      await hardLogout();
-      showBanner('Unexpected response from server.');
-    }
-    setBusy(false); validate();
+    location.assign('/account/');
   });
 })();
 </script>
