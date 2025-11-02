@@ -76,27 +76,12 @@
 
           <div>
             <label style="display:block;font-size:14px;margin:6px 0 4px">Password <span id="hint_pass" class="hint">(8 - 15 char)</span></label>
-            <div style="position:relative">
-              <input id="password" type="password" autocomplete="new-password" minlength="8" maxlength="15" required
-                style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 44px 10px 12px;font-size:16px"><button type="button" class="pw-toggle btn-icon" data-target="password" data-eye aria-pressed="false" aria-label="Show password"></button>
-              <!-- Use same icon hook as login: i.ico.eye toggled to eye-off -->
-              <button id="reveal1" type="button" aria-label="Show password" title="Show password"
-                style="position:absolute;right:6px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:0">
-                <i id="ico1" class="ico eye" aria-hidden="true" style="width:20px;height:20px"></i>
-              </button>
-            </div>
+            System.Func`2[System.Text.RegularExpressions.Match,System.String]
           </div>
 
           <div>
             <label style="display:block;font-size:14px;margin:6px 0 4px">Confirm Password</label>
-            <div style="position:relative">
-              <input id="password2" type="password" autocomplete="new-password" minlength="8" maxlength="15" required
-                style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 44px 10px 12px;font-size:16px">
-              <button id="reveal2" type="button" aria-label="Show confirm password" title="Show confirm password"
-                style="position:absolute;right:6px;top:50%;translate:0 -50%;width:32px;height:32px;padding:0;border:0;background:transparent;display:grid;place-items:center;outline:0">
-                <i id="ico2" class="ico eye" aria-hidden="true" style="width:20px;height:20px"></i>
-              </button>
-            </div>
+            System.Func`2[System.Text.RegularExpressions.Match,System.String]
           </div>
 
           <div style="grid-column:1 / -1"><div id="form_error" class="alert" style="display:none"></div></div>
@@ -138,24 +123,25 @@
 
 <script src="/auth.js" defer></script>
 <script src="/signup/app.js" defer></script>
+
+
+<!-- pw-eye-wire -->
 <script>
 (function(){
-  var qs = document.querySelectorAll('.pw-toggle');
-  if(!qs.length) return;
-  qs.forEach(function(btn){
-    var id = btn.getAttribute('data-target');
+  function wire(btn){
+    var id = btn.getAttribute('aria-controls');
     var input = document.getElementById(id);
     if(!input) return;
+    btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
     btn.addEventListener('click', function(){
-      var show = input.type === 'password';
-      input.type = show ? 'text' : 'password';
+      var show = btn.getAttribute('aria-pressed') !== 'true';
       btn.setAttribute('aria-pressed', String(show));
-      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      input.type = show ? 'text' : 'password';
+      if (input.focus) try { input.focus({ preventScroll:true }); } catch(e) {}
     });
-  });
+  }
+  document.querySelectorAll('.pw-eye').forEach(wire);
 })();
 </script>
 </body>
 </html>
-
-
