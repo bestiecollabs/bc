@@ -33,7 +33,7 @@
     <div class="cols">
 
       <!-- 10% wider than previous: 52.2% -->
-      <article class="card" style="max-width:52.2%;min-width:340px;margin:0 auto;padding-bottom:14px">
+      <article class="card auth-card" style="max-width:52.2%;min-width:340px;margin:0 auto;padding-bottom:14px">
         <h2 class="funtext" style="text-align:center;margin:0 0 12px">New Account Setup</h2>
 
         <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin:6px 0 14px">
@@ -45,22 +45,19 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div>
             <label style="display:block;font-size:14px;margin:6px 0 4px">First Name</label>
-            <input id="first_name" type="text" autocomplete="given-name" required
-              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
+            <input id="first_name" type="text" autocomplete="given-name" required>
           </div>
 
           <div>
             <label style="display:block;font-size:14px;margin:6px 0 4px">Last Name</label>
-            <input id="last_name" type="text" autocomplete="family-name" required
-              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
+            <input id="last_name" type="text" autocomplete="family-name" required>
           </div>
 
           <div style="grid-column:1 / -1">
             <label style="display:block;font-size:14px;margin:6px 0 4px">Email
               <span id="email_used" class="hint hint-error" style="display:none;margin-left:8px;font-weight:600">Email already used</span>
             </label>
-            <input id="email" type="email" autocomplete="email" required
-              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
+            <input id="email" type="email" autocomplete="email" required>
             <div id="email_error" class="error" style="display:none">Email — Email already in use</div>
           </div>
 
@@ -69,8 +66,7 @@
               Create User ID <span id="hint_user" class="hint">(3 - 15 char)</span>
               <span id="hint_user_taken" class="hint hint-error" style="display:none">(user id already taken)</span>
             </label>
-            <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required
-              style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
+            <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required>
             <div id="user_error" class="error" style="display:none">User ID already in use</div>
           </div>
 
@@ -101,7 +97,7 @@
       </article>
 
       <!-- 10% wider too; Create Account stays inside -->
-      <article class="card subcard" style="max-width:52.2%;min-width:340px;margin:12px auto 0">
+      <article class="card auth-card subcard" style="max-width:52.2%;min-width:340px;margin:12px auto 0">
         <h3 class="funtext" style="text-align:center;margin:0 0 10px">Terms And Privacy</h3>
         <div style="display:flex;justify-content:center;gap:10px">
           <label style="display:flex;align-items:center;gap:10px">
@@ -114,7 +110,7 @@
         </div>
       </article>
 
-      <article class="card" style="max-width:52.2%;min-width:340px;margin:12px auto 0;padding-top:8px">
+      <article class="card auth-card" style="max-width:52.2%;min-width:340px;margin:12px auto 0;padding-top:8px">
         <h3 class="funtext" style="margin:0 0 8px;text-align:center">Already Have An Account?</h3>
         <div style="text-align:center">
           <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
@@ -138,24 +134,9 @@
 
 
 <!-- pw-eye-wire -->
-<script>
-(function(){
-  function wire(btn){
-    var id = btn.getAttribute('aria-controls');
-    var input = document.getElementById(id);
-    if(!input) return;
-    btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
-    btn.addEventListener('click', function(){
-      var show = btn.getAttribute('aria-pressed') !== 'true';
-      btn.setAttribute('aria-pressed', String(show));
-      input.type = show ? 'text' : 'password';
-      if (input.focus) try { input.focus({ preventScroll:true }); } catch(e) {}
-    });
-  }
-  document.querySelectorAll('.pw-eye').forEach(wire);
-})();
-</script>
+
 </body>
 </html>
+
 
 
