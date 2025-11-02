@@ -142,6 +142,20 @@ let busy=false, allOk=false;
       create.disabled = !agree.checked;
       agree.addEventListener('change', function(){ create.disabled = !agree.checked; });
     }
+  })();  (function wirePwEyes(){
+    document.querySelectorAll('.pw-eye').forEach(function(btn){
+      var id = btn.getAttribute('aria-controls');
+      var input = document.getElementById(id);
+      if (!input) return;
+      btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      btn.addEventListener('click', function(){
+        var show = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', String(show));
+        input.type = show ? 'text' : 'password';
+        try { input.focus({ preventScroll:true }); } catch(_) {}
+      });
+    });
   })();})();
+
 
 
