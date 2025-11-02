@@ -1,58 +1,138 @@
 (function(){
-  function $(id){ return document.getElementById(id); }
-  function toggle(id, btnId){
-    const i = $(id), b = $(btnId);
-    b.addEventListener("click", ()=> {
-      i.type = i.type === "password" ? "text" : "password";
-      b.textContent = i.type === "password" ? "Show" : "Hide";
+  const ids=['first_name','last_name','email','username','password','password2','agree','roleBrand','roleCreator'];
+  const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
+  const btn=document.getElementById('createBtn');
+  const banner=document.getElementById('form_error');
+  const userErr=document.getElementById('user_error');
+  const emailErr=document.getElementById('email_error');
+  const hintUser=document.getElementById('hint_user');
+  const hintUserTaken=document.getElementById('hint_user_taken');
+  const hintPass=document.getElementById('hint_pass');
+  const passError=document.getElementById('pass_error');
+  const ico1=document.getElementById('ico1');
+  const ico2=document.getElementById('ico2');
+
+  // Show/Hide with air.css icons
+  function hookupReveal(inputId, btnId, ico){
+    const input=document.getElementById(inputId);
+    const btn=document.getElementById(btnId);
+    btn.addEventListener('click', ()=>{
+      const toText = input.type === 'password';
+      input.type = toText ? 'text' : 'password';
+      ico.classList.toggle('ico-eye', !toText);
+      ico.classList.toggle('ico-eye-off', toText);
+      btn.setAttribute('aria-label', toText ? 'Hide password' : 'Show password');
+      btn.setAttribute('title', toText ? 'Hide password' : 'Show password');
     });
   }
+  hookupReveal('password','reveal1',ico1);
+  hookupReveal('password2','reveal2',ico2);
 
-  document.addEventListener("DOMContentLoaded", ()=>{
-    toggle("password","togglePwd");
-    toggle("confirm","toggleConfirm");
+  let busy=false, allOk=false;
+  const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-    const form = $("signupForm");
-    const msg  = $("msg");
-    const btn  = $("submitBtn");
+  function validate(){
+    userErr.style.display='none';
+    emailErr.style.display='none';
 
-    form.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      msg.textContent = "";
+    const first=el.first_name.value.trim();
+    const last =el.last_name.value.trim();
+    const email=el.email.value.trim();
+    const user =el.username.value.trim();
+    const p1   =el.password.value;
+    const p2   =el.password2.value;
+    const roleOk = el.roleBrand.checked || el.roleCreator.checked;
 
-      // Require fields via HTML5; also check match
-      const pwd = $("password").value;
-      const cfm = $("confirm").value;
-      if (pwd !== cfm) {
-        alert("Passwords do not match."); // hard alert by request
-        return;
+    const userOk = /^[A-Za-z0-9_]{3,15}$/.test(user);
+    const passLenOk = p1.length>=8 && p1.length<=15;
+    const match = p1 === p2 && p2.length>0;
+
+    passError.style.display = p2 && !match ? 'block' : 'none';
+    hintUser.classList.toggle('hint-error', !!user && !userOk);
+    hintPass.classList.toggle('hint-error', !!p1 && !passLenOk);
+
+    allOk = !!first && !!last && validEmail(email) && userOk && passLenOk && match && roleOk && el.agree.checked;
+    btn.disabled = !allOk || busy;
+  }
+
+  Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
+  el.password2.addEventListener('blur', ()=>{ if(el.password.value && el.password2.value && el.password.value !== el.password2.value){ alert('Passwords do not match'); } });
+  validate();
+
+  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; btn.disabled = !allOk || busy; }
+  async function postJSON(url,data){
+    try{
+      const res=await fetch(url,{ method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'}, credentials:'include', body:JSON.stringify(data) });
+      const text=await res.text(); let json=null; try{ json=JSON.parse(text); }catch{}
+      return { ok:res.ok, status:res.status, json, text };
+    }catch(e){ return { ok:false, status:0, json:null, text:String(e) }; }
+  }
+  async function hardLogout(){ try{ await fetch('/logout',{credentials:'include'}); }catch(_){ } }
+  async function probeUsername(base){
+    const probe = { ...base, password:'x', accepted_terms:false };
+    const r = await postJSON('/api/signup/complete', probe);
+    if(r.status===409) return { taken:true };
+    const code = ((r.json && (r.json.error||r.json.code))||'').toLowerCase();
+    if(/user.*exist|username|user_id/.test(code)) return { taken:true };
+    return { taken:false };
+  }
+
+  btn.addEventListener('click', async ()=>{
+    if(btn.disabled) return;
+    if(el.password.value !== el.password2.value){ alert('Passwords do not match'); return; }
+
+    setBusy(true);
+
+    const role = el.roleCreator.checked ? 'creator' : el.roleBrand.checked ? 'brand' : '';
+    const username = el.username.value.trim();
+    const base = {
+      email: el.email.value.trim(),
+      username,
+      user_id: username,
+      full_name: (el.first_name.value.trim() + ' ' + el.last_name.value.trim()).trim(),
+      role
+    };
+
+    // 1) precheck email
+    const s1 = await postJSON('/auth/start', { email: base.email, role });
+    if(!s1.ok || (s1.json && s1.json.ok===false)){
+      const e = (s1.json && (s1.json.error||s1.json.code)) || '';
+      if(s1.status===409 || /already|email/i.test(e)){
+        await hardLogout();
+        emailErr.style.display='block';
+        document.getElementById('modal-backdrop').classList.add('show');
+        document.getElementById('modal-email').classList.add('show');
+        setBusy(false); validate(); return;
       }
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
+      banner.textContent = `/auth/start failed. status ${s1.status}. body: ${s1.text.slice(0,300)}`;
+      banner.style.display='block';
+      await hardLogout(); setBusy(false); validate(); return;
+    }
 
-      const role = (new FormData(form)).get("role");
-      const email = $("email").value.trim();
+    // 2) precheck username
+    const u = await probeUsername(base);
+    await hardLogout();
+    if(u.taken){
+      document.getElementById('user_error').style.display='block';
+      document.getElementById('hint_user_taken').style.display='inline';
+      setBusy(false); validate(); return;
+    }
 
-      btn.disabled = true;
-      try {
-        const res = await fetch("/api/signup", {
-          method: "POST",
-          headers: { "content-type":"application/json" },
-          body: JSON.stringify({ email, password: pwd, role })
-        });
-        const data = await res.json().catch(()=> ({}));
-        if (res.ok && data?.ok) {
-          window.location.href = "/login/?created=1";
-        } else {
-          msg.textContent = data?.error || "Sign up failed.";
-        }
-      } catch(err){
-        msg.textContent = "Network error.";
-      } finally {
-        btn.disabled = false;
+    // 3) create
+    const payload = { ...base, password: el.password.value, accepted_terms: !!el.agree.checked, terms_version:'v1' };
+    const s2 = await postJSON('/api/signup/complete', payload);
+    if(!s2.ok || (s2.json && s2.json.ok===false)){
+      await hardLogout();
+      if(s2.status===409 || /user.*exist|username|user_id/.test(((s2.json && (s2.json.error||s2.json.code))||'').toLowerCase())){
+        document.getElementById('user_error').style.display='block';
+        document.getElementById('hint_user_taken').style.display='inline';
+        setBusy(false); validate(); return;
       }
-    });
+      banner.textContent = s2.text.slice(0,300) || 'Signup failed.';
+      banner.style.display='block';
+      setBusy(false); validate(); return;
+    }
+
+    location.assign('/account/');
   });
 })();
