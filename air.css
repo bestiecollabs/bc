@@ -290,3 +290,8 @@ footer a:hover{background:rgba(0,0,0,.03)}
           mask:var(--eye-closed) center/24px 24px no-repeat;
 }
 /* === PW TOGGLE END === */
+
+ /* signup terms row */
+ .agree-row{display:inline-flex;align-items:center;gap:10px}
+ .agree-row input[type=checkbox]{width:auto}
+ .agree-text{white-space:nowrap}
