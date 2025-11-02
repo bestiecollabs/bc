@@ -4,7 +4,8 @@
   const btn=document.getElementById('createBtn');
   const banner=document.getElementById('form_error');
   const userErr=document.getElementById('user_error');
-  const emailErr=document.getElementById('email_error');
+  const emailErr=document.getElementById('email_error'); // legacy under-input
+  const emailUsed=document.getElementById('email_used'); // inline, same size as label
   const hintUser=document.getElementById('hint_user');
   const hintUserTaken=document.getElementById('hint_user_taken');
   const hintPass=document.getElementById('hint_pass');
@@ -12,7 +13,6 @@
   const ico1=document.getElementById('ico1');
   const ico2=document.getElementById('ico2');
 
-  // Show/Hide with air.css icons
   function hookupReveal(inputId, btnId, ico){
     const input=document.getElementById(inputId);
     const btn=document.getElementById(btnId);
@@ -31,9 +31,15 @@
   let busy=false, allOk=false;
   const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
+  function setBtnVisual(){
+    btn.classList.toggle('btn-fun', allOk && !busy);
+    btn.classList.toggle('btn-ghost', !(allOk && !busy));
+  }
+
   function validate(){
     userErr.style.display='none';
     emailErr.style.display='none';
+    emailUsed.style.display='none';
 
     const first=el.first_name.value.trim();
     const last =el.last_name.value.trim();
@@ -53,13 +59,16 @@
 
     allOk = !!first && !!last && validEmail(email) && userOk && passLenOk && match && roleOk && el.agree.checked;
     btn.disabled = !allOk || busy;
+    setBtnVisual();
   }
 
   Object.values(el).forEach(i=>{ i?.addEventListener('input',validate); i?.addEventListener('change',validate); });
+  el.email.addEventListener('input', ()=>{ emailUsed.style.display='none'; emailErr.style.display='none'; });
   el.password2.addEventListener('blur', ()=>{ if(el.password.value && el.password2.value && el.password.value !== el.password2.value){ alert('Passwords do not match'); } });
   validate();
 
-  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; btn.disabled = !allOk || busy; }
+  function setBusy(s){ busy=s; btn.textContent = s ? 'Creating…' : 'Create Account'; btn.disabled = !allOk || busy; setBtnVisual(); }
+
   async function postJSON(url,data){
     try{
       const res=await fetch(url,{ method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'}, credentials:'include', body:JSON.stringify(data) });
@@ -99,9 +108,8 @@
       const e = (s1.json && (s1.json.error||s1.json.code)) || '';
       if(s1.status===409 || /already|email/i.test(e)){
         await hardLogout();
-        emailErr.style.display='block';
-        document.getElementById('modal-backdrop').classList.add('show');
-        document.getElementById('modal-email').classList.add('show');
+        // inline notice near label per request
+        emailUsed.style.display='inline';
         setBusy(false); validate(); return;
       }
       banner.textContent = `/auth/start failed. status ${s1.status}. body: ${s1.text.slice(0,300)}`;
@@ -113,8 +121,8 @@
     const u = await probeUsername(base);
     await hardLogout();
     if(u.taken){
-      document.getElementById('user_error').style.display='block';
-      document.getElementById('hint_user_taken').style.display='inline';
+      userErr.style.display='block';
+      hintUserTaken.style.display='inline';
       setBusy(false); validate(); return;
     }
 
@@ -124,9 +132,7 @@
     if(!s2.ok || (s2.json && s2.json.ok===false)){
       await hardLogout();
       if(s2.status===409 || /user.*exist|username|user_id/.test(((s2.json && (s2.json.error||s2.json.code))||'').toLowerCase())){
-        document.getElementById('user_error').style.display='block';
-        document.getElementById('hint_user_taken').style.display='inline';
-        setBusy(false); validate(); return;
+        userErr.style.display='block'; hintUserTaken.style.display='inline'; setBusy(false); validate(); return;
       }
       banner.textContent = s2.text.slice(0,300) || 'Signup failed.';
       banner.style.display='block';

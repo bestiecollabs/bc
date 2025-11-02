@@ -29,20 +29,23 @@
     .termsRow{display:flex;justify-content:center;gap:10px}
     .actions{text-align:center;margin-top:10px}
     .btn-lg{padding:14px 36px;font-size:16px;border-radius:999px}
-    .btn[disabled]{opacity:.5;filter:grayscale(80%);cursor:not-allowed}
     .btn{border:0;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer;text-decoration:none}
-    .btn-fun{background:var(--fun);color:#fff;font-weight:800}
+    .btn-fun{background:var(--fun);color:#fff}
     .btn-fun:hover{background:var(--fun-600)}
     .btn-ghost{background:#f1f5f9;color:#0f172a}
+    .btn[disabled]{opacity:.6;filter:grayscale(90%);cursor:not-allowed}
     .card{padding-bottom:14px}
     .error{color:#c00;font-size:13px;margin-top:4px;display:none}
+    .label-error{color:#c00;font-size:14px;margin-left:8px;font-weight:600;display:none}
     .alert{margin:8px 0 0;padding:10px 12px;border:1px solid #fecaca;background:#fee2e2;color:#7f1d1d;border-radius:10px;display:none;white-space:pre-wrap}
     .hint{color:#64748b;font-size:12px}
     .hint-error{color:#c00}
     .rel{position:relative}
-    .reveal{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:0;border:0;background:transparent;width:32px;height:32px;cursor:pointer}
-    /* Expecting air.css to provide .ico, .ico-eye, .ico-eye-off backgrounds */
-    .ico{display:inline-block;width:24px;height:24px;vertical-align:middle}
+    .reveal{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .reveal:active{transform:translateY(-50%)} /* prevent nudge */
+    .reveal .ico{width:20px;height:20px}
+    .reveal .ico{background-color:var(--fun)} /* purple icon if icons use CSS mask */
+    .alt-actions{margin-top:12px;text-align:center}
   </style>
 </head>
 <body>
@@ -73,7 +76,6 @@
 
         <div class="role-inline">
           <span class="role-title funtext">I am a</span>
-          <!-- radios start unselected by default -->
           <label><input type="radio" name="role" id="roleBrand" value="brand"> <span>Brand</span></label>
           <label><input type="radio" name="role" id="roleCreator" value="creator"> <span>Creator</span></label>
         </div>
@@ -89,7 +91,7 @@
           </div>
 
           <div class="full">
-            <label>Email</label>
+            <label>Email <span id="email_used" class="label-error" role="alert">Email already used</span></label>
             <input id="email" type="email" autocomplete="email" required>
             <div id="email_error" class="error">Email — Email already in use</div>
           </div>
@@ -139,7 +141,12 @@
     </div>
 
     <div class="actions">
-      <button class="btn btn-lg btn-fun" id="createBtn" type="button" disabled>Create Account</button>
+      <!-- start as ghost; JS swaps to fun when valid -->
+      <button class="btn btn-lg btn-ghost" id="createBtn" type="button" disabled>Create Account</button>
+      <div class="alt-actions">
+        <p>Already Have An Account?</p>
+        <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
+      </div>
     </div>
   </section>
 </main>
@@ -152,7 +159,7 @@
   </nav>
 </footer>
 
-<!-- Email-taken modal -->
+<!-- keep modal markup but we no longer open it for email-in-use -->
 <div id="modal-backdrop" class="modal-backdrop" aria-hidden="true"></div>
 <div id="modal-email" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-email-title" aria-describedby="modal-email-desc">
   <div id="modal-email-header" class="modal-header"><h4 id="modal-email-title">That Email Is Already Used</h4></div>
@@ -167,8 +174,6 @@
 </div>
 
 <script src="/auth.js" defer></script>
-<script src="/auth.js" defer></script>
 <script src="/signup/app.js" defer></script>
 </body>
 </html>
-
