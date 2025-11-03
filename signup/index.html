@@ -148,8 +148,50 @@
 })();
 </script>
 <!-- END auto-remove TermsPrivacy -->
+<!-- BEGIN remove Terms And Privacy card -->
+<script id="remove-terms-privacy-card">
+document.addEventListener('DOMContentLoaded', function () {
+  try {
+    var titleNodes = Array.prototype.slice.call(document.querySelectorAll('h1,h2,h3,h4,h5,h6,div,section,article'));
+    var target = null;
+    for (var i = 0; i < titleNodes.length; i++) {
+      var txt = (titleNodes[i].innerText || '').trim().toLowerCase();
+      if (txt.includes('terms') && txt.includes('privacy')) {
+        // climb to a likely card container
+        var n = titleNodes[i];
+        var limit = 6;
+        while (n && limit-- > 0) {
+          if (n.classList && (
+              n.classList.contains('card') ||
+              n.classList.contains('panel') ||
+              n.tagName === 'SECTION' ||
+              n.tagName === 'ARTICLE' ||
+              n.tagName === 'DIV'
+            )) {
+            target = n;
+            break;
+          }
+          n = n.parentElement;
+        }
+        if (target) break;
+      }
+    }
+    if (!target) {
+      // fallback: any block containing both words
+      var blocks = document.querySelectorAll('section,article,div');
+      for (var j = 0; j < blocks.length; j++) {
+        var t = (blocks[j].innerText || '').toLowerCase();
+        if (t.includes('terms') && t.includes('privacy')) { target = blocks[j]; break; }
+      }
+    }
+    if (target && target.parentNode) { target.parentNode.removeChild(target); }
+  } catch (e) {}
+});
+</script>
+<!-- END remove Terms And Privacy card -->
 </body>
 </html>
+
 
 
 
