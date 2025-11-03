@@ -132,8 +132,25 @@
 
 <!-- pw-eye-wire -->
 
+<!-- BEGIN auto-remove TermsPrivacy -->
+<script id="auto-remove-terms-privacy">
+(function removeTermsPrivacyCard() {
+  try {
+    var nodes = document.querySelectorAll("section,div,article,aside,main");
+    for (var i = 0; i < nodes.length; i++) {
+      var t = (nodes[i].innerText || "").toLowerCase();
+      if (t.indexOf("terms") !== -1 && t.indexOf("privacy") !== -1) {
+        var target = nodes[i].closest(".card, section, article, div") || nodes[i];
+        if (target && target.parentNode) { target.parentNode.removeChild(target); }
+      }
+    }
+  } catch (e) {}
+})();
+</script>
+<!-- END auto-remove TermsPrivacy -->
 </body>
 </html>
+
 
 
 
