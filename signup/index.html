@@ -93,52 +93,8 @@
   <link rel="icon" href="/favicon.png">
   <meta name="theme-color" content="#5E7BFF">
   <link rel="stylesheet" href="/air.css">
-<style>
-  /* signup: make Terms/Privacy card same width as other cards */
-  .signup-page .section .subcard {
-    width: 56.25%;
-    min-width: 340px;
-    margin: 0 auto;
-  }
-  @media (max-width: 980px){
-    .signup-page .section .subcard {
-      width: 92%;
-      min-width: auto;
-    }
-  }
-  /* signup overrides v3 */
-  /* Same width as other cards */
-  .signup-page .section .subcard{
-    width:56.25%;
-    min-width:340px;
-    margin-left:auto;margin-right:auto;
-  }
-  @media (max-width:980px){
-    .signup-page .section .subcard{ width:92%; min-width:auto; }
-  }
-  /* Card #2 = Terms: add space above and reduce top padding */
-  .signup-page .section .subcard:nth-of-type(2){ margin-top:24px; padding-top:6px; }
-  .signup-page .section .subcard:nth-of-type(2) h3{ margin-top:0; }
-</style>
-<style>
-  /* signup width and spacing parity */
-  .signup-page .section .subcard{
-    width:56.25%;
-    min-width:340px;
-    margin-left:auto;margin-right:auto;
-  }
-  /* Terms card = second subcard: tighter gap and top padding */
-  .signup-page .section .subcard:nth-of-type(2){
-    margin-top:20px;    /* requested gap */
-    padding-top:6px;
-  }
-  .signup-page .section .subcard:nth-of-type(2) h3{ margin-top:0; }
 
-  @media (max-width:980px){
-    .signup-page .section .subcard{ width:92%; min-width:auto; }
-    .signup-page .section .subcard:nth-of-type(2){ margin-top:16px; }
-  }
-</style>
+
 </head>
 <body class="signup-page signup-page signup-page">
 <header class="site-header">
@@ -161,40 +117,77 @@
     <h1 class="funtext">Create Your Bestie Account</h1>
   </section>
 
-  
-
-
-
-
-
-<section class="section">
+  <section class="section">
     <div class="cols">
+      <!-- Card 1: New Account Setup -->
+      <article class="card">
+        <h2 class="funtext">New Account Setup</h2>
 
-      <!-- 10% wider than previous: 52.2% -->
-      
+        <div class="role-inline">
+          <span class="role-title funtext">I am a</span>
+          <label><input type="radio" name="role" id="roleBrand" value="brand" checked> <span>Brand</span></label>
+          <label><input type="radio" name="role" id="roleCreator" value="creator"> <span>Creator</span></label>
+        </div>
 
-      
+        <div class="formgrid">
+          <div>
+            <label>First Name</label>
+            <input id="first_name" type="text" autocomplete="given-name" required>
+          </div>
+          <div>
+            <label>Last Name</label>
+            <input id="last_name" type="text" autocomplete="family-name" required>
+          </div>
 
-<!-- NEW_TERMS_CARD_START -->
-<section class="section" style="margin-top:20px">
-  <div class="cols">
-    <article class="card" style="padding:16px 28px; text-align:center">
-      <h2 class="funtext" style="margin-top:0">Terms And Privacy</h2>
-      <div class="termsRow" style="margin-top:8px">
-        <label style="display:block; text-align:center">
-          <input type="checkbox" id="agree2" onchange="document.getElementById('agree').checked=this.checked">
-          <span>I Agree To Bestie Collabs <a href="/terms/">Terms</a> And <a href="/privacy/">Privacy</a></span>
-        </label>
-      </div>
-      <div class="actions" style="text-align:center; margin-top:16px">
-        <button class="btn btn-lg" type="button" onclick="document.getElementById('createBtn').click()">Create Account</button>
-      </div>
-    </article>
-  </div>
-</section>
-<!-- NEW_TERMS_CARD_END -->
+          <div class="full">
+            <label>Email</label>
+            <input id="email" type="email" autocomplete="email" required>
+            <div id="email_error" class="error">Email — Email already in use</div>
+          </div>
 
+          <div class="full">
+            <label>
+              Create User ID
+              <span id="hint_user" class="hint">(3 - 15 char)</span>
+              <span id="hint_user_taken" class="hint hint-error" style="display:none">(user id already taken)</span>
+            </label>
+            <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required>
+            <div id="user_error" class="error">User ID already in use</div>
+          </div>
 
+          <div>
+            <label>
+              Password
+              <span id="hint_pass" class="hint">(8 - 15 char)</span>
+            </label>
+            <input id="password" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
+          </div>
+          <div>
+            <label id="label_password2">Confirm Password</label>
+            <input id="password2" type="password" autocomplete="new-password" minlength="8" maxlength="15" required>
+            <div id="pass_error" class="error">Passwords do not match</div>
+          </div>
+
+          <div class="full"><div id="form_error" class="alert"></div></div>
+        </div>
+      </article>
+
+      <!-- Card 2: Terms And Privacy in its own card -->
+      <article class="card subcard">
+        <h3 class="funtext">Terms And Privacy</h3>
+        <div class="termsRow">
+          <label>
+            <input type="checkbox" id="agree" required>
+            <span>I Agree To Bestie Collabs <a href="/terms/">Terms</a> And <a href="/privacy/">Privacy</a></span>
+          </label>
+        </div>
+      </article>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-lg" id="createBtn" type="button" disabled>Create Account</button>
+    </div>
+  </section>
 </main>
 
 <footer class="wrap">
@@ -213,6 +206,7 @@
 
 </body>
 </html>
+
 
 
 
