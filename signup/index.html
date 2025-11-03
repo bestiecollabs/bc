@@ -14,6 +14,42 @@
 
 .termsRow label { min-width: 0; max-width: 100%; }           /* allow shrink below min-content for flex child */
 .termsRow label span { overflow-wrap: anywhere; word-break: break-word; } /* break long strings to prevent width growth */
+
+/* Signup unified width + Terms alignment */
+:root{
+  --signup-card-width: min(64rem, 860px);   /* hard cap using min() */
+  --signup-card-pad: 20px;
+}
+
+/* One centered track. Every card fills it. */
+.cols{
+  display: grid;
+  grid-template-columns: var(--signup-card-width); /* same width for all cards */
+  justify-content: center;
+}
+.cols > .card{
+  width: 100%;
+  box-sizing: border-box;                     /* width includes padding and border */
+  padding: var(--signup-card-pad);
+}
+
+/* Fix Terms card padding and alignment */
+.card:has(.termsRow){ padding: var(--signup-card-pad); }
+.card:has(.termsRow) h2,
+.card:has(.termsRow) h3{ text-align: center; margin-top: 0 }
+
+/* Checkbox row alignment and wrapping */
+.termsRow{ display: flex; align-items: flex-start; gap: 12px; }
+.termsRow input[type=checkbox]{ flex: 0 0 auto; margin-top: 2px; }
+.termsRow label{ min-width: 0; max-width: 100%; line-height: 1.4; overflow-wrap: anywhere; }
+
+/* Center the Terms button group if present */
+.card:has(.termsRow) .actions{ display: flex; justify-content: center; }
+
+/* Fallback if :has() unsupported */
+@supports not selector(:has(*)){
+  .termsRow{ padding: var(--signup-card-pad); }
+}
 </style>
 </head>
 <body>
@@ -142,6 +178,7 @@
 
 </body>
 </html>
+
 
 
 
