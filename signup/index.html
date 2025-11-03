@@ -7,6 +7,14 @@
   <link rel="icon" href="/favicon.png">
   <meta name="theme-color" content="#5E7BFF">
   <link rel="stylesheet" href="/air.css">
+<style>
+/* Signup width fix: equal card widths + hard cap + wrap long terms text */
+.cols { justify-items: stretch; width: min(56.25%, 720px); }  /* grid items fill track; cap overall column width */
+.cols > .card { width: 100%; box-sizing: border-box; }       /* each card fills the grid cell */
+
+.termsRow label { min-width: 0; max-width: 100%; }           /* allow shrink below min-content for flex child */
+.termsRow label span { overflow-wrap: anywhere; word-break: break-word; } /* break long strings to prevent width growth */
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -134,6 +142,7 @@
 
 </body>
 </html>
+
 
 
 
