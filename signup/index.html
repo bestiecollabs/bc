@@ -94,46 +94,94 @@
 
           <!-- BEGIN signup-cta -->
 <style>
-  #signup-cta-wrap { text-align:center; margin:24px 0 12px 0; }
-  #signup-cta-wrap .accept-line { display:inline-flex; align-items:center; gap:8px; white-space:nowrap; font-size:14px; }
-  #signup-cta-wrap .accept-line input[type="checkbox"] { transform: translateY(1px); }
-  #signup-cta-wrap .btn-fun { padding:12px 22px; border-radius:9999px; background:linear-gradient(90deg,#a78bfa,#f472b6,#f59e0b); color:#fff; border:0; font-weight:600; box-shadow:0 8px 18px rgba(0,0,0,.12); cursor:pointer; transition:transform .08s ease; }
-  #signup-cta-wrap .btn-fun:active { transform:translateY(1px); }
-  #signup-cta-wrap .btn-fun[disabled] { opacity:.55; cursor:not-allowed; }
-  #signup-cta-wrap .sep-line { margin:16px auto 6px auto; width:220px; height:2px; border:0; background:linear-gradient(90deg,transparent,#a78bfa,#f472b6,#f59e0b,transparent); }
-  /* Fun theme for "Already Have An Account?" */
-  .login-cta-fun { text-align:center !important; font-weight:800; background:linear-gradient(90deg,#a78bfa,#f472b6); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:.2px; }
+  /* Center the whole CTA cluster */
+  #signup-cta-wrap{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin:20px 0 10px 0;
+    text-align:center;
+  }
+  /* One-line consent, centered */
+  #signup-cta-wrap .accept-line{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    white-space:nowrap;
+  }
+  #signup-cta-wrap .btn-fun{
+    padding:12px 22px;
+    border-radius:9999px;
+    background:linear-gradient(90deg,#a78bfa,#f472b6,#f59e0b);
+    color:#fff; border:0; font-weight:600;
+    box-shadow:0 8px 18px rgba(0,0,0,.12);
+    cursor:pointer; transition:transform .08s ease;
+  }
+  #signup-cta-wrap .btn-fun:active{ transform:translateY(1px); }
+  #signup-cta-wrap .btn-fun[disabled]{ opacity:.55; cursor:not-allowed; }
+  /* Centered separator bar */
+  #signup-cta-wrap .sep-line{
+    width:240px; max-width:70%;
+    height:2px; border:0; margin:14px auto 6px auto;
+    background:linear-gradient(90deg,transparent,#a78bfa,#f472b6,#f59e0b,transparent);
+  }
+  /* Fun theme + centering for the login section */
+  .login-cta-fun{
+    font-weight:800;
+    background:linear-gradient(90deg,#a78bfa,#f472b6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-align:center !important; display:block; width:100%;
+  }
+  .login-cta-center{ text-align:center !important; }
+  .login-cta-center .btn-center{ display:inline-flex; justify-content:center; }
 </style>
+
 <div id="signup-cta-wrap" role="group" aria-label="Create account actions">
   <label class="accept-line">
     <input type="checkbox" id="accept-pt" required />
     <span>I accept <a href="/privacy">Privacy</a> and <a href="/terms">Terms</a></span>
   </label>
-  <div style="margin-top:12px;">
-    <button id="btn-create-account" class="btn-fun" disabled>Create Account</button>
-  </div>
+  <button id="btn-create-account" class="btn-fun" disabled>Create Account</button>
   <hr class="sep-line" />
 </div>
+
 <script>
 (function(){
-  try {
+  try{
+    // Enable/disable button on consent
     var cb=document.getElementById('accept-pt');
     var btn=document.getElementById('btn-create-account');
     if(cb&&btn){
-      function sync(){ btn.disabled = !cb.checked; }
-      cb.addEventListener('change', sync); sync();
-      btn.addEventListener('click', function(){
+      function sync(){ btn.disabled=!cb.checked; }
+      cb.addEventListener('change',sync); sync();
+      btn.addEventListener('click',function(){
         var form = btn.closest('form') || document.querySelector('form');
         if(form){ if(form.requestSubmit){ form.requestSubmit(); } else { form.submit(); } }
       });
     }
-    // Apply fun theme to the "Already Have An Account?" heading
-    var nodes = document.querySelectorAll('h1,h2,h3,h4,h5,h6,div,section');
-    for (var i=0;i<nodes.length;i++){
-      var t = (nodes[i].innerText||'').trim();
-      if (/^Already Have An Account\\??$/i.test(t)) { nodes[i].classList.add('login-cta-fun'); break; }
+
+    // Center and theme the "Already Have An Account?" block and its button
+    var nodes=document.querySelectorAll('h1,h2,h3,h4,h5,h6,div,section');
+    var hdr=null;
+    for(var i=0;i<nodes.length;i++){
+      var t=(nodes[i].innerText||'').trim();
+      if(/^Already Have An Account\\??$/i.test(t)){ hdr=nodes[i]; break; }
     }
-  } catch(e){}
+    if(hdr){
+      // Theme the heading
+      hdr.classList.add('login-cta-fun');
+      // Center the container
+      var wrap=hdr.closest('div,section,article,form')||hdr.parentElement;
+      if(wrap){ wrap.classList.add('login-cta-center'); }
+      // Center the following button or link
+      var nextBtn = hdr.parentElement.querySelector('button, a.button, a[href*=\"signin\" i], a[href*=\"login\" i]');
+      if(nextBtn){ nextBtn.classList.add('btn-center'); }
+    }
+  }catch(e){}
 })();
 </script>
 <!-- END signup-cta -->
@@ -220,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- END remove Terms And Privacy card -->
 </body>
 </html>
+
 
 
 
