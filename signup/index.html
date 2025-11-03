@@ -2,7 +2,27 @@
 
 
 
+  <
+
+<!-- NEW_TERMS_CARD_START -->
+<section class="section" style="margin-top:20px">
+  <div class="cols">
+    <article class="card" style="padding:16px 28px; text-align:center">
+      <h2 class="funtext" style="margin-top:0">Terms And Privacy</h2>
+      <div class="termsRow" style="margin-top:8px">
+        <label style="display:block; text-align:center">
+          <input type="checkbox" id="agree2" onchange="document.getElementById('agree').checked=this.checked">
+          <span>I Agree To Bestie Collabs <a href="/terms/">Terms</a> And <a href="/privacy/">Privacy</a></span>
+        </label>
+      </div>
+      <div class="actions" style="text-align:center; margin-top:16px">
+        <button class="btn btn-lg" type="button" onclick="document.getElementById('createBtn').click()">Create Account</button>
+      </div>
+    </article>
   </div>
+</section>
+<!-- NEW_TERMS_CARD_END -->
+/div>
 </section>
 <!doctype html>
 <html lang="en">
@@ -86,29 +106,24 @@
 
 
 
-<!-- NEW_TERMS_CARD_START -->
-<section class="section" style="margin-top:20px">
-  <div class="cols">
-    <article class="card">
-      <h2 class="funtext">Terms And Privacy</h2>
-      <div class="termsRow">
-        <label>
-          <input type="checkbox" id="agree2" onchange="document.getElementById('agree').checked=this.checked">
-          <span>I Agree To Bestie Collabs <a href="/terms/">Terms</a> And <a href="/privacy/">Privacy</a></span>
-        </label>
-      </div>
-      <div class="actions">
-        <button class="btn btn-lg" type="button" onclick="document.getElementById('createBtn').click()">Create Account</button>
-      </div>
-    </article>
-  </div>
-</section>
-<!-- NEW_TERMS_CARD_END -->
+
 <section class="section">
     <div class="cols">
 
       <!-- 10% wider than previous: 52.2% -->
-      <article class="card auth-card" style="max-width:52.2%;min-width:340px;margin:0 auto;padding-bottom:14px">
+      
+
+      <article class="card auth-card" style="max-width:52.2%;min-width:340px;margin:12px auto 0;padding-top:8px">
+        <h3 class="funtext" style="margin:0 0 8px;text-align:center">Already Have An Account?</h3>
+        <div style="text-align:center">
+          <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+<article class="card auth-card" style="max-width:52.2%;min-width:340px;margin:0 auto;padding-bottom:14px">
         <h2 class="funtext" style="text-align:center;margin:0 0 12px">New Account Setup</h2>
 
         <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin:6px 0 14px">
@@ -182,15 +197,6 @@
   </div>
 </article>
 
-      <article class="card auth-card" style="max-width:52.2%;min-width:340px;margin:12px auto 0;padding-top:8px">
-        <h3 class="funtext" style="margin:0 0 8px;text-align:center">Already Have An Account?</h3>
-        <div style="text-align:center">
-          <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
-        </div>
-      </article>
-
-    </div>
-  </section>
 </main>
 
 <footer class="wrap">
@@ -209,6 +215,7 @@
 
 </body>
 </html>
+
 
 
 
