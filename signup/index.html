@@ -92,7 +92,40 @@
 </div>
           </div>
 
-          <div style="grid-column:1 / -1">Already Have An Account?</h3>
+          <!-- BEGIN signup-cta -->
+<style>
+  #signup-cta-wrap { text-align:center; margin:24px 0; }
+  #signup-cta-wrap .btn-fun { padding:12px 22px; border-radius:9999px; background:linear-gradient(90deg,#a78bfa,#f472b6,#f59e0b); color:#fff; border:0; font-weight:600; box-shadow:0 8px 18px rgba(0,0,0,.12); cursor:pointer; transition:transform .08s ease; }
+  #signup-cta-wrap .btn-fun:active { transform:translateY(1px); }
+  #signup-cta-wrap .btn-fun[disabled] { opacity:.55; cursor:not-allowed; }
+</style>
+<div id="signup-cta-wrap" role="group" aria-label="Create account actions">
+  <label style="display:inline-flex; align-items:center; gap:8px; font-size:14px;">
+    <input type="checkbox" id="accept-pt" required />
+    <span>I accept <a href="/privacy">Privacy</a> and <a href="/terms">Terms</a></span>
+  </label>
+  <div style="margin-top:16px;">
+    <button id="btn-create-account" class="btn-fun" disabled>Create Account</button>
+  </div>
+</div>
+<script>
+(function(){
+  try {
+    var cb=document.getElementById('accept-pt');
+    var btn=document.getElementById('btn-create-account');
+    if(cb&&btn){
+      function sync(){ btn.disabled = !cb.checked; }
+      cb.addEventListener('change', sync); sync();
+      btn.addEventListener('click', function(){
+        var form = btn.closest('form') || document.querySelector('form');
+        if(form){ if(form.requestSubmit){ form.requestSubmit(); } else { form.submit(); } }
+      });
+    }
+  } catch(e){}
+})();
+</script>
+<!-- END signup-cta -->
+<div style="grid-column:1 / -1">Already Have An Account?</h3>
         <div style="text-align:center">
           <a class="btn btn-lg btn-fun" href="/login/">Sign In</a>
         </div>
@@ -175,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- END remove Terms And Privacy card -->
 </body>
 </html>
+
 
 
 
