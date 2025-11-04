@@ -112,3 +112,33 @@
   }
 })();
 // bc-auth-ui-end
+// auth-logout-start
+(function(){
+  function candidates(){
+    var list = [];
+    list = list.concat(Array.from(document.querySelectorAll('[data-action="logout"]')));
+    list = list.concat(Array.from(document.querySelectorAll('#logout, .logout')));
+    // Fallback by link text
+    list = list.concat(Array.from(document.querySelectorAll('a,button')).filter(function(el){
+      return /log\s*out/i.test((el.textContent||'').trim());
+    }));
+    // Deduplicate
+    return Array.from(new Set(list)).filter(Boolean);
+  }
+  async function doLogout(ev){
+    try {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      await fetch("/api/users/logout", { method:"POST", credentials:"include" });
+    } finally {
+      // Reload to clear UI and server-side checks
+      location.assign("/");
+    }
+  }
+  function bind(){
+    candidates().forEach(function(el){
+      if (!el.dataset.boundLogout) { el.addEventListener("click", doLogout); el.dataset.boundLogout="1"; }
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind); else bind();
+})();
+// auth-logout-end
