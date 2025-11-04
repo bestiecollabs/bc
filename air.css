@@ -290,3 +290,7 @@ footer a:hover{background:rgba(0,0,0,.03)}
           mask:var(--eye-closed) center/24px 24px no-repeat;
 }
 /* === PW TOGGLE END === */
+/* signup validation defaults [2025-11-03 PST] */
+.error-msg,.field-msg,[data-error],.validation-msg{display:none;}
+.is-invalid .error-msg,[data-error="true"],.is-invalid .validation-msg{display:inline;}
+.hidden{display:none !important;}

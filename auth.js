@@ -1,3 +1,11 @@
+const API_BASE = '';
+async function getJSON(url, opts) {
+  const r = await fetch(url, { credentials: 'include', ...opts });
+  if (!r.ok) throw new Error(\HTTP \ \\);
+  const ct = r.headers.get('content-type') || '';
+  if (!ct || !ct.includes('application/json')) throw new Error(\Non-JSON from \\);
+  return r.json();
+}
 // /auth.js — header link toggles + simple route guards + footer dot scrub (no theme)
 (function () {
   const d = document;
@@ -72,3 +80,4 @@
 
   d.addEventListener("auth:changed", () => init());
 })();
+
