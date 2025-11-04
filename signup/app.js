@@ -299,7 +299,7 @@
   function closestForm(n){ while(n && n!==document.body){ if(n.tagName==="FORM") return n; n=n.parentElement } return null; }
   var form = closestForm(el.btn);
 
-  function httpOk(r){ return r && (r.status>=200 && r.status<=299); }
+  function httpOk(r){ return r && (r.status >= 200 && r.status <= 299); }
 
   async function signUpAndLogin(ev){
     try{
@@ -319,8 +319,10 @@
 
       // 1) Signup: accept any 2xx; also accept 409 as "already exists"
       var s = await fetch("/api/users/signup", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        credentials: "include", body: JSON.stringify(payload)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
       });
       if (!(httpOk(s) || s.status === 409)) {
         let msg = "Signup failed (" + s.status + ")";
@@ -331,8 +333,10 @@
 
       // 2) Login to set cookie
       var l = await fetch("/api/users/login", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        credentials: "include", body: JSON.stringify({ email: payload.email, password: payload.password })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: payload.email, password: payload.password })
       });
       if (!httpOk(l)) { alert("Login after signup failed (" + l.status + ")"); return; }
 
