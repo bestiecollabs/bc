@@ -216,3 +216,69 @@
   }
 })();
 // signup-validate-end
+/* eslint-disable */
+// signup-bold-start
+(function () {
+  function byId(id){ return document.getElementById(id); }
+
+  var el = {
+    first: byId('first_name'),
+    last:  byId('last_name'),
+    user:  byId('username'),
+    email: byId('email'),
+    pass:  byId('password'),
+    pass2: byId('password2')
+  };
+  var roles = Array.prototype.slice.call(document.querySelectorAll('input[name="role"]'));
+
+  function labelFor(input) {
+    if (!input || !input.parentElement) return null;
+    return input.parentElement.querySelector('label');
+  }
+
+  function findIamLabel() {
+    var nodes = Array.prototype.slice.call(document.querySelectorAll('span.funtext'));
+    for (var i = 0; i < nodes.length; i++) {
+      var t = (nodes[i].textContent || '').trim().toLowerCase();
+      if (t === 'i am a') return nodes[i];
+    }
+    return null;
+  }
+
+  function setBold(node, on) {
+    if (!node) return;
+    node.style.fontWeight = on ? '700' : '';
+  }
+
+  function incomplete(val) {
+    return !val || val.trim() === '';
+  }
+
+  function updateBold() {
+    setBold(labelFor(el.first),  incomplete(el.first  ? el.first.value  : ''));
+    setBold(labelFor(el.last),   incomplete(el.last   ? el.last.value   : ''));
+    setBold(labelFor(el.user),   incomplete(el.user   ? el.user.value   : ''));
+    setBold(labelFor(el.email),  incomplete(el.email  ? el.email.value  : ''));
+    setBold(labelFor(el.pass),   incomplete(el.pass   ? el.pass.value   : ''));
+    setBold(labelFor(el.pass2),  incomplete(el.pass2  ? el.pass2.value  : ''));
+
+    var roleChosen = roles.some(function(r){ return r.checked; });
+    setBold(findIamLabel(), !roleChosen);
+  }
+
+  function bind(elm) {
+    if (!elm) return;
+    var evt = (elm.type === 'radio' || elm.type === 'checkbox') ? 'change' : 'input';
+    elm.addEventListener(evt, updateBold);
+  }
+
+  Object.keys(el).forEach(function(k){ bind(el[k]); });
+  roles.forEach(bind);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateBold);
+  } else {
+    updateBold();
+  }
+})();
+// signup-bold-end
