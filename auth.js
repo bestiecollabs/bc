@@ -1,3 +1,14 @@
+// bc-fetch-include-start
+;(() => {
+  // default all fetch() calls to send cookies unless explicitly overridden
+  const _f = window.fetch;
+  window.fetch = function(input, init) {
+    init = init || {};
+    if (!init.credentials) init.credentials = "include";
+    return _f(input, init);
+  };
+})();
+// bc-fetch-include-end
 // /auth.js — header link toggles + simple route guards + footer dot scrub (no theme)
 (function () {
   const d = document;
@@ -72,3 +83,4 @@
 
   d.addEventListener("auth:changed", () => init());
 })();
+
