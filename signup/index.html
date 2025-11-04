@@ -7,6 +7,19 @@
   <link rel="icon" href="/favicon.png">
   <meta name="theme-color" content="#5E7BFF">
   <link rel="stylesheet" href="/air.css">
+<!-- create-btn-grey-start -->
+<style>
+  /* Grey out the Create Account button while disabled */
+  #createBtn[disabled],
+  .btn[disabled],
+  .btn:disabled {
+    opacity: 0.5;
+    filter: grayscale(100%);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+</style>
+<!-- create-btn-grey-end -->
 </head>
 <body>
 <header class="site-header">
@@ -130,6 +143,7 @@
 
 </body>
 </html>
+
 
 
 
