@@ -83,4 +83,32 @@
 
   d.addEventListener("auth:changed", () => init());
 })();
+// bc-auth-ui-start
+;(() => {
+  // ensure all fetches send cookies (already patched earlier, keep here idempotently)
+  const _f = window.fetch;
+  if (_f && !_f.__bcInclude__) {
+    window.fetch = function(i, init){ init = init || {}; if (!init.credentials) init.credentials = "include"; return _f(i, init); };
+    window.fetch.__bcInclude__ = true;
+  }
 
+  async function checkSession() {
+    try {
+      const r = await fetch("/api/users/me", { credentials: "include" });
+      const authed = r.ok;
+      document.documentElement.setAttribute("data-auth", authed ? "1" : "0");
+      // fire an event so navbars/pages can react
+      document.dispatchEvent(new CustomEvent("bc:auth", { detail: { authed } }));
+    } catch (_) {
+      document.documentElement.setAttribute("data-auth", "0");
+    }
+  }
+
+  // run at load and after returning from signup/login redirects
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", checkSession);
+  } else {
+    checkSession();
+  }
+})();
+// bc-auth-ui-end
