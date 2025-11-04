@@ -143,3 +143,76 @@
     agree.addEventListener('change', ()=>{ btn.disabled = !agree.checked || !allOk || busy; });
   }
 })();
+/* eslint-disable */
+// signup-validate-start
+(function () {
+  function byId(id){ return document.getElementById(id); }
+
+  var el = {
+    first: byId('first_name'),
+    last:  byId('last_name'),
+    user:  byId('username'),
+    email: byId('email'),
+    pass:  byId('password'),
+    pass2: byId('password2'),
+    agree: byId('agree'),
+    btn:   byId('createBtn')
+  };
+
+  var roles = Array.prototype.slice.call(document.querySelectorAll('input[name="role"]'));
+
+  function allFilled() {
+    var ok = true;
+    [
+      el.first, el.last, el.user, el.email, el.pass, el.pass2
+    ].forEach(function(i){
+      if (!i) ok = false;
+      else if (i.type === 'email') { ok = ok && i.value.trim() !== '' && i.checkValidity(); }
+      else { ok = ok && i.value.trim() !== ''; }
+    });
+    return ok;
+  }
+
+  function roleSelected() {
+    return roles.some(function(r){ return r.checked; });
+  }
+
+  function passwordsValid() {
+    var p1 = el.pass ? el.pass.value : '';
+    var p2 = el.pass2 ? el.pass2.value : '';
+    var lenOK = p1.length >= 8 && p1.length <= 15;
+    var match = p1 === p2 && p2.length > 0;
+
+    if (el.pass)  { el.pass.setCustomValidity(lenOK ? '' : 'Password must be 8–15 characters'); }
+    if (el.pass2) { el.pass2.setCustomValidity(match ? '' : 'Passwords do not match'); }
+
+    return lenOK && match;
+  }
+
+  function recompute() {
+    var ok =
+      el.btn &&
+      el.agree && el.agree.checked &&
+      allFilled() &&
+      roleSelected() &&
+      passwordsValid();
+
+    if (el.btn) { el.btn.disabled = !ok; }
+  }
+
+  function bind(elm) {
+    if (!elm) return;
+    var evt = (elm.type === 'radio' || elm.type === 'checkbox') ? 'change' : 'input';
+    elm.addEventListener(evt, recompute);
+  }
+
+  [el.first, el.last, el.user, el.email, el.pass, el.pass2, el.agree].forEach(bind);
+  roles.forEach(bind);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', recompute);
+  } else {
+    recompute();
+  }
+})();
+// signup-validate-end
