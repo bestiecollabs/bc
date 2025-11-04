@@ -282,7 +282,8 @@
   }
 })();
 // signup-bold-end
-// signup-afterlogin-start
+/* eslint-disable */
+// signup-afterlogin-v2-start
 (function () {
   function byId(id){ return document.getElementById(id); }
   var el = {
@@ -296,57 +297,94 @@
   };
   var roles = Array.prototype.slice.call(document.querySelectorAll('input[name="role"]'));
 
+  function closestForm(n){
+    while(n && n !== document.body){
+      if (n.tagName === "FORM") return n;
+      n = n.parentElement;
+    }
+    return null;
+  }
+  var form = closestForm(el.btn);
+
   async function signUpAndLogin(ev){
     try {
       if (ev && ev.preventDefault) ev.preventDefault();
-      if (el.btn) el.btn.disabled = true;
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+
+      if (el.btn) {
+        el.btn.disabled = true;
+        el.btn.dataset.label = el.btn.textContent || el.btn.value || "";
+        if (el.btn.tagName === "BUTTON") el.btn.textContent = "Creating...";
+      }
 
       var role = (roles.find(function(r){ return r.checked; }) || {}).value || null;
+      var payload = {
+        first_name: el.first && el.first.value ? el.first.value.trim() : "",
+        last_name:  el.last  && el.last.value  ? el.last.value.trim()  : "",
+        username:   el.user  && el.user.value  ? el.user.value.trim()  : "",
+        email:      el.email && el.email.value ? el.email.value.trim() : "",
+        password:   el.pass  && el.pass.value  ? el.pass.value : "",
+        role: role
+      };
 
-      // 1) Sign up
+      // 1) Signup
       var res = await fetch("/api/users/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          first_name: el.first?.value?.trim(),
-          last_name:  el.last?.value?.trim(),
-          username:   el.user?.value?.trim(),
-          email:      el.email?.value?.trim(),
-          password:   el.pass?.value || "",
-          role:       role
-        })
+        body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error("Signup failed");
 
-      // 2) Immediately log in to get the session cookie
+      // Accept 2xx or 409 (already exists)
+      if (!(res.ok || res.status === 409)) {
+        var msg = "Signup failed (" + res.status + ")";
+        try { var j = await res.json(); if (j && j.error) msg += ": " + j.error; } catch(_){}
+        alert(msg);
+        return;
+      }
+
+      // 2) Login
       var res2 = await fetch("/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          email:    el.email?.value?.trim(),
-          password: el.pass?.value || ""
-        })
+        body: JSON.stringify({ email: payload.email, password: payload.password })
       });
-      if (!res2.ok) throw new Error("Login after signup failed");
+      if (!res2.ok) {
+        alert("Login after signup failed (" + res2.status + ")");
+        return;
+      }
 
-      // 3) Verify session before redirect to avoid race conditions
+      // 3) Verify session, then go to account
       var me = await fetch("/api/users/me", { credentials: "include" });
-      if (!me.ok) throw new Error("Session not established");
+      if (!me.ok) { alert("Session not established (" + me.status + ")"); return; }
 
-      location.assign("/dashboard/");
-    } catch (e) {
-      alert(e && e.message ? e.message : "Signup flow error");
+      location.assign("/account/");
     } finally {
-      if (el.btn) el.btn.disabled = false;
+      if (el.btn) {
+        el.btn.disabled = false;
+        if (el.btn.tagName === "BUTTON" && el.btn.dataset.label) el.btn.textContent = el.btn.dataset.label;
+      }
     }
   }
 
-  // Bind without duplicating
-  if (el.btn && !el.btn.dataset.boundSignup) {
-    el.btn.addEventListener("click", signUpAndLogin);
-    el.btn.dataset.boundSignup = "1";
+  function bindHandlers(){
+    if (el.btn) { try { el.btn.setAttribute("type","button"); } catch(_){ } } // avoid implicit submit
+    if (el.btn && !el.btn.dataset.boundClick) {
+      el.btn.addEventListener("click", signUpAndLogin);
+      el.btn.dataset.boundClick = "1";
+    }
+    if (form && !form.dataset.boundSubmit) {
+      form.addEventListener("submit", signUpAndLogin);
+      form.setAttribute("novalidate","novalidate");
+      form.dataset.boundSubmit = "1";
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindHandlers);
+  } else {
+    bindHandlers();
   }
 })();
-// signup-afterlogin-end
+// signup-afterlogin-v2-end
