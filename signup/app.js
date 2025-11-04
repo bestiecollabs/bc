@@ -283,7 +283,7 @@
 })();
 // signup-bold-end
 /* eslint-disable */
-// signup-afterlogin-v2-start
+// signup-afterlogin-v3-start
 (function () {
   function byId(id){ return document.getElementById(id); }
   var el = {
@@ -295,96 +295,62 @@
     pass2: byId("password2"),
     btn:   byId("createBtn")
   };
-  var roles = Array.prototype.slice.call(document.querySelectorAll('input[name="role"]'));
-
-  function closestForm(n){
-    while(n && n !== document.body){
-      if (n.tagName === "FORM") return n;
-      n = n.parentElement;
-    }
-    return null;
-  }
+  var roles = Array.prototype.slice.call(document.querySelectorAll("input[name=\"role\"]"));
+  function closestForm(n){ while(n && n!==document.body){ if(n.tagName==="FORM") return n; n=n.parentElement } return null; }
   var form = closestForm(el.btn);
 
+  function httpOk(r){ return r && (r.status>=200 && r.status<=299); }
+
   async function signUpAndLogin(ev){
-    try {
+    try{
       if (ev && ev.preventDefault) ev.preventDefault();
       if (ev && ev.stopPropagation) ev.stopPropagation();
-
-      if (el.btn) {
-        el.btn.disabled = true;
-        el.btn.dataset.label = el.btn.textContent || el.btn.value || "";
-        if (el.btn.tagName === "BUTTON") el.btn.textContent = "Creating...";
-      }
+      if (el.btn) el.btn.disabled = true;
 
       var role = (roles.find(function(r){ return r.checked; }) || {}).value || null;
       var payload = {
-        first_name: el.first && el.first.value ? el.first.value.trim() : "",
-        last_name:  el.last  && el.last.value  ? el.last.value.trim()  : "",
-        username:   el.user  && el.user.value  ? el.user.value.trim()  : "",
-        email:      el.email && el.email.value ? el.email.value.trim() : "",
-        password:   el.pass  && el.pass.value  ? el.pass.value : "",
+        first_name: el.first?.value?.trim() || "",
+        last_name:  el.last?.value?.trim()  || "",
+        username:   el.user?.value?.trim()  || "",
+        email:      el.email?.value?.trim() || "",
+        password:   el.pass?.value || "",
         role: role
       };
 
-      // 1) Signup
-      var res = await fetch("/api/users/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload)
+      // 1) Signup: accept any 2xx; also accept 409 as "already exists"
+      var s = await fetch("/api/users/signup", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify(payload)
       });
-
-      // Accept 2xx or 409 (already exists)
-      if (!(res.ok || res.status === 409)) {
-        var msg = "Signup failed (" + res.status + ")";
-        try { var j = await res.json(); if (j && j.error) msg += ": " + j.error; } catch(_){}
+      if (!(httpOk(s) || s.status === 409)) {
+        let msg = "Signup failed (" + s.status + ")";
+        try { const j = await s.json(); if (j?.error) msg += ": " + j.error; } catch(_){}
         alert(msg);
         return;
       }
 
-      // 2) Login
-      var res2 = await fetch("/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: payload.email, password: payload.password })
+      // 2) Login to set cookie
+      var l = await fetch("/api/users/login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify({ email: payload.email, password: payload.password })
       });
-      if (!res2.ok) {
-        alert("Login after signup failed (" + res2.status + ")");
-        return;
-      }
+      if (!httpOk(l)) { alert("Login after signup failed (" + l.status + ")"); return; }
 
       // 3) Verify session, then go to account
       var me = await fetch("/api/users/me", { credentials: "include" });
-      if (!me.ok) { alert("Session not established (" + me.status + ")"); return; }
+      if (!httpOk(me)) { alert("Session not established (" + me.status + ")"); return; }
 
       location.assign("/account/");
     } finally {
-      if (el.btn) {
-        el.btn.disabled = false;
-        if (el.btn.tagName === "BUTTON" && el.btn.dataset.label) el.btn.textContent = el.btn.dataset.label;
-      }
+      if (el.btn) el.btn.disabled = false;
     }
   }
 
-  function bindHandlers(){
-    if (el.btn) { try { el.btn.setAttribute("type","button"); } catch(_){ } } // avoid implicit submit
-    if (el.btn && !el.btn.dataset.boundClick) {
-      el.btn.addEventListener("click", signUpAndLogin);
-      el.btn.dataset.boundClick = "1";
-    }
-    if (form && !form.dataset.boundSubmit) {
-      form.addEventListener("submit", signUpAndLogin);
-      form.setAttribute("novalidate","novalidate");
-      form.dataset.boundSubmit = "1";
-    }
+  function bind(){
+    if (el.btn) { try { el.btn.setAttribute("type","button"); } catch(_){ } }
+    if (el.btn && !el.btn.dataset.boundClick) { el.btn.addEventListener("click", signUpAndLogin); el.btn.dataset.boundClick="1"; }
+    if (form && !form.dataset.boundSubmit) { form.addEventListener("submit", signUpAndLogin, true); form.setAttribute("novalidate","novalidate"); form.dataset.boundSubmit="1"; }
   }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bindHandlers);
-  } else {
-    bindHandlers();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind); else bind();
 })();
-// signup-afterlogin-v2-end
+// signup-afterlogin-v3-end
