@@ -282,3 +282,71 @@
   }
 })();
 // signup-bold-end
+// signup-afterlogin-start
+(function () {
+  function byId(id){ return document.getElementById(id); }
+  var el = {
+    first: byId("first_name"),
+    last:  byId("last_name"),
+    user:  byId("username"),
+    email: byId("email"),
+    pass:  byId("password"),
+    pass2: byId("password2"),
+    btn:   byId("createBtn")
+  };
+  var roles = Array.prototype.slice.call(document.querySelectorAll('input[name="role"]'));
+
+  async function signUpAndLogin(ev){
+    try {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (el.btn) el.btn.disabled = true;
+
+      var role = (roles.find(function(r){ return r.checked; }) || {}).value || null;
+
+      // 1) Sign up
+      var res = await fetch("/api/users/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          first_name: el.first?.value?.trim(),
+          last_name:  el.last?.value?.trim(),
+          username:   el.user?.value?.trim(),
+          email:      el.email?.value?.trim(),
+          password:   el.pass?.value || "",
+          role:       role
+        })
+      });
+      if (!res.ok) throw new Error("Signup failed");
+
+      // 2) Immediately log in to get the session cookie
+      var res2 = await fetch("/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email:    el.email?.value?.trim(),
+          password: el.pass?.value || ""
+        })
+      });
+      if (!res2.ok) throw new Error("Login after signup failed");
+
+      // 3) Verify session before redirect to avoid race conditions
+      var me = await fetch("/api/users/me", { credentials: "include" });
+      if (!me.ok) throw new Error("Session not established");
+
+      location.assign("/dashboard/");
+    } catch (e) {
+      alert(e && e.message ? e.message : "Signup flow error");
+    } finally {
+      if (el.btn) el.btn.disabled = false;
+    }
+  }
+
+  // Bind without duplicating
+  if (el.btn && !el.btn.dataset.boundSignup) {
+    el.btn.addEventListener("click", signUpAndLogin);
+    el.btn.dataset.boundSignup = "1";
+  }
+})();
+// signup-afterlogin-end
