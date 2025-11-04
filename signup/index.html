@@ -7,6 +7,10 @@
   <link rel="icon" href="/favicon.png">
   <meta name="theme-color" content="#5E7BFF">
   <link rel="stylesheet" href="/air.css">
+<style id="signup-default-hide">
+.error-msg{display:none;}
+.hidden{display:none !important;}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -57,21 +61,21 @@
 
           <div style="grid-column:1 / -1">
             <label style="display:block;font-size:14px;margin:6px 0 4px">Email
-              <span id="email_used" class="hint hint-error" style="display:none;margin-left:8px;font-weight:600">Email already used</span>
+              <span id="email_used" class="hint hint-error" style="display:none;margin-left:8px;font-weight:600"><small class="error-msg hidden" id="err-email-taken">Email already in use</small></span>
             </label>
             <input id="email" type="email" autocomplete="email" required
               style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
-            <div id="email_error" class="error" style="display:none">Email — Email already in use</div>
+            <div id="email_error" class="error" style="display:none">Email <small class="error-msg hidden" id="err-email-taken">Email already in use</small></div>
           </div>
 
           <div style="grid-column:1 / -1">
             <label style="display:block;font-size:14px;margin:6px 0 4px">
               Create User ID <span id="hint_user" class="hint">(3 - 15 char)</span>
-              <span id="hint_user_taken" class="hint hint-error" style="display:none">(user id already taken)</span>
+              <span id="hint_user_taken" class="hint hint-error" style="display:none"><small class="error-msg hidden" id="err-userid-taken">User ID already in use</small></span>
             </label>
             <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required
               style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
-            <div id="user_error" class="error" style="display:none">User ID already in use</div>
+            <div id="user_error" class="error" style="display:none"><small class="error-msg hidden" id="err-userid-taken">User ID already in use</small></div>
           </div>
 
           <div>
@@ -145,3 +149,4 @@
 </script>
 </body>
 </html>
+
