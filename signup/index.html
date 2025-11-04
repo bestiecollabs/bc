@@ -11,6 +11,27 @@
 .error-msg{display:none;}
 .hidden{display:none !important;}
 </style>
+<style id="signup-hotfix">
+/* Layout containment */
+[data-scope="signup-hotfix"] { overflow-x: hidden; }
+[data-scope="signup-hotfix"] form { max-width: 960px; margin-left: auto; margin-right: auto; }
+
+/* Inputs do not spill past the card */
+[data-scope="signup-hotfix"] input,
+[data-scope="signup-hotfix"] select,
+[data-scope="signup-hotfix"] textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Hide default error text until JS marks invalid */
+[data-scope="signup-hotfix"] .error-msg,
+[data-scope="signup-hotfix"] .field-msg,
+[data-scope="signup-hotfix"] [data-error] { display: none; }
+
+[data-scope="signup-hotfix"] .hidden { display: none !important; }
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -61,31 +82,33 @@
 
           <div style="grid-column:1 / -1">
             <label style="display:block;font-size:14px;margin:6px 0 4px">Email
-              <span id="email_used" class="hint hint-error" style="display:none;margin-left:8px;font-weight:600"><small class="error-msg hidden" id="err-email-taken">Email already in use</small></span>
+              <span id="email_used" class="hint hint-error" style="display:none;margin-left:8px;font-weight:600"><small class="error-msg hidden" id="err-email-taken"><small class="error-msg hidden" id="err-email-taken">Email already in use</small></small></span>
             </label>
             <input id="email" type="email" autocomplete="email" required
               style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
-            <div id="email_error" class="error" style="display:none">Email <small class="error-msg hidden" id="err-email-taken">Email already in use</small></div>
+            <div id="email_error" class="error" style="display:none">Email <small class="error-msg hidden" id="err-email-taken"><small class="error-msg hidden" id="err-email-taken">Email already in use</small></small></div>
           </div>
 
           <div style="grid-column:1 / -1">
             <label style="display:block;font-size:14px;margin:6px 0 4px">
               Create User ID <span id="hint_user" class="hint">(3 - 15 char)</span>
-              <span id="hint_user_taken" class="hint hint-error" style="display:none"><small class="error-msg hidden" id="err-userid-taken">User ID already in use</small></span>
+              <span id="hint_user_taken" class="hint hint-error" style="display:none"><small class="error-msg hidden" id="err-userid-taken"><small class="error-msg hidden" id="err-userid-taken">User ID already in use</small></small></span>
             </label>
             <input id="username" type="text" autocomplete="username" minlength="3" maxlength="15" pattern="[A-Za-z0-9_]{3,15}" required
               style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:16px">
-            <div id="user_error" class="error" style="display:none"><small class="error-msg hidden" id="err-userid-taken">User ID already in use</small></div>
+            <div id="user_error" class="error" style="display:none"><small class="error-msg hidden" id="err-userid-taken"><small class="error-msg hidden" id="err-userid-taken">User ID already in use</small></small></div>
           </div>
 
           <div>
             <label style="display:block;font-size:14px;margin:6px 0 4px">Password <span id="hint_pass" class="hint">(8 - 15 char)</span></label>
-            System.Func`2[System.Text.RegularExpressions.Match,System.String]
+            <small class="field-hint">Use 8 to 15 characters</small>
           </div>
 
           <div>
-            <label style="display:block;font-size:14px;margin:6px 0 4px">Confirm Password</label>
-            System.Func`2[System.Text.RegularExpressions.Match,System.String]
+            <label style="display:block;font-size:14px;margin:6px 0 4px">Confirm Password
+<input id="confirm_password" name="confirm_password" type="password" minlength="8" maxlength="15" autocomplete="new-password" required />
+</label>
+            <small class="field-hint">Use 8 to 15 characters</small>
           </div>
 
           <div style="grid-column:1 / -1"><div id="form_error" class="alert" style="display:none"></div></div>
@@ -149,4 +172,5 @@
 </script>
 </body>
 </html>
+
 
