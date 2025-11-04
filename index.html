@@ -9,6 +9,13 @@
   <meta name="theme-color" content="#5E7BFF" />
   <link rel="stylesheet" href="/air.css">
 <script src="/scripts/login.js" defer></script>
+<!-- bc-auth-css-start -->
+<style>
+  /* elements visible only when authed or anon */
+  [data-auth="1"] .show-when-signed-out { display: none !important; }
+  [data-auth="0"] .show-when-signed-in  { display: none !important; }
+</style>
+<!-- bc-auth-css-end -->
 </head>
 <body>
   <!-- Header -->
@@ -189,6 +196,7 @@
   <script src="/auth.js" defer></script>
 </body>
 </html>
+
 
 
 
